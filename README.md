@@ -1,10 +1,14 @@
 # piccr
 
+## \*\* README \*\*
+
+Note that this branch is *for archiving only*! It contains the legacy code of **piccr** from [BitBucket](https://bitbucket.org/ecus/piccr/) when **piccr** was still just a bundle of R scripts and functions. Now **piccr** is actively developed to be transformed into an R package; please see the other branches here on GitHub.
+
 ## Introduction
 
 **piccr** is a bundle of R scripts that provide an easy-to-use and quick way to correct and calibrate raw isotope data output from Picarro Inc. cavity ring down spectroscopy measurement devices. The bundle is capable of automatically processing at once a given amount of data files that follow the same measurement sequence. Correction of the data includes a correction for memory effects in subsequent injections of the same water sample and a linear drift correction (van Geldern and Barth, 2012). Calibration is performed based on the measurement of in-house isotope standards along with the samples.
 
-For questions regarding the script and its use please contact Thomas Münch <<thomas.muench@awi.de>> at the Alfred Wegener Institute Helmholtz Centre for Polar and Marine Research in Potsdam, Germany.
+For questions regarding the script and its use please contact Thomas MÃ¼nch <<thomas.muench@awi.de>> at the Alfred Wegener Institute Helmholtz Centre for Polar and Marine Research in Potsdam, Germany.
 
 **Please note** that **piccr** is currently supported for use under Mac OS X and Linux only; Windows computers are not supported. In due time, **piccr** will be converted into a full **R** package to ease its use, which then will also support Windows machines; so please stay tuned for updates.
 
@@ -91,4 +95,4 @@ Finally, to obtain an independent estimate of the overall precision and accuracy
 
 ## Literature cited
 
-van Geldern, R. and Barth, J. A.: Optimization of instrument setup and post-run corrections for oxygen and hydrogen stable isotope measurements of water by isotope ratio infrared spectroscopy (IRIS), Limnol. Oceanogr. Methods, 10, 1024–1036, doi: [10.4319/lom.2012.10.1024](https://doi.org/10.4319/lom.2012.10.1024), 2012.
+van Geldern, R. and Barth, J. A.: Optimization of instrument setup and post-run corrections for oxygen and hydrogen stable isotope measurements of water by isotope ratio infrared spectroscopy (IRIS), Limnol. Oceanogr. Methods, 10, 1024â€“1036, doi: [10.4319/lom.2012.10.1024](https://doi.org/10.4319/lom.2012.10.1024), 2012.
