@@ -24,7 +24,7 @@ piccr <- function(dir = getwd()) {
 
     file <- file.path(dir, "INPUT.txt")
     if (!file.exists(file)) {
-        stop(sprintf("Mandatory file INPUT.txt not found in %s."), dir)
+        stop(sprintf("Mandatory file INPUT.txt not found in %s.", dir))
     } else {
         if (file.access(file) != 0) stop("INPUT.txt not readable.")
     }
