@@ -51,14 +51,15 @@ WriteOutput <- function(calibration.results, meta.info_folder) {
     # output of corrected+calibrated data
 
     ## create output directory if it does not already exist
-    out_dir=paste(meta.info_folder$folder_path,'calibrated/',sep='')
+    out_dir=file.path(meta.info_folder$folder_path,"calibrated")
     if (!file.exists(out_dir))
         dir.create(out_dir)
 
     ## save as R data file
+    filename=paste(basename(meta.info_folder$folder_path),
+                   "calibrated", "rdat", sep = ".")
     save(folder.iso_data.calibrated,
-         file=paste(out_dir,basename(meta.info_folder$folder_path),
-                    '.calibrated','.rdat',sep=''))
+         file=file.path(out_dir,filename))
 
     ## save as csv text files
     lapply(folder.iso_data.calibrated$isotope_data,CSV.Output,
@@ -94,7 +95,7 @@ WriteOutput <- function(calibration.results, meta.info_folder) {
     # write output
 
     ## output file name
-    out.file=paste(out_dir,'OutputAccuracy.txt',sep='')
+    out.file=file.path(out_dir,'OutputAccuracy.txt')
 
     ## wrapper function to format data frame
     Format.Col <- function(col){
@@ -188,7 +189,7 @@ CSV.Output <- function(file_data, out_dir, flag.CSV_Output) {
     LineNo=1:dim(data_out)[1]
     
     write.csv(cbind(LineNo,data_out),
-              file=paste(out_dir,out_file,sep=''),
+              file=file.path(out_dir,out_file),
               row.names=FALSE)
 
 

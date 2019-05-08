@@ -18,8 +18,8 @@ wrapper.ReadDataFiles <- function(meta.info_folder) {
     # get all files in given folder
 
     data_files=
-        Sys.glob(paste(meta.info_folder$folder_path,
-                       meta.info_folder$fileID, sep=''))
+        Sys.glob(file.path(meta.info_folder$folder_path,
+                           meta.info_folder$fileID))
 
 
     #---------------------------------------------------------------------------

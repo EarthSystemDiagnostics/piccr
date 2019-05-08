@@ -20,7 +20,7 @@ get.input_folder <- function(dir) {
 
     #---------------------------------------------------------------------------
     # read in meta input file INPUT.txt line-by-line
-    meta=readLines(paste(dir,'INPUT.txt',sep=''))
+    meta=readLines(file.path(dir, "INPUT.txt"))
     meta=meta[-c(1:3,13:16)]
 
 
