@@ -47,12 +47,15 @@ wrapper.StandardCalibration <- function(std_data, meta.info_std,
 
 
     #---------------------------------------------------------------------------
-    # standard means of last three injections
+    # standard means and SD of last three injections
 
-    ## calculate mean of the last three injection isotope values
+    ## calculate mean and SD of the last three injection isotope values
     ## and of the file line numbers for each measurement block
     std_data.MeanLast3=
         lapply(std_data,GetSubList,GetSubVec,GetMeanLastN,params=list(N=3))
+
+    std_data.SDLast3=
+        lapply(std_data,GetSubList,GetSubVec,GetSDLastN,params=list(N=3))
 
 
     #---------------------------------------------------------------------------
@@ -116,6 +119,23 @@ wrapper.StandardCalibration <- function(std_data, meta.info_std,
     ## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ## calibrated standard values + mean of respective line numbers
     ## ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    ## copy SD values to main list structure
+    for (i in 1 : length(std_data.MeanLast3)) {
+        for (j in 1 : length(std_data.MeanLast3[[i]])) {
+
+            std_data.MeanLast3[[i]][[j]] <-
+                c(std_data.MeanLast3[[i]][[j]],
+                  sd.O18 = std_data.SDLast3[[i]][[j]]["delta.O18"],
+                  sd.H2 = std_data.SDLast3[[i]][[j]]["delta.H2"])
+
+            # clean names
+            names(std_data.MeanLast3[[i]][[j]]) <-
+                c("line.numbers", "injection.no", "delta.O18", "delta.H2",
+                  "sd.O18", "sd.H2")
+
+        }
+    }
 
     res$std_data=std_data.MeanLast3
 

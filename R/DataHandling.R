@@ -61,7 +61,9 @@ TakeMean_CalcPooledSD.sample_data <- function(sample_data){
         ## take mean - convert result to array for consistency
         sample_data.MeanLast3Inj=array(colMeans(aux),dim=c(1,4))
         ## calculate pooled sd
-        pooled.sd=sqrt(apply(aux[,c('delta.O18','delta.H2')],2,var,na.rm=TRUE))
+        mean.var=apply(aux[,c('delta.O18','delta.H2')],2,var,na.rm=TRUE)
+        pooled.sd=sqrt(mean.var)
+        mean.sd=pooled.sd
         
     } else {
         
@@ -75,8 +77,9 @@ TakeMean_CalcPooledSD.sample_data <- function(sample_data){
         sample_data.MeanLast3Inj=apply(sample_data.array[,,range],c(1,2),
                                        mean,na.rm=TRUE)
         ## calculate pooled sd
-        pooled.sd=sqrt(colMeans(apply(sample_data.array[,c(3,4),range],c(1,2),
-                                      var,na.rm=TRUE)))
+        mean.var=apply(sample_data.array[,c(3,4),range],c(1,2),var,na.rm=TRUE)
+        mean.sd=sqrt(mean.var)
+        pooled.sd=sqrt(colMeans(mean.var))
     }
 
     ## name columns again as these information has been lost in above process
@@ -100,6 +103,10 @@ TakeMean_CalcPooledSD.sample_data <- function(sample_data){
 
     ## move sample_names back to first column - only for later file output
     sample_data=sample_data[c(dim(sample_data)[2],1:(dim(sample_data)[2]-1))]
+
+    ## add standard deviation of the mean
+    sample_data$sd.O18=mean.sd[, 1]
+    sample_data$sd.H2=mean.sd[, 2]
 
 
     #---------------------------------------------------------------------------

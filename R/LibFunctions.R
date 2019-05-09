@@ -73,6 +73,19 @@ GetMeanLastN <-  function(x, params) {
     return(mean(x[(length(x)-(params$N-1)):length(x)],na.rm=TRUE))
 }
 
+##' SD of last N elements
+##'
+##' Return the standard deviation of the last N elements of a vector.
+##' @param x a numeric vector.
+##' @param params a list containing an element \code{N} giving the number of the
+##' last \code{N} elements to average.
+##' @return numeric value with the standard deviation of the \code{N} elements.
+##' @author Thomas Münch
+GetSDLastN <-  function(x, params) {
+    if (!'N' %in% names(params)) stop('Argument N missing in function GetSDLastN()')
+    return(sd(x[(length(x)-(params$N-1)):length(x)],na.rm=TRUE))
+}
+
 ##' First N elements
 ##'
 ##' Return the first N elements of a vector.
@@ -180,6 +193,7 @@ FinalDataFormat <- function(x) {
     
     ## introduce column of d-excess values
     x['d.excess']=x['delta.H2']-8*x['delta.O18']
+    x['sd.d.excess']=sqrt((x['sd.H2'])^2+64*(x['sd.O18'])^2)
 
     return(x)
 }
