@@ -1,6 +1,6 @@
 # piccr
 
-## Introduction
+## Setup
 
 To install the current package version from within R, use the `devtools` package:
 
