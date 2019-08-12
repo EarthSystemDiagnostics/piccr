@@ -5,7 +5,7 @@ processFiles <- function(configFile){
   
   processedData <- readFiles(config) %>% 
     groupStandardsInBlocks(config)
-    associateStandardsWithTrueValues(config) %>%
+    associateStandardsWithConfigInfo(config) %>%
     processData()
   
   writeDataToFile(config, processedData)
