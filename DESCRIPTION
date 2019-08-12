@@ -15,7 +15,6 @@ Suggests:
 VignetteBuilder: knitr
 Imports:
     yaml,
-    readr,
-    purrr
+    tidyverse
 URL: https://github.com/EarthSystemDiagnostics/proxysnr
 BugReports: https://github.com/EarthSystemDiagnostics/proxysnr/issues
