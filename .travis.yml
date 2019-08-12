@@ -3,5 +3,8 @@ language: r
 r_packages:
   - covr
 
+script:
+  - make test
+
 after_success:
   - Rscript -e 'library(covr); codecov()'
