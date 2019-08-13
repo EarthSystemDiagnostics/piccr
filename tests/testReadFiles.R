@@ -1,7 +1,9 @@
 library(testthat)
 library(dplyr)
 library(readr)
-source("../R/readFiles.R")
+
+source("../R/readhelpers/Files.R")
+
 
 context("Test data reading")
 

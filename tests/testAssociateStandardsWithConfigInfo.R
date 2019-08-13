@@ -1,6 +1,8 @@
 library(testthat)
 library(tidyverse)
-source("../R/associateStandardsWithConfigInfo.R")
+
+source("../R/helpers/associateStandardsWithConfigInfo.R")
+
 
 context("Test associating standards with their true values")
 

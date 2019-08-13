@@ -2,7 +2,8 @@ library(testthat)
 library(readr)
 library(stringr)
 
-source("../R/writeDataToFile.R")
+source("../R/helpers/writeDataToFile.R")
+
 
 context("Test writing data to file (csv output)")
 

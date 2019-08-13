@@ -1,5 +1,7 @@
 library(testthat)
-source("../R/parseConfig.R")
+
+source("../R/helpers/parseConfig.R")
+
 
 context("Test parse config")
 

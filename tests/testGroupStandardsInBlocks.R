@@ -1,6 +1,8 @@
 library(testthat)
 library(tidyverse)
-source("../R/groupStandardsInBlocks.R")
+
+source("../R/helpers/groupStandardsInBlocks.R")
+
 
 context("Test grouping standards in blocks")
 
