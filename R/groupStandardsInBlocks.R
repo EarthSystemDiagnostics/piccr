@@ -22,7 +22,7 @@ groupStandardsInBlocksForDataset <- function(dataset, config){
         dataset[row, "block"] <- currBlock
       }
     } else {
-      dataset[row, "block"] = NA
+      dataset[row, "block"] <- NA
       inBlock <- FALSE
     }
   }
