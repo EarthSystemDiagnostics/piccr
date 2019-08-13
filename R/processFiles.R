@@ -1,3 +1,5 @@
+library(magrittr)
+
 #' @export
 processFiles <- function(configFile){
   

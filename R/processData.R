@@ -4,7 +4,7 @@ library(magrittr)
 processData <- function(rawData, config){
   
   memoryCorrectedData    <- correctForMemoryEffectIfRequested(rawData, config)
-  calibrationParameters  <- calibrate(memoryCorrectedData, config)
+  calibrationParameters  <- calculateCalibrationParameters(memoryCorrectedData, config)
   calibratedData         <- correctForDriftingPattern(memoryCorrectedData, calibrationParameters, config)
   
   processedData <- accumulateMeasurementsForEachSample(calibratedData)
