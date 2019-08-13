@@ -1,2 +1,2 @@
 test:
-	- Rscript -e "library(testthat); test_dir('tests', reporter = 'summary')"
+	- Rscript -e "devtools::load_all(); testthat::test_dir('tests', reporter = 'summary')"

@@ -1,12 +1,9 @@
 library(testthat)
 library(tidyverse)
 
-source("../R/helpers/groupStandardsInBlocks.R")
-
-
 context("Test grouping standards in blocks")
 
-config <- list(STANDARDS = list(list(NAME = "STD_A"), list(NAME = "STD_B")))
+config <- list(standards = list(list(name = "STD_A"), list(name = "STD_B")))
 
 test_that("test for dataframe with single row (contains standard)", {
   df <- tibble(

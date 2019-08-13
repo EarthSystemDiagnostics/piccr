@@ -6,7 +6,7 @@ associateStandardsWithConfigInfo <- function(datasets, config){
 
 associateStandardsWithConfigInfoForDataset <- function(dataset, config){
   
-  configAsTable <- do.call(rbind, config$STANDARDS) %>%
+  configAsTable <- do.call(rbind, config$standards) %>%
     data.frame() %>%
     as_tibble() %>%
     transmute(`Identifier 1` = as.character(name), 

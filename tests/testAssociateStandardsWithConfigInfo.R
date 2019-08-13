@@ -1,13 +1,10 @@
 library(testthat)
 library(tidyverse)
 
-source("../R/helpers/associateStandardsWithConfigInfo.R")
-
-
 context("Test associating standards with their true values")
 
 test_that("associating standards for single row (standard, including usage in phases)", {
-  config <- list(STANDARDS = list(list(name = "STD_A", 
+  config <- list(standards = list(list(name = "STD_A", 
                                        o18_True = -2, 
                                        H2_True = 3,
                                        use_for_memory_correction = TRUE,

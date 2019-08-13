@@ -28,7 +28,3 @@ groupStandardsInBlocksForDataset <- function(dataset, config){
   }
   return(dataset)
 }
-
-isStandard <- function(id1, config){
-  id1 %in% map(config$STANDARDS, ~ .$NAME)
-}

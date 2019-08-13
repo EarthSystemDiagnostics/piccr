@@ -1,8 +1,5 @@
 library(testthat)
 
-source("../R/helpers/parseConfig.R")
-
-
 context("Test parse config")
 
 test_that("Config parsed correctly", {

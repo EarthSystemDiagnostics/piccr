@@ -2,9 +2,6 @@ library(testthat)
 library(dplyr)
 library(readr)
 
-source("../R/helpers/readFiles.R")
-
-
 context("Test data reading")
 
 config <- list(input_directory = "test_data", file_extension = ".csv")

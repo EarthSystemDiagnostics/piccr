@@ -2,14 +2,14 @@ library(testthat)
 library(readr)
 library(stringr)
 
-source("../R/helpers/writeDataToFile.R")
-
-
 context("Test writing data to file (csv output)")
 
-config <- list(output_directory = tempdir())
-datasets <- list(processed = list(d1.csv = read_csv("a,b\n1.2,3.1"), 
-                                  d2.csv = read_csv("c,d\n3.1,\n9,-2")))
+d1Content <- "Identifier 1,a,b\na,1.2,3.1\n"
+d2Content <- "Identifier 1,c,d\na,3.1,\nb,9,-2\n"
+
+config <- list(output_directory = tempdir(), include_standards_in_output = TRUE)
+datasets <- list(processed = list(d1.csv = read_csv(d1Content), 
+                                  d2.csv = read_csv(d2Content)))
 
 test_that("test correct files are created (output dir exists)", {
   writeDataToFile(datasets, config)
@@ -24,7 +24,7 @@ test_that("test correct files are created (output dir does not exists)", {
   unlink("some_dir_that_does_not_exist", recursive = TRUE)
   stopifnot(!dir.exists("some_dir_that_does_not_exist"))
   
-  config <- list(output_directory = "some_dir_that_does_not_exist")
+  config <- list(output_directory = "some_dir_that_does_not_exist", include_standards_in_output = TRUE)
   
   writeDataToFile(datasets, config)
   
@@ -38,7 +38,49 @@ test_that("test file contents are correct", {
   writeDataToFile(datasets, config)
   
   expect_identical(read_file(file.path(tempdir(), "d1.csv")),
-                   "a,b\n1.2,3.1\n")
+                   d1Content)
   expect_identical(read_file(file.path(tempdir(), "d2.csv")),
-                   "c,d\n3.1,\n9,-2\n")
+                   d2Content)
+})
+
+test_that("test don't include standards in output (case standard in file)", {
+  config <- list(output_directory = tempdir(), 
+                 include_standards_in_output = FALSE,
+                 standards = list(list(name = "a"), list(name = "c")))
+  
+  writeDataToFile(datasets, config)
+  
+  expect_identical(read_file(file.path(tempdir(), "d1.csv")),
+                   "Identifier 1,a,b\n")
+  
+  expect_identical(read_file(file.path(tempdir(), "d2.csv")),
+                   "Identifier 1,c,d\nb,9,-2\n")
+})
+
+test_that("test don't include standards in output (case only probes in file)", {
+  config <- list(output_directory = tempdir(), 
+                 include_standards_in_output = FALSE,
+                 standards = list(list(name = "c")))
+  
+  writeDataToFile(datasets, config)
+  
+  expect_identical(read_file(file.path(tempdir(), "d1.csv")),
+                   d1Content)
+  
+  expect_identical(read_file(file.path(tempdir(), "d2.csv")),
+                   d2Content)
+})
+
+test_that("test don't include standards in output (case standard list empty)", {
+  config <- list(output_directory = tempdir(), 
+                 include_standards_in_output = FALSE,
+                 standards = list())
+  
+  writeDataToFile(datasets, config)
+  
+  expect_identical(read_file(file.path(tempdir(), "d1.csv")),
+                   d1Content)
+  
+  expect_identical(read_file(file.path(tempdir(), "d2.csv")),
+                   d2Content)
 })
