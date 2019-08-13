@@ -12,10 +12,11 @@ LazyData: true
 RoxygenNote: 6.1.1
 Suggests:
     testthat,
-    covr
+    covr,
+    devtools
 VignetteBuilder: knitr
 Imports:
     yaml,
     tidyverse
-URL: https://github.com/EarthSystemDiagnostics/proxysnr
-BugReports: https://github.com/EarthSystemDiagnostics/proxysnr/issues
+URL: https://github.com/EarthSystemDiagnostics/piccr
+BugReports: https://github.com/EarthSystemDiagnostics/piccr/issues
