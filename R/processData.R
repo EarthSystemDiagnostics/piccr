@@ -1,17 +1,17 @@
 library(magrittr)
 
 #' @export
-processData <- function(rawData, config){
+processData <- function(datasets, config){
   
-  memoryCorrectedData    <- correctForMemoryEffectIfRequested(rawData, config)
-  calibrationParameters  <- calculateCalibrationParameters(memoryCorrectedData, config)
-  calibratedData         <- correctForDriftingPattern(memoryCorrectedData, calibrationParameters, config)
+  memoryCorrectedDatasets <- correctForMemoryEffectIfRequested(datasets, config)
+  calibrationParameters   <- calculateCalibrationParameters(memoryCorrectedDatasets, config)
+  calibratedDatasets      <- correctForDriftingPattern(memoryCorrectedDatasets, calibrationParameters, config)
   
-  processedData <- accumulateMeasurementsForEachSample(calibratedData)
+  processedData <- accumulateMeasurementsForEachSample(calibratedDatasets)
   pooledStdDev <- calculatePoooledStdDev(processedData)
   
-  invisible(list(memoryCorrected = memoryCorrectedData,
-                 calibrated = calibratedData,
+  invisible(list(memoryCorrected = memoryCorrectedDatasets,
+                 calibrated = calibratedDatasets,
                  processed = processedData,
                  pooledStdDev = pooledStdDev))
 }
