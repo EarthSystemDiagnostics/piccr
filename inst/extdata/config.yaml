@@ -1,58 +1,38 @@
 # This is a config file for the piccr package
 
-FILE_ID: "*.csv"	# file extension used for data files
-COLUMNSEP: ","		# column separator used in data files
-DECSEP: "."   		# decimal separator used in data files
-NAME_StdScheme: IsoLabP_Muench2014.v2  # name of applied standard scheme (optional meta information)
-STD_NO:	5			  # number of standards used in standard scheme
-BLOCK_NO:	3			# number of standard blocks distributed over measurement rack in this standard scheme
-CALIBRATION_FLAG:	2			# set type of desired calibration: flag=1->drift-correction+three-point calibration/flag=2->double three-point calibration
-MEMORYCORR_FLAG:	1			# signal memory correction: 1=YES/0=NO
-OUTPUT_FLAG:	1			# format of desired csv-file output: flag=1->only output sample data/flag=2->output standard and sample data in original order
+file_extension: "*.csv"	          # file extension used for data files
+calibration_method:	2		        	# set type of desired calibration: flag=1->drift-correction+three-point calibration/flag=2->double three-point calibration
+use_memory_correction:	yes			  # signal memory correction: yes/no
+include_standards_in_output:	no	# format of desired csv-file output: flag=no->only output sample data/flag=yes->output standard and sample data in original order
 
-STANDARDS:
-  - NAME: KARA
-    O18_VAL: -0.10
-    H2_VAL: -0.6
-    INJ_BLOCK1: 12
-    INJ_BLOCK2: 0
-    INJ_BLOCK3: 0
-    MEMORYCORR: no
-    DRIFTCORR: no
-    CALIBRATION: no
-  - NAME: DML
-    O18_VAL: -42.50
-    H2_VAL: -341.0
-    INJ_BLOCK1: 12
-    INJ_BLOCK2: 3
-    INJ_BLOCK3: 3
-    MEMORYCORR: yes
-    DRIFTCORR: yes
-    CALIBRATION: yes
-  - NAME: TD1
-    O18_VAL: -33.90
-    H2_VAL: -266.2
-    INJ_BLOCK1: 12
-    INJ_BLOCK2: 0
-    INJ_BLOCK3: 3
-    MEMORYCORR: yes
-    DRIFTCORR: yes
-    CALIBRATION: yes
-  - NAME: JASE
-    O18_VAL: -50.22
-    H2_VAL: -392.5
-    INJ_BLOCK1: 12
-    INJ_BLOCK2: 3
-    INJ_BLOCK3: 3
-    MEMORYCORR: yes
-    DRIFTCORR: yes
-    CALIBRATION: yes
-  - NAME: NGT
-    O18_VAL: -34.40
-    H2_VAL: -265.5
-    INJ_BLOCK1: 0
-    INJ_BLOCK2: 3
-    INJ_BLOCK3: 0
-    MEMORYCORR: no
-    DRIFTCORR: no
-    CALIBRATION: no
+standards:
+  - name: KARA
+    O18_True: -0.10
+    H2_True: -0.6
+    use_for_memory_correction: no
+    use_for_drift_correction: no
+    use_for_calibration: no
+  - name: DML
+    o18_True: -42.50
+    H2_True: -341.0
+    use_for_memory_correction: yes
+    use_for_drift_correction: yes
+    use_for_calibration: yes
+  - name: TD1
+    o18_True: -33.90
+    H2_True: -266.2
+    use_for_memory_correction: yes
+    use_for_drift_correction: yes
+    use_for_calibration: yes
+  - name: JASE
+    o18_True: -50.22
+    H2_True: -392.5
+    use_for_memory_correction: yes
+    use_for_drift_correction: yes
+    use_for_calibration: yes
+  - name: NGT
+    o18_True: -34.40
+    H2_True: -265.5
+    use_for_memory_correction: no
+    use_for_drift_correction: no
+    use_for_calibration: no
