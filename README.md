@@ -1,5 +1,5 @@
 # piccr
-[![Codecov test coverage](https://codecov.io/gh/EarthSystemDiagnostics/piccr/branch/master/graph/badge.svg)](https://codecov.io/gh/EarthSystemDiagnostics/piccr?branch=master)
+[![Codecov test coverage](https://codecov.io/gh/EarthSystemDiagnostics/piccr/branch/dev/graph/badge.svg)](https://codecov.io/gh/EarthSystemDiagnostics/piccr?branch=dev)
 
 ## Setup
 
