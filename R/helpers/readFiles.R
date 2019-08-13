@@ -7,11 +7,11 @@ readFiles <- function(config) {
   folder <- config$input_directory
   file_pattern <- str_c("*", config$file_extension)
   
-  files <- list.files(path = folder, pattern = file_pattern)
-  pathsToFiles <- file.path(folder, files)
+  filenames <- list.files(path = folder, pattern = file_pattern)
+  pathsToFiles <- file.path(folder, filenames)
   
   datasets <- map(pathsToFiles, read_csv)
-  names(datasets) <- files
+  names(datasets) <- filenames
   
   return(datasets)
 }
