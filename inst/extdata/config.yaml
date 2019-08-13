@@ -15,7 +15,7 @@ use_memory_correction:	yes			  # signal memory correction: yes/no
 # -------- set standards --------
 standards:
   - name: KARA
-    O18_True: -0.10
+    o18_True: -0.10
     H2_True: -0.6
     use_for_memory_correction: no
     use_for_drift_correction: no
