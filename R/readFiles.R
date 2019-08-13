@@ -2,12 +2,15 @@ library(readr)
 library(purrr)
 library(stringr)
 
-readFiles <- function(config, folder = ".") {
+readFiles <- function(config) {
   
-  files <- list.files(path = folder, pattern = config$FILE_ID)
-  pathToFiles <- str_c(folder, "/", files)
+  folder <- config$input_directory
+  file_pattern <- str_c("*", config$file_extension)
   
-  datasets <- map(pathToFiles, read_csv)
+  files <- list.files(path = folder, pattern = file_pattern)
+  pathsToFiles <- file.path(folder, files)
+  
+  datasets <- map(pathsToFiles, read_csv)
   names(datasets) <- files
   
   return(datasets)
