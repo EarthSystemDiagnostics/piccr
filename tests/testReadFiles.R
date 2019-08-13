@@ -2,7 +2,7 @@ library(testthat)
 library(dplyr)
 library(readr)
 
-source("../R/readhelpers/Files.R")
+source("../R/helpers/readFiles.R")
 
 
 context("Test data reading")
