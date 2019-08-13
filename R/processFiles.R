@@ -6,9 +6,9 @@ processFiles <- function(configFile){
   processedData <- readFiles(config) %>% 
     groupStandardsInBlocks(config) %>%
     associateStandardsWithConfigInfo(config) %>%
-    processData()
+    processData(config)
   
-  writeDataToFile(config, processedData)
+  writeDataToFile(processedData, config)
   
   invisible(processedData)
 }
