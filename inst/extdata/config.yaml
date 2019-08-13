@@ -1,12 +1,18 @@
 # This is a config file for the piccr package
 
+# -------- input and output options --------
 file_extension: ".csv"	          # file extension used for data files
 input_directory:  data            # directory with the measurement data to be calibrated
 output_directory: calibrated_data # output directory for the calibrated data
-calibration_method:	2		        	# set type of desired calibration: flag=1->drift-correction+three-point calibration/flag=2->double three-point calibration
-use_memory_correction:	yes			  # signal memory correction: yes/no
 include_standards_in_output:	no	# format of desired csv-file output: flag=no->only output sample data/flag=yes->output standard and sample data in original order
 
+# -------- data processing options --------
+average_over_last_n_inj: all      # use the last n injections for each sample to calculate the mean d18O etc. To use all injections, pass "all".
+use_three_point_calibration: yes  # If yes, use three-point calibration. If no, use two-point calibration.
+calibration_method:	2		        	# set type of desired calibration: flag=1->drift-correction+three-point calibration/flag=2->double three-point calibration
+use_memory_correction:	yes			  # signal memory correction: yes/no
+
+# -------- set standards --------
 standards:
   - name: KARA
     O18_True: -0.10
