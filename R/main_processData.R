@@ -2,7 +2,7 @@
 processData <- function(datasets, config){
   
   if (config$use_memory_correction) {
-    datasets <- correctForMemoryEffect(datasets, config)
+    datasets <- correctForMemoryEffect(datasets)
   }
   
   if (config$calibration_method == 0){

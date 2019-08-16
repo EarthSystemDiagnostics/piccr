@@ -1,14 +1,17 @@
-correctForMemoryEffect <- function(datasets, config){
-  return(map(datasets, correctSingleDatasetForMemoryEffect, config = config))
+library(tidyverse)
+
+correctForMemoryEffect <- function(datasets){
+  
+  map(datasets, correctSingleDatasetForMemoryEffect)
 }
 
-correctSingleDatasetForMemoryEffect <- function(dataset, config){
+correctSingleDatasetForMemoryEffect <- function(dataset){
+  
   memoryCoefficients <- calculateMemoryCoefficients(dataset)
   datasetMemoryCorrected <- applyMemoryCorrection(dataset, memoryCoefficients)
   
   return(datasetMemoryCorrected)
 }
-
 
 calculateMemoryCoefficients <- function(dataset) {
   
