@@ -6,7 +6,7 @@ processData <- function(datasets, config){
   }
   
   if (config$calibration_method == 0){
-    calibratedDatasets <- datasets
+    calibratedDatasets <- calibrateWithoutDriftCorrection(datasets, config)
   }
   else if (config$calibration_method == 1) {
     calibratedDatasets <- calibrateUsingSimpleDriftCorrection(datasets, config)

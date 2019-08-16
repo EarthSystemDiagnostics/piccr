@@ -22,9 +22,9 @@ dataset1 <- tribble(
 expected1 <- tribble(
   ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block,
   # ------------ / -------- / -------------- / -------
-  "A",           1,         1,               1,
-  "A",           2,         1,               1,
-  "A",           3,         1,               1,
+  "A",           1,         NA,               1,
+  "A",           2,         NA,               1,
+  "A",           3,         NA,               1,
   "C",           1,         2,               1,
   "C",           2,         2,               1,
   "C",           3,         2,               1,
@@ -55,8 +55,8 @@ dataset2 <- tribble(
 expected2 <- tribble(
   ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block,
   # ------------ / -------- / -------------- / -------
-  "Probe1",        1,         10,              NA,
-  "Probe1",        2,         10,              NA,
+  "Probe1",        1,         NA,              NA,
+  "Probe1",        2,         NA,              NA,
   "A",             1,         1,               1,
   "A",             2,         1,               1,
   "B",             1,         2,               1,

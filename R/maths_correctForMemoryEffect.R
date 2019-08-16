@@ -33,8 +33,7 @@ applyMemoryCorrection <- function(dataset, memoryCoefficients){
   
   memoryCorrectedRow <- inner_join(deltaTrueAndDeltaTruePrev, memoryCoefficients, by = c("Inj Nr")) %>%
     transmute(memoryCorrected = `d(18_16)Mean` + (1-memoryCoefficient) / memoryCoefficient * (`d(18_16)Mean` - deltaTrueApproxPrev)) %>%
-    .$memoryCorrected %>%
-    replace_na(deltaTrueAndDeltaTruePrev[[1,"deltaTrueApprox"]]) # first injection's memory corrected values is always NA
+    .$memoryCorrected
   
   datasetMemoryCorrected <- dataset %>%
     mutate(`d(18_16)Mean` = memoryCorrectedRow)
