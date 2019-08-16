@@ -16,8 +16,9 @@ processData <- function(datasets, config){
   }
   
   processedData <- accumulateMeasurementsForEachSample(calibratedDatasets)
-  pooledStdDev <- calculatePoooledStdDev(processedData)
+  processedData <- addColumnDExcess(processedData)  # d_excess = dH - 8 * d18O
   
+  pooledStdDev <- calculatePoooledStdDev(processedData)
   invisible(list(memoryCorrected = memoryCorrectedDatasets,
                  calibrated = calibratedDatasets,
                  processed = processedData,
