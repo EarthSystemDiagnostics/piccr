@@ -13,14 +13,13 @@ calibrateNoDriftSingleDataset <- function(dataset, config, block){
   return(calibratedDataset)
 }
 
-getCalibInterceptAndSlope <- function(dataset, config, block){
+getCalibInterceptAndSlope <- function(dataset, config, useBlock){
   
   # TODO
-  # - only use standards with "use_for_calibration: yes"
   # - if memory correction is not used, use only last three injections for calibration
   # - two-point vs. three-point calibration
   
-  trainingData <- filter(dataset, block == block)
+  trainingData <- filter(dataset, block == useBlock, useForMemCorr == TRUE)
   
   d18OModel <- lm(o18_True ~ `d(18_16)Mean`, data = trainingData)
   d18OIntercept <- coef(d18OModel)[[1]]
