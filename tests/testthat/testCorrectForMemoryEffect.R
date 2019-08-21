@@ -111,19 +111,52 @@ expected2 <- tribble(
 
 # -------------- tests ------------------------------
 
-test_that("test correct list of dataframes", {
+test_that("test memory corrected datasets", {
 
   actual <- correctForMemoryEffect(list(df1 = dataset1, df2 = dataset2))
   
   expect_length(actual, 2)
   
-  df1Rounded <- mutate(actual$df1, 
+  df1Rounded <- mutate(actual$df1$datasetMemoryCorrected, 
                        `d(D_H)Mean` = round(`d(D_H)Mean`, 2),
                        `d(18_16)Mean` = round(`d(18_16)Mean`, 2))
   expect_true(all_equal(df1Rounded, expected1))
   
-  df2Rounded <- mutate(actual$df2, 
+  df2Rounded <- mutate(actual$df2$datasetMemoryCorrected, 
                        `d(D_H)Mean` = round(`d(D_H)Mean`, 2), 
                        `d(18_16)Mean` = round(`d(18_16)Mean`, 2))
   expect_true(all_equal(df2Rounded, expected2))
+})
+
+test_that("test memory coefficients", {
+  
+  memCoeffExpected1 <- tribble(
+    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD,
+    # ------ / --------------- / --------------
+    1,         0.75,             0.76,
+    2,         1.0,              1.05,
+    3,         1.25,             1.18
+  )
+  
+  memCoeffExpected2 <- tribble(
+    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD,
+    # ------ / --------------- / --------------
+    1,         0.985,             0.992,
+    2,         0.990,             0.986,
+    3,         0.995,             0.992,
+    4,         1.0,               1.002,
+    5,         1.005,             1.007
+  )
+  
+  actual <- correctForMemoryEffect(list(df1 = dataset1, df2 = dataset2))
+  
+  
+  expect_true(all_equal(
+    round(actual$df1$memoryCoefficients, 2), 
+    memCoeffExpected1
+  ))
+  expect_true(all_equal(
+    round(actual$df2$memoryCoefficients, 3), 
+    memCoeffExpected2
+  ))
 })

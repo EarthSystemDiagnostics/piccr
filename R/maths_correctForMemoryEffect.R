@@ -10,7 +10,8 @@ correctSingleDatasetForMemoryEffect <- function(dataset){
   memoryCoefficients <- calculateMemoryCoefficients(dataset)
   datasetMemoryCorrected <- applyMemoryCorrection(dataset, memoryCoefficients)
   
-  return(datasetMemoryCorrected)
+  return(list(datasetMemoryCorrected = datasetMemoryCorrected,
+              memoryCoefficients = memoryCoefficients))
 }
 
 calculateMemoryCoefficients <- function(dataset) {
