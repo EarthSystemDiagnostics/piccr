@@ -2,62 +2,63 @@ library(tidyverse)
 
 correctForMemoryEffect <- function(datasets){
   
-  d18OCorrected <- map(datasets, correctSingleDatasetForMemoryEffect, column = "d(18_16)Mean")
-  dDCorrected <- map(d18OCorrected, correctSingleDatasetForMemoryEffect, column = "d(D_H)Mean")
-  
-  return(dDCorrected)
+  map(datasets, correctSingleDatasetForMemoryEffect)
 }
 
-correctSingleDatasetForMemoryEffect <- function(dataset, column){
+correctSingleDatasetForMemoryEffect <- function(dataset){
   
-  memoryCoefficients <- calculateMemoryCoefficients(dataset, column)
-  datasetMemoryCorrected <- applyMemoryCorrection(dataset, memoryCoefficients, column)
+  memoryCoefficients <- calculateMemoryCoefficients(dataset)
+  datasetMemoryCorrected <- applyMemoryCorrection(dataset, memoryCoefficients)
   
   return(datasetMemoryCorrected)
 }
 
-calculateMemoryCoefficients <- function(dataset, column) {
+calculateMemoryCoefficients <- function(dataset) {
   
   block1 <- filter(dataset, block == 1)
-  deltaTrueAndDeltaTruePrev <- getDeltaTrueAndDeltaTruePrevForEachSample(block1, column, `Identifier 1`)
+  deltaTrueAndDeltaTruePrev <- getDeltaTrueAndDeltaTruePrevForEachSample(block1, `Identifier 1`)
   
   memoryCoefficients <- deltaTrueAndDeltaTruePrev %>%
-    mutate(memoryCoefficient = (.[[column]] - deltaTrueApproxPrev) / (deltaTrueApprox - deltaTrueApproxPrev)) %>%
-    drop_na() %>%
+    mutate(memoryCoeffD18O = (.$`d(18_16)Mean` - deltaTruePrevD18O) / (deltaTrueD18O - deltaTruePrevD18O),
+           memoryCoeffDD = (.$`d(D_H)Mean` - deltaTruePrevDD) / (deltaTrueDD - deltaTruePrevDD)) %>%
     group_by(`Inj Nr`) %>%
-    summarise(memoryCoefficient = mean(memoryCoefficient))
+    summarise(memoryCoeffD18O = mean(memoryCoeffD18O, na.rm = T), memoryCoeffDD = mean(memoryCoeffDD, na.rm = T))
   
   return(memoryCoefficients)
 }
 
-applyMemoryCorrection <- function(dataset, memoryCoefficients, column){
+applyMemoryCorrection <- function(dataset, memoryCoefficients){
   
-  deltaTrueAndDeltaTruePrev <- getDeltaTrueAndDeltaTruePrevForEachSample(dataset, column = column, `Identifier 1`, block)
+  deltaTrueAndDeltaTruePrev <- getDeltaTrueAndDeltaTruePrevForEachSample(dataset, `Identifier 1`, block)
   
-  memoryCorrectedRow <- inner_join(deltaTrueAndDeltaTruePrev, memoryCoefficients, by = c("Inj Nr")) %>%
-    transmute(memoryCorrected = .[[column]] + (1-memoryCoefficient) / memoryCoefficient * (.[[column]] - deltaTrueApproxPrev)) %>%
-    .$memoryCorrected
+  memoryCorrectedCols <- inner_join(deltaTrueAndDeltaTruePrev, memoryCoefficients, by = c("Inj Nr")) %>%
+    transmute(memoryCorrectedD18O = .$`d(18_16)Mean` + (1-memoryCoeffD18O) / memoryCoeffD18O * (.$`d(18_16)Mean` - deltaTruePrevD18O),
+              memoryCorrectedDD = .$`d(D_H)Mean` + (1-memoryCoeffDD) / memoryCoeffDD * (.$`d(D_H)Mean` - deltaTruePrevDD))
   
-  dataset[[column]] <- memoryCorrectedRow
+  dataset[["d(18_16)Mean"]] <- memoryCorrectedCols$memoryCorrectedD18O
+  dataset[["d(D_H)Mean"]] <- memoryCorrectedCols$memoryCorrectedDD
   
   return(dataset)
 }
 
-getDeltaTrueAndDeltaTruePrevForEachSample <- function(dataset, column, ...){
+getDeltaTrueAndDeltaTruePrevForEachSample <- function(dataset, ...){
   
-  deltaTrueForLastInjections <- dataset %>%
-    rowid_to_column("rowNumber") %>%
+  deltaTrue <- dataset %>%
     group_by(...) %>%
-    slice(n()) %>%
-    arrange(`rowNumber`) %>%
-    select(deltaTrueApprox = column)
+    slice((n()-2):n()) %>%
+    summarise(deltaTrueD18O = mean(`d(18_16)Mean`),
+              deltaTrueDD = mean(`d(D_H)Mean`), 
+              Line = min(Line)) %>%
+    arrange(Line) %>%
+    select(-Line)
   
-  deltaTrueAndDeltaTruePrevForLastInjections <- deltaTrueForLastInjections %>% 
-    .$deltaTrueApprox %>% 
-    lag() %>%
-    add_column(deltaTrueForLastInjections, deltaTrueApproxPrev = .)
+  deltaTruePrevD18O <- lag(deltaTrue$deltaTrueD18O)
+  deltaTruePrevDD <- lag(deltaTrue$deltaTrueDD)
   
-  deltasForAllRows <- inner_join(dataset, deltaTrueAndDeltaTruePrevForLastInjections)
+  deltaTrueAndDeltaTruePrev <- deltaTrue %>% 
+    add_column(deltaTruePrevD18O = deltaTruePrevD18O, deltaTruePrevDD = deltaTruePrevDD)
+  
+  deltasForAllRows <- inner_join(dataset, deltaTrueAndDeltaTruePrev)
   
   return(deltasForAllRows)
 }
