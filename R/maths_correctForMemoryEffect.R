@@ -1,5 +1,18 @@
 library(tidyverse)
 
+#' correctForMemoryEffect
+#' 
+#' Take a list of dataframes with isotope measurement data and apply memory correction
+#' to each dataset in the list.
+#'
+#' @param datasets A named list of data frames. Each dataframe is one Picarro
+#'                 isotope file. Each dataframe should contain the column
+#'                 block (not included in the raw Picarro output).
+#'
+#' @return A list. The list elements are named like the input list "datasets". 
+#'         Each element of the list is a list with the two named elements
+#'         "datasetMemoryCorrected" and "memoryCoefficients".
+#' @export
 correctForMemoryEffect <- function(datasets){
   
   map(datasets, correctSingleDatasetForMemoryEffect)
@@ -10,7 +23,8 @@ correctSingleDatasetForMemoryEffect <- function(dataset){
   memoryCoefficients <- calculateMemoryCoefficients(dataset)
   datasetMemoryCorrected <- applyMemoryCorrection(dataset, memoryCoefficients)
   
-  return(datasetMemoryCorrected)
+  return(list(datasetMemoryCorrected = datasetMemoryCorrected,
+              memoryCoefficients = memoryCoefficients))
 }
 
 calculateMemoryCoefficients <- function(dataset) {
@@ -19,44 +33,62 @@ calculateMemoryCoefficients <- function(dataset) {
   deltaTrueAndDeltaTruePrev <- getDeltaTrueAndDeltaTruePrevForEachSample(block1, `Identifier 1`)
   
   memoryCoefficients <- deltaTrueAndDeltaTruePrev %>%
-    mutate(memoryCoefficient = (`d(18_16)Mean` - deltaTrueApproxPrev) / (deltaTrueApprox - deltaTrueApproxPrev)) %>%
-    drop_na() %>%
-    group_by(`Inj Nr`) %>%
-    summarise(memoryCoefficient = mean(memoryCoefficient))
+    mutate(memoryCoeffD18O = formulaMemCoeff(.$`d(18_16)Mean`, .$deltaTrueD18O, .$deltaTruePrevD18O),
+           memoryCoeffDD = formulaMemCoeff(.$`d(D_H)Mean`, .$deltaTrueDD, .$deltaTruePrevDD))
   
-  return(memoryCoefficients)
+  meanMemoryCoefficients <- memoryCoefficients %>%
+    group_by(`Inj Nr`) %>%
+    summarise(memoryCoeffD18O = mean(memoryCoeffD18O, na.rm = T), 
+              memoryCoeffDD = mean(memoryCoeffDD, na.rm = T))
+  
+  return(meanMemoryCoefficients)
 }
 
 applyMemoryCorrection <- function(dataset, memoryCoefficients){
   
   deltaTrueAndDeltaTruePrev <- getDeltaTrueAndDeltaTruePrevForEachSample(dataset, `Identifier 1`, block)
   
-  memoryCorrectedRow <- inner_join(deltaTrueAndDeltaTruePrev, memoryCoefficients, by = c("Inj Nr")) %>%
-    transmute(memoryCorrected = `d(18_16)Mean` + (1-memoryCoefficient) / memoryCoefficient * (`d(18_16)Mean` - deltaTrueApproxPrev)) %>%
-    .$memoryCorrected %>%
-    replace_na(deltaTrueAndDeltaTruePrev[[1,"deltaTrueApprox"]]) # first injection's memory corrected values is always NA
+  memoryCorrectedCols <- inner_join(deltaTrueAndDeltaTruePrev, memoryCoefficients, by = c("Inj Nr")) %>%
+    transmute(memoryCorrectedD18O = formulaCorrectMem(.$`d(18_16)Mean`, .$memoryCoeffD18O, .$deltaTruePrevD18O),
+              memoryCorrectedDD = formulaCorrectMem(.$`d(D_H)Mean`, .$memoryCoeffDD, .$deltaTruePrevDD))
   
-  datasetMemoryCorrected <- dataset %>%
-    mutate(`d(18_16)Mean` = memoryCorrectedRow)
+  dataset[["d(18_16)Mean"]] <- memoryCorrectedCols$memoryCorrectedD18O
+  dataset[["d(D_H)Mean"]] <- memoryCorrectedCols$memoryCorrectedDD
   
-  return(datasetMemoryCorrected)
+  return(dataset)
 }
 
 getDeltaTrueAndDeltaTruePrevForEachSample <- function(dataset, ...){
   
-  deltaTrueForLastInjections <- dataset %>%
-    rowid_to_column("rowNumber") %>%
+  lastThreeInj <- dataset %>%
     group_by(...) %>%
-    slice(n()) %>%
-    arrange(`rowNumber`) %>%
-    select(deltaTrueApprox = `d(18_16)Mean`)
+    slice((n()-2):n())
   
-  deltaTrueAndDeltaTruePrevForLastInjections <- deltaTrueForLastInjections %>% 
-    .$deltaTrueApprox %>% 
-    lag() %>%
-    add_column(deltaTrueForLastInjections, deltaTrueApproxPrev = .)
+  deltaTrue <-lastThreeInj  %>%
+    summarise(deltaTrueD18O = mean(`d(18_16)Mean`),
+              deltaTrueDD = mean(`d(D_H)Mean`), 
+              Line = min(Line))
   
-  deltasForAllRows <- inner_join(dataset, deltaTrueAndDeltaTruePrevForLastInjections)
+  deltaTrueInCorrectOrder <- deltaTrue %>%
+    arrange(Line) %>%
+    select(-Line)
+  
+  deltaTruePrevD18O <- lag(deltaTrueInCorrectOrder$deltaTrueD18O)
+  deltaTruePrevDD <- lag(deltaTrueInCorrectOrder$deltaTrueDD)
+  
+  deltaTrueAndDeltaTruePrev <- deltaTrueInCorrectOrder %>% 
+    add_column(deltaTruePrevD18O = deltaTruePrevD18O, 
+               deltaTruePrevDD = deltaTruePrevDD)
+  
+  deltasForAllRows <- inner_join(dataset, deltaTrueAndDeltaTruePrev)
   
   return(deltasForAllRows)
+}
+
+formulaMemCoeff <- function(data, deltaTrue, deltaTruePrev){
+  (data - deltaTruePrev) / (deltaTrue - deltaTruePrev)
+}
+
+formulaCorrectMem <- function(data, memCoeff, deltaTruePrev){
+  data + (1 - memCoeff) / memCoeff * (data - deltaTruePrev)
 }

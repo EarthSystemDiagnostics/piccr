@@ -6,7 +6,7 @@ processData <- function(datasets, config){
   }
   
   if (config$calibration_method == 0){
-    calibratedDatasets <- datasets
+    calibratedDatasets <- calibrateWithoutDriftCorrection(datasets, config)
   }
   else if (config$calibration_method == 1) {
     calibratedDatasets <- calibrateUsingSimpleDriftCorrection(datasets, config)
@@ -16,8 +16,9 @@ processData <- function(datasets, config){
   }
   
   processedData <- accumulateMeasurementsForEachSample(calibratedDatasets)
-  pooledStdDev <- calculatePoooledStdDev(processedData)
+  processedData <- addColumnDExcess(processedData)  # d_excess = dH - 8 * d18O
   
+  pooledStdDev <- calculatePoooledStdDev(processedData)
   invisible(list(memoryCorrected = memoryCorrectedDatasets,
                  calibrated = calibratedDatasets,
                  processed = processedData,
