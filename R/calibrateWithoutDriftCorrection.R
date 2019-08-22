@@ -16,10 +16,9 @@ calibrateNoDriftSingleDataset <- function(dataset, config, block){
 getCalibInterceptAndSlope <- function(dataset, config, useBlock){
   
   # TODO
-  # - if memory correction is not used, use only last three injections for calibration
   # - two-point vs. three-point calibration
   
-  trainingData <- filter(dataset, block == useBlock, useForMemCorr == TRUE)
+  trainingData <- getTrainingData(dataset, config, useBlock)
   
   d18OModel <- lm(o18_True ~ `d(18_16)Mean`, data = trainingData)
   d18OIntercept <- coef(d18OModel)[[1]]
@@ -33,6 +32,21 @@ getCalibInterceptAndSlope <- function(dataset, config, useBlock){
     d18O = list(intercept = d18OIntercept, slope = d18OSlope),
     dD = list(intercept = dDIntercept, slope = dDSlope)
   )
+}
+
+getTrainingData <- function(dataset, config, useBlock) {
+  
+  trainingData <- filter(dataset, block == useBlock, useForMemCorr == TRUE)
+  
+  # if no memory correction is applied, use only the last three injections for calibration
+  if (config$use_memory_correction == FALSE) {
+    trainingData <- trainingData %>% 
+      group_by(`Identifier 1`) %>% 
+      slice((n()-2):n()) %>% 
+      ungroup()
+  }
+  
+  return(trainingData)
 }
 
 applyCalibration <- function(dataset, calibrationParams){
