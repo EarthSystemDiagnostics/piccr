@@ -17,6 +17,7 @@ Suggests:
 VignetteBuilder: knitr
 Imports:
     yaml,
-    tidyverse
+    tidyverse,
+    lubridate
 URL: https://github.com/EarthSystemDiagnostics/piccr
 BugReports: https://github.com/EarthSystemDiagnostics/piccr/issues

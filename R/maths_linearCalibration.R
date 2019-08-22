@@ -15,7 +15,7 @@ library(tidyverse)
 #'                 Each dataframe should contain the columns "block" and 
 #'                 "useForMemCorr" (not included in the raw Picarro output).
 #' @param config A named list. Need to contain the boolean elements "use_memory_correction"
-#'               and "use_triple_calibration".
+#'               and "use_three_point_calibration".
 #' @param block A number. Use the standards in this block for calibration. Default: 1.
 #'
 #' @return A list. The list elements are named like the input list "datasets". 
