@@ -42,6 +42,6 @@ test_that("associating standards for single row (standard, including usage in ph
   dfActual <- associateStandardsWithConfigInfo(list(df_1, df_2), config)
   
   expect_length(dfActual, 2)
-  expect_true(all_equal(dfActual[[1]], dfExpected_1))
-  expect_true(all_equal(dfActual[[2]], dfExpected_2))
+  expect_equal(dfActual[[1]], dfExpected_1)
+  expect_equal(dfActual[[2]], dfExpected_2)
 })

@@ -15,10 +15,10 @@ test_that("test number of files read is correct", {
 test_that("test content of files read is correct", {
   data <- readFiles(config)
   
-  expect_true(all_equal(data$HIDS2041_IsoWater_20151125_111138.csv, 
-                        read_csv("test_data/HIDS2041_IsoWater_20151125_111138.csv")))
-  expect_true(all_equal(data$HIDS2041_IsoWater_20151126_115726.csv, 
-                        read_csv("test_data/HIDS2041_IsoWater_20151126_115726.csv")))
-  expect_true(all_equal(data$HIDS2041_IsoWater_20151127_143940.csv, 
-                        read_csv("test_data/HIDS2041_IsoWater_20151127_143940.csv")))
+  expect_equal(data$HIDS2041_IsoWater_20151125_111138.csv, 
+                        read_csv("test_data/HIDS2041_IsoWater_20151125_111138.csv"))
+  expect_equal(data$HIDS2041_IsoWater_20151126_115726.csv, 
+                        read_csv("test_data/HIDS2041_IsoWater_20151126_115726.csv"))
+  expect_equal(data$HIDS2041_IsoWater_20151127_143940.csv, 
+                        read_csv("test_data/HIDS2041_IsoWater_20151127_143940.csv"))
 })

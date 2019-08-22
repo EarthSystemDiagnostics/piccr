@@ -120,12 +120,12 @@ test_that("test memory corrected datasets", {
   df1Rounded <- mutate(actual$df1$datasetMemoryCorrected, 
                        `d(D_H)Mean` = round(`d(D_H)Mean`, 2),
                        `d(18_16)Mean` = round(`d(18_16)Mean`, 2))
-  expect_true(all_equal(df1Rounded, expected1))
+  expect_equal(df1Rounded, expected1)
   
   df2Rounded <- mutate(actual$df2$datasetMemoryCorrected, 
                        `d(D_H)Mean` = round(`d(D_H)Mean`, 2), 
                        `d(18_16)Mean` = round(`d(18_16)Mean`, 2))
-  expect_true(all_equal(df2Rounded, expected2))
+  expect_equal(df2Rounded, expected2)
 })
 
 test_that("test memory coefficients", {
@@ -151,12 +151,12 @@ test_that("test memory coefficients", {
   actual <- correctForMemoryEffect(list(df1 = dataset1, df2 = dataset2))
   
   
-  expect_true(all_equal(
+  expect_equal(
     round(actual$df1$memoryCoefficients, 2), 
     memCoeffExpected1
-  ))
-  expect_true(all_equal(
+  )
+  expect_equal(
     round(actual$df2$memoryCoefficients, 3), 
     memCoeffExpected2
-  ))
+  )
 })
