@@ -15,7 +15,7 @@ accumulateMeasurementsForSingleDataset <- function(dataset){
               sd.O18 = sd(`d(18_16)Mean`),
               sd.H2 = sd(`d(D_H)Mean`),
               Line = min(Line)) %>%
-    arrange(Line) %>%
+    arrange(Line) %>%  # preserve original order of samples
     select(-Line) %>%
     rowid_to_column("Line")
 }
