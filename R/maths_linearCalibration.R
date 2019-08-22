@@ -1,9 +1,10 @@
 library(tidyverse)
 
-#' calibrateWithoutDriftCorrection
+#' linearCalibration
 #'
 #' Take a list of dataframes with isotope measurement data and 
-#' calibrate each dataframe. Note: 
+#' calibrate each dataframe. Does not include drift correction.
+#' Note: 
 #'  - If config$use_memory_correction is TRUE all injections are used for 
 #'    calibration, else only the last three injections are used.
 #'  - If config$use_triple_calibration is TRUE all standards in the specified
@@ -19,12 +20,12 @@ library(tidyverse)
 #'
 #' @return A list. The list elements are named like the input list "datasets". 
 #'         Each element of the list is a list is a dataframe with calibrated data.
-calibrateWithoutDriftCorrection <- function(datasets, config, block = 1){
+linearCalibration <- function(datasets, config, block = 1){
   
-  map(datasets, calibrateNoDriftSingleDataset, config = config, block = block)
+  map(datasets, linearCalibrationSingleDataset, config = config, block = block)
 }
 
-calibrateNoDriftSingleDataset <- function(dataset, config, block){
+linearCalibrationSingleDataset <- function(dataset, config, block){
   
   calibrationParams <- getCalibInterceptAndSlope(dataset, config, block)
   calibratedDataset <- applyCalibration(dataset, calibrationParams)
