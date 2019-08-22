@@ -1,5 +1,24 @@
 library(tidyverse)
 
+#' calibrateWithoutDriftCorrection
+#'
+#' Take a list of dataframes with isotope measurement data and 
+#' calibrate each dataframe. Note: 
+#'  - If config$use_memory_correction is TRUE all injections are used for 
+#'    calibration, else only the last three injections are used.
+#'  - If config$use_triple_calibration is TRUE all standards in the specified
+#'    block are used for calibration. If it is FALSE, only the first and last
+#'    standards are used.
+#'    
+#' @param datasets A named list of dataframes with isotope measurement data.
+#'                 Each dataframe should contain the columns "block" and 
+#'                 "useForMemCorr" (not included in the raw Picarro output).
+#' @param config A named list. Need to contain the boolean elements "use_memory_correction"
+#'               and "use_triple_calibration".
+#' @param block A number. Use the standards in this block for calibration. Default: 1.
+#'
+#' @return A list. The list elements are named like the input list "datasets". 
+#'         Each element of the list is a list is a dataframe with calibrated data.
 calibrateWithoutDriftCorrection <- function(datasets, config, block = 1){
   
   map(datasets, calibrateNoDriftSingleDataset, config = config, block = block)
