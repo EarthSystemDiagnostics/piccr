@@ -1,5 +1,21 @@
 library(lubridate)
 
+#' calibrateUsingSimpleDriftCorrection
+#' 
+#' Apply calibration and drift correction to the input datasets. Uses
+#' linear drift correction and linear calibration. The calibration uses
+#' only the standards in block 1. 
+#'
+#' @param datasets A named list of dataframes with isotope measurement data.
+#'                 Each dataframe should contain the additional columns "block", 
+#'                 "useForDriftCorr", and "useForMemCorr" (not included in the 
+#'                 raw Picarro output).
+#' @param config A named list of config arguments. The required config arguments 
+#'               are the same as for the function "linearDriftCorrection".
+#'
+#' @return A list. The list elements are named like the input list "datasets". 
+#'         Each element of the list is a list is a dataframe with data that
+#'         has been calibrated and drift corrected.
 calibrateUsingSimpleDriftCorrection <- function(datasets, config){
   
   datasets %>%

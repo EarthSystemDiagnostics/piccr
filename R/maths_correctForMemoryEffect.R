@@ -6,8 +6,8 @@ library(tidyverse)
 #' to each dataset in the list.
 #'
 #' @param datasets A named list of data frames. Each dataframe is one Picarro
-#'                 isotope file. Each dataframe should contain the column
-#'                 block (not included in the raw Picarro output).
+#'                 isotope file. Each dataframe should contain the additional column
+#'                 "block" (not included in the raw Picarro output).
 #'
 #' @return A list. The list elements are named like the input list "datasets". 
 #'         Each element of the list is a list with the two named elements

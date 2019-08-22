@@ -12,7 +12,7 @@ library(tidyverse)
 #'    standards are used.
 #'    
 #' @param datasets A named list of dataframes with isotope measurement data.
-#'                 Each dataframe should contain the columns "block" and 
+#'                 Each dataframe should contain the additional columns "block" and 
 #'                 "useForMemCorr" (not included in the raw Picarro output).
 #' @param config A named list. Need to contain the boolean elements "use_memory_correction"
 #'               and "use_three_point_calibration".
