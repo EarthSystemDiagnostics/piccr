@@ -15,9 +15,6 @@ calibrateNoDriftSingleDataset <- function(dataset, config, block){
 
 getCalibInterceptAndSlope <- function(dataset, config, useBlock){
   
-  # TODO
-  # - two-point vs. three-point calibration
-  
   trainingData <- getTrainingData(dataset, config, useBlock)
   
   d18OModel <- lm(o18_True ~ `d(18_16)Mean`, data = trainingData)
@@ -46,9 +43,23 @@ getTrainingData <- function(dataset, config, useBlock) {
       ungroup()
   }
   
+  # if two-point calibration is to be used, discard middle standard
+  if (config$use_three_point_calibration == FALSE) {
+    trainingData <- trainingData %>% 
+      split(.$`Identifier 1`) %>% 
+      selectGroupsForTwoPointCalib() %>%
+      bind_rows()
+  }
+  
   return(trainingData)
 }
 
+selectGroupsForTwoPointCalib <- function(groups){
+  
+  orderedByLine <- order(map_dbl(groups, ~ .$Line[[1]]))
+  firstAndLastElement <- groups[c(orderedByLine[1], tail(orderedByLine, 1))]
+  return(firstAndLastElement)
+}
 applyCalibration <- function(dataset, calibrationParams){
   
   d18OIntercept <- calibrationParams$d18O$intercept

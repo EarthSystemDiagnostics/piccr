@@ -30,36 +30,7 @@ expected1 <- tribble(
   9,    "B",             3,         2.93,             1,      7,             3,         7,        TRUE
 )
 
-# In this dataset only the first two rows should be used to determine calibration intercept and slope.
-dataset2 <- tribble(
-  ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~block, ~o18_True, ~H2_True, ~useForMemCorr,
-  # ------------ / ----------- / ----- / -------- / ------- / ---------------
-    1,             2,            1,      1,         2,        TRUE,
-    5,             3,            1,      5,         3,        TRUE,
-    50,            100,          2,      1,         2,        TRUE,
-    50,            100,          1,      1,         2,        FALSE,
-    50,            100,          2,      1,         2,        FALSE,
-    50,            100,          NA,     1,         2,        TRUE
-)
-
-dataset3 <- tribble(
-  ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForMemCorr,
-  # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
-  1,    "A",             1,         100,              1,      100,           2,        -5,       TRUE,
-  2,    "A",             2,         2,                1,      -5,            2,        -5,       TRUE,
-  3,    "A",             3,         2,                1,      -5,            2,        -5,       TRUE,
-  3,    "A",             4,         2,                1,      -5,            2,        -5,       TRUE,
-  4,    "C",             1,         100,              1,      100,           5,         4,        TRUE,
-  5,    "C",             2,         100,              1,      100,           5,         4,        TRUE,
-  6,    "C",             3,         5,                1,      4,             5,         4,        TRUE,
-  6,    "C",             4,         5,                1,      4,             5,         4,        TRUE,
-  6,    "C",             5,         5,                1,      4,             5,         4,        TRUE,
-  7,    "B",             1,         -2,               1,      7,             -2,        7,        TRUE,
-  8,    "B",             2,         -2,               1,      7,             -2,        7,        TRUE,
-  9,    "B",             3,         -2,               1,      7,             -2,        7,        TRUE
-)
-
-config <- list(use_memory_correction = TRUE)
+config <- list(use_memory_correction = TRUE, use_three_point_calibration = TRUE)
 
 test_that("test getCalibInterceptAndSlope", {
   
@@ -78,6 +49,18 @@ test_that("test getCalibInterceptAndSlope", {
 })
 
 test_that("test getCalibInterceptAndSlope for dataset with rows that should be excluded", {
+  
+  # In this dataset only the first two rows should be used to determine calibration intercept and slope.
+  dataset2 <- tribble(
+    ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~block, ~o18_True, ~H2_True, ~useForMemCorr,
+    # ------------ / ----------- / ----- / -------- / ------- / ---------------
+    1,             2,            1,      1,         2,        TRUE,
+    5,             3,            1,      5,         3,        TRUE,
+    50,            100,          2,      1,         2,        TRUE,
+    50,            100,          1,      1,         2,        FALSE,
+    50,            100,          2,      1,         2,        FALSE,
+    50,            100,          NA,     1,         2,        TRUE
+  )
   
   actual <- getCalibInterceptAndSlope(dataset2, config = config, useBlock = 1)
   
@@ -136,9 +119,56 @@ test_that("test calibrateWithoutDriftCorrection", {
 
 test_that("test use only last three injections if memory correction is not used", {
   
-  config <- list(use_memory_correction = FALSE)
+  dataset3 <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForMemCorr,
+    # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
+    1,    "A",             1,         100,              1,      100,           2,        -5,        TRUE,
+    2,    "A",             2,         2,                1,      -5,            2,        -5,        TRUE,
+    3,    "A",             3,         2,                1,      -5,            2,        -5,        TRUE,
+    3,    "A",             4,         2,                1,      -5,            2,        -5,        TRUE,
+    4,    "C",             1,         100,              1,      100,           5,         4,        TRUE,
+    5,    "C",             2,         100,              1,      100,           5,         4,        TRUE,
+    6,    "C",             3,         5,                1,      4,             5,         4,        TRUE,
+    6,    "C",             4,         5,                1,      4,             5,         4,        TRUE,
+    6,    "C",             5,         5,                1,      4,             5,         4,        TRUE,
+    7,    "B",             1,         -2,               1,      7,             -2,        7,        TRUE,
+    8,    "B",             2,         -2,               1,      7,             -2,        7,        TRUE,
+    9,    "B",             3,         -2,               1,      7,             -2,        7,        TRUE
+  )
+  
+  config <- list(use_memory_correction = FALSE, use_three_point_calibration = TRUE)
   
   actual <- getCalibInterceptAndSlope(dataset3, config = config, useBlock = 1)
+  
+  expect_equal(actual$d18O$intercept, 0)
+  expect_equal(actual$d18O$slope, 1)
+  
+  expect_equal(actual$dD$intercept, 0)
+  expect_equal(actual$dD$slope, 1)
+})
+
+test_that("test two point calibration", {
+  
+  dataset4 <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForMemCorr,
+    # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
+    1,    "A",             1,         100,              1,      100,           2,        -5,       TRUE,
+    2,    "A",             2,         2,                1,      -5,            2,        -5,       TRUE,
+    3,    "A",             3,         2,                1,      -5,            2,        -5,       TRUE,
+    4,    "A",             4,         2,                1,      -5,            2,        -5,       TRUE,
+    5,    "C",             1,         100,              1,      100,           5,         4,        TRUE,
+    6,    "C",             2,         100,              1,      100,           5,         4,        TRUE,
+    7,    "C",             3,         100,              1,      4,             5,         4,        TRUE,
+    8,    "C",             4,         100,              1,      4,             5,         4,        TRUE,
+    9,    "C",             5,         100,              1,      4,             5,         4,        TRUE,
+    10,   "B",             1,         -2,               1,      7,             -2,        7,        TRUE,
+    11,   "B",             2,         -2,               1,      7,             -2,        7,        TRUE,
+    12,   "B",             3,         -2,               1,      7,             -2,        7,        TRUE
+  )
+  
+  config <- list(use_memory_correction = FALSE, use_three_point_calibration = FALSE)
+  
+  actual <- getCalibInterceptAndSlope(dataset4, config = config, useBlock = 1)
   
   expect_equal(actual$d18O$intercept, 0)
   expect_equal(actual$d18O$slope, 1)
