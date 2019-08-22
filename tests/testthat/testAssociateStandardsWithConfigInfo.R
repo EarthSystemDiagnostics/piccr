@@ -7,13 +7,11 @@ test_that("associating standards for single row (standard, including usage in ph
   config <- list(standards = list(list(name = "STD_A", 
                                        o18_True = -2, 
                                        H2_True = 3,
-                                       use_for_memory_correction = TRUE,
                                        use_for_drift_correction = FALSE,
                                        use_for_calibration = TRUE), 
                                   list(name = "STD_B", 
                                        o18_True = 1.8,
                                        H2_True = -0.4,
-                                       use_for_memory_correction = NA,
                                        use_for_drift_correction = TRUE,
                                        use_for_calibration = TRUE)))
   df_1 <- tibble(
@@ -25,7 +23,6 @@ test_that("associating standards for single row (standard, including usage in ph
     val = 1:4,
     o18_True = c(-2, 1.8, NA, -2),
     H2_True = c(3, -0.4, NA, 3),
-    useForMemCorr = c(T, NA, NA, T),
     useForDriftCorr = c(F, T, NA, F),
     useForCalibration = c(T, T, NA, T)
   )
@@ -38,7 +35,6 @@ test_that("associating standards for single row (standard, including usage in ph
     val = 1:4,
     o18_True = c(NA, 1.8, NA, -2),
     H2_True = c(NA, -0.4, NA, 3),
-    useForMemCorr = c(NA, NA, NA, T),
     useForDriftCorr = c(NA, T, NA, F),
     useForCalibration = c(NA, T, NA, T)
   )

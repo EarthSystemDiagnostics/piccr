@@ -12,7 +12,6 @@ associateStandardsWithConfigInfoForDataset <- function(dataset, config){
     transmute(`Identifier 1` = as.character(name), 
               o18_True = as.double(o18_True), 
               H2_True = as.double(H2_True),
-              useForMemCorr = as.logical(use_for_memory_correction),
               useForDriftCorr = as.logical(use_for_drift_correction),
               useForCalibration = as.logical(use_for_calibration))
   

@@ -52,7 +52,7 @@ getCalibInterceptAndSlope <- function(dataset, config, useBlock){
 
 getTrainingData <- function(dataset, config, useBlock) {
   
-  trainingData <- filter(dataset, block == useBlock, useForMemCorr == TRUE)
+  trainingData <- filter(dataset, block == useBlock, useForCalibration == TRUE)
   
   # if no memory correction is applied, use only the last three injections for calibration
   if (config$use_memory_correction == FALSE) {

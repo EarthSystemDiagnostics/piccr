@@ -12,5 +12,5 @@ processFiles <- function(configFile){
   
   writeDataToFile(processedData, config)
   
-  invisible(processedData)
+  return(processedData)
 }

@@ -2,14 +2,14 @@
 
 # -------- input and output options --------
 file_extension: ".csv"	          # file extension used for data files
-input_directory:  data            # directory with the measurement data to be calibrated
-output_directory: calibrated_data # output directory for the calibrated data
+input_directory:  tests/testthat/test_data       # directory with the measurement data to be calibrated
+output_directory: tests/testthat/test_data/output # output directory for the calibrated data
 include_standards_in_output:	no	# format of desired csv-file output: flag=no->only output sample data/flag=yes->output standard and sample data in original order
 
 # -------- data processing options --------
 average_over_last_n_inj: all      # use the last n injections for each sample to calculate the mean d18O etc. To use all injections, pass "all".
 use_three_point_calibration: yes  # If yes, use three-point calibration. If no, use two-point calibration.
-calibration_method:	2		        	# set type of desired calibration: flag=1->drift-correction+three-point calibration/flag=2->double three-point calibration
+calibration_method:	0		        	# set type of desired calibration: flag=1->drift-correction+three-point calibration/flag=2->double three-point calibration
 use_memory_correction:	yes			  # signal memory correction: yes/no
 
 # -------- set standards --------
@@ -17,30 +17,25 @@ standards:
   - name: KARA
     o18_True: -0.10
     H2_True: -0.6
-    use_for_memory_correction: no
     use_for_drift_correction: no
     use_for_calibration: no
   - name: DML
     o18_True: -42.50
     H2_True: -341.0
-    use_for_memory_correction: yes
     use_for_drift_correction: yes
     use_for_calibration: yes
   - name: TD1
     o18_True: -33.90
     H2_True: -266.2
-    use_for_memory_correction: yes
     use_for_drift_correction: yes
     use_for_calibration: yes
   - name: JASE
     o18_True: -50.22
     H2_True: -392.5
-    use_for_memory_correction: yes
     use_for_drift_correction: yes
     use_for_calibration: yes
   - name: NGT
     o18_True: -34.40
     H2_True: -265.5
-    use_for_memory_correction: no
     use_for_drift_correction: no
     use_for_calibration: no

@@ -2,25 +2,30 @@
 processData <- function(datasets, config){
   
   if (config$use_memory_correction) {
-    datasets <- correctForMemoryEffect(datasets)
+    memoryCorrected <- correctForMemoryEffect(datasets)
+    memoryCorrectedDatasets <- map(memoryCorrected, ~ .$datasetMemoryCorrected)
+  } else {
+    memoryCorrected <- NULL
+    memoryCorrectedDatasets <- datasets
   }
   
   if (config$calibration_method == 0){
-    calibratedDatasets <- calibrateWithoutDriftCorrection(datasets, config)
+    calibratedDatasets <- calibrateWithoutDriftCorrection(memoryCorrectedDatasets, config)
   }
   else if (config$calibration_method == 1) {
-    calibratedDatasets <- calibrateUsingSimpleDriftCorrection(datasets, config)
+    calibratedDatasets <- calibrateUsingSimpleDriftCorrection(memoryCorrectedDatasets, config)
   } 
   else if (config$calibration_method == 2) {
-    calibratedDatasets <- calibrateUsingDoubleCalibration(datasets, config)
+    calibratedDatasets <- calibrateUsingDoubleCalibration(memoryCorrectedDatasets, config)
   }
   
   processedData <- accumulateMeasurementsForEachSample(calibratedDatasets)
   processedData <- addColumnDExcess(processedData)  # d_excess = dH - 8 * d18O
   
   pooledStdDev <- calculatePoooledStdDev(processedData)
-  invisible(list(memoryCorrected = memoryCorrectedDatasets,
-                 calibrated = calibratedDatasets,
-                 processed = processedData,
-                 pooledStdDev = pooledStdDev))
+  
+  list(memoryCorrected = memoryCorrected,
+       calibrated = calibratedDatasets,
+       processed = processedData,
+       pooledStdDev = pooledStdDev)
 }

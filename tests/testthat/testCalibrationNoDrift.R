@@ -4,7 +4,7 @@ library(tidyverse)
 context("Test simple calibration without drift correction")
 
 dataset1 <- tribble(
-  ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForMemCorr,
+  ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
   # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
    1,    "A",             1,         1.05,            1,      -5,            1,         -5,       TRUE,
    2,    "A",             2,         1,               1,      -5,            1,         -5,       TRUE,
@@ -17,7 +17,7 @@ dataset1 <- tribble(
    9,    "B",             3,         3,               1,      7,             3,         7,        TRUE
 )
 expected1 <- tribble(
-  ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForMemCorr,
+  ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
   # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
   1,    "A",             1,         0.99,             1,      -5,            1,         -5,       TRUE,
   2,    "A",             2,         0.94,             1,      -5,            1,         -5,       TRUE,
@@ -52,7 +52,7 @@ test_that("test getCalibInterceptAndSlope for dataset with rows that should be e
   
   # In this dataset only the first two rows should be used to determine calibration intercept and slope.
   dataset2 <- tribble(
-    ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~block, ~o18_True, ~H2_True, ~useForMemCorr,
+    ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~block, ~o18_True, ~H2_True, ~useForCalibration,
     # ------------ / ----------- / ----- / -------- / ------- / ---------------
     1,             2,            1,      1,         2,        TRUE,
     5,             3,            1,      5,         3,        TRUE,
@@ -120,7 +120,7 @@ test_that("test calibrateWithoutDriftCorrection", {
 test_that("test use only last three injections if memory correction is not used", {
   
   dataset3 <- tribble(
-    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForMemCorr,
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
     # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
     1,    "A",             1,         100,              1,      100,           2,        -5,        TRUE,
     2,    "A",             2,         2,                1,      -5,            2,        -5,        TRUE,
@@ -150,7 +150,7 @@ test_that("test use only last three injections if memory correction is not used"
 test_that("test two point calibration", {
   
   dataset4 <- tribble(
-    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForMemCorr,
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
     # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
     1,    "A",             1,         100,              1,      100,           2,        -5,       TRUE,
     2,    "A",             2,         2,                1,      -5,            2,        -5,       TRUE,
