@@ -12,7 +12,6 @@ library(tidyverse)
 #' @return A list. The list elements are named like the input list "datasets". 
 #'         Each element of the list is a list with the two named elements
 #'         "datasetMemoryCorrected" and "memoryCoefficients".
-#' @export
 correctForMemoryEffect <- function(datasets){
   
   map(datasets, correctSingleDatasetForMemoryEffect)
