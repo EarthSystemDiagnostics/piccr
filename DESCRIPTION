@@ -13,7 +13,8 @@ RoxygenNote: 6.1.1
 Suggests:
     testthat,
     covr,
-    devtools
+    devtools,
+    knitr
 VignetteBuilder: knitr
 Imports:
     yaml,

@@ -98,11 +98,11 @@ test_that("test linearDriftCorrection", {
 test_that("test calibrateUsingSimpleDriftCorrection", {
   
   # mock linearCalibration to return the dataframes that should be drift corrected
-  local_mock(linearCalibration = function(dfs, config, block){
+  testthat::local_mock(linearCalibration = function(dfs, config, block){
     force(config)  # make sure that the argument "config" is passed to linearCalibration
     force(block)  # make sure that the argument "block" is passed to linearCalibration
     list(df1 = dataset1, df2 = dataset2, df3 = dataset3)
-  }) 
+  }, .env = environment(linearCalibration)) 
   
   actual <- calibrateUsingSimpleDriftCorrection(list(), config = list())
   
