@@ -80,6 +80,7 @@ selectGroupsForTwoPointCalib <- function(groups){
   firstAndLastElement <- groups[c(orderedByLine[1], tail(orderedByLine, 1))]
   return(firstAndLastElement)
 }
+
 applyCalibration <- function(dataset, calibrationParams){
   
   d18OIntercept <- calibrationParams$d18O$intercept

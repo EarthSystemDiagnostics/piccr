@@ -13,7 +13,7 @@ processData <- function(datasets, config){
     calibratedDatasets <- linearCalibration(memoryCorrectedDatasets, config, block = 1)
   }
   else if (config$calibration_method == 1) {
-    calibratedDatasets <- calibrateUsingSimpleDriftCorrection(memoryCorrectedDatasets)
+    calibratedDatasets <- calibrateUsingSimpleDriftCorrection(memoryCorrectedDatasets, config)
   } 
   else if (config$calibration_method == 2) {
     calibratedDatasets <- calibrateUsingDoubleCalibration(memoryCorrectedDatasets, config)

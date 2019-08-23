@@ -1,4 +1,4 @@
-library(lubridate)
+library(tidyverse)
 
 #' calibrateUsingSimpleDriftCorrection
 #' 
@@ -34,14 +34,6 @@ linearDriftCorrectionSingleDataset <- function(dataset){
   driftCorrectedData <- applyDriftCorrection(dataset, alphaValues)
   
   return(driftCorrectedData)
-}
-
-addColumnSecondsSinceStart <- function(dataset){
-  
-  dataset %>%
-    mutate(SecondsSinceStart = ymd_hms(.$TimeCode)) %>%
-    mutate(SecondsSinceStart = c(0, int_diff(.$SecondsSinceStart))) %>%
-    mutate(SecondsSinceStart = cumsum(.$SecondsSinceStart))
 }
 
 calculateDriftSlope <- function(dataset){
