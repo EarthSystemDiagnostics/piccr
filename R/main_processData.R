@@ -19,8 +19,8 @@ processData <- function(datasets, config){
     calibratedDatasets <- calibrateUsingDoubleCalibration(memoryCorrectedDatasets, config)
   }
   
+  calibratedDatasets <- addColumnDExcess(calibratedDatasets)
   processedData <- accumulateMeasurementsForEachSample(calibratedDatasets)
-  processedData <- addColumnDExcess(processedData)
   
   pooledStdDev <- calculatePoooledStdDev(processedData)
   
