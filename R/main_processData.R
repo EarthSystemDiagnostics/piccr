@@ -20,7 +20,7 @@ processData <- function(datasets, config){
   }
   
   processedData <- accumulateMeasurementsForEachSample(calibratedDatasets)
-  processedData <- addColumnDExcess(processedData)  # d_excess = dH - 8 * d18O
+  processedData <- addColumnDExcess(processedData)
   
   pooledStdDev <- calculatePoooledStdDev(processedData)
   

@@ -14,7 +14,7 @@ library(tidyverse)
 #'               are the same as for the function "linearDriftCorrection".
 #'
 #' @return A list. The list elements are named like the input list "datasets". 
-#'         Each element of the list is a list is a dataframe with data that
+#'         Each element of the list is a dataframe with data that
 #'         has been calibrated and drift corrected.
 calibrateUsingSimpleDriftCorrection <- function(datasets, config){
   
