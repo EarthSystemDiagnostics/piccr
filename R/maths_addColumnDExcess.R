@@ -17,5 +17,5 @@ addColumnDExcess <- function(datasets){
 
 addColumnDExcessForSingleDataset <- function(dataset){
   
-  mutate(dataset, dExcess = delta.H2 - delta.O18 * 8)
+  mutate(dataset, dExcess = `d(D_H)Mean` - `d(18_16)Mean` * 8)
 }

@@ -6,7 +6,7 @@ context("test addColumnDExcess (d_excess = dH - 8 * d18O)")
 test_that("test addColumnDExcess", {
   
   dataset1 <- tribble(
-    ~delta.O18, ~delta.H2, ~otherCol,
+    ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~otherCol,
     # ------------ / ------------ / -------- /
     1,               4,             10,
     2,               3,             10,
@@ -15,7 +15,7 @@ test_that("test addColumnDExcess", {
     5,               0,             10
   )
   expected1 <- tribble(
-    ~delta.O18, ~delta.H2, ~otherCol, ~dExcess,
+    ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~otherCol, ~dExcess,
     # ------- / --------- / -------- / --------
     1,         4,             10,        -4,
     2,         3,             10,        -13,
@@ -24,7 +24,7 @@ test_that("test addColumnDExcess", {
     5,         0,             10,        -40
   ) 
   dataset2 <- tribble(
-    ~delta.O18, ~delta.H2, ~otherCol,
+    ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~otherCol,
     # ------- / --------- / -------
     1,          8,             10,
     2,          16,            10,
@@ -33,7 +33,7 @@ test_that("test addColumnDExcess", {
     -20,        0,             10
   )
   expected2 <- tribble(
-    ~delta.O18, ~delta.H2, ~otherCol, ~dExcess,
+    ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~otherCol, ~dExcess,
     # ------- / -------- / -------- / --------
     1,         8,             10,        0,
     2,         16,            10,        0,
