@@ -1,5 +1,17 @@
 library(tidyverse)
 
+#' calibrateUsingDoubleCalibration
+#' 
+#' Calibrate the given datasets using double calibration
+#'
+#' @param datasets A named list of dataframes with isotope measurement data.
+#'                 Each dataframe should contain the additional columns "block" and 
+#'                 "useForMemCorr" (not included in the raw Picarro output).
+#' @param config A named list. Need to contain the boolean elements "use_memory_correction"
+#'               and "use_three_point_calibration".
+#'
+#' @return A list. The list elements are named like the input list "datasets". 
+#'         Each element of the list is a list is a dataframe with calibrated data.
 calibrateUsingDoubleCalibration <- function(datasets, config){
   
   map(datasets, doubleCalibrationForSingleDataset, config = config)
