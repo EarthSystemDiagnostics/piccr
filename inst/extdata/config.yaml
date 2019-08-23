@@ -4,7 +4,7 @@
 file_extension: ".csv"	          # file extension used for data files
 input_directory:  tests/testthat/test_data       # directory with the measurement data to be calibrated
 output_directory: tests/testthat/test_data/output # output directory for the calibrated data
-include_standards_in_output:	no	# format of desired csv-file output: flag=no->only output sample data/flag=yes->output standard and sample data in original order
+include_standards_in_output:	yes	# format of desired csv-file output: flag=no->only output sample data/flag=yes->output standard and sample data in original order
 
 # -------- data processing options --------
 average_over_last_n_inj: all      # use the last n injections for each sample to calculate the mean d18O etc. To use all injections, pass "all".
