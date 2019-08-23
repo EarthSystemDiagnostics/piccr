@@ -23,6 +23,7 @@ test_that("full run with memory correction and simple calibration", {
   expect_length(processedData$memoryCorrected, 3)
   expect_length(processedData$calibrated, 3)
   expect_length(processedData$processed, 3)
+  expect_length(processedData$pooledStdDev, 3)
 })
 
 test_that("full run with memory correction and simple calibration", {
