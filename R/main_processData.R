@@ -1,6 +1,9 @@
 #' @export
 processData <- function(datasets, config){
   
+  datasets <- groupStandardsInBlocks(datasets, config) %>%
+    associateStandardsWithConfigInfo(config)
+  
   if (config$use_memory_correction) {
     memoryCorrected <- correctForMemoryEffect(datasets)
     memoryCorrectedDatasets <- map(memoryCorrected, ~ .$datasetMemoryCorrected)
