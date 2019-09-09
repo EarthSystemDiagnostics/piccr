@@ -1,5 +1,19 @@
 library(purrr)
 
+#' groupStandardsInBlocks
+#'
+#' For each standard injection, determine which standard block
+#' it belongs to. The results are stored in the column 'block'.
+#' For probes the value is NA.
+#'
+#' @param datasets A named list of dataframes.
+#' @param config A named list. Needs to contain the component
+#'               $standards; a list of lists where each innermost
+#'               list needs to contain the component $name.
+#'
+#' @return A named list of dataframes. The names are the same as
+#'         the names of the input 'datasets'. 
+#'
 groupStandardsInBlocks <- function(datasets, config){
   map(datasets, groupStandardsInBlocksForDataset, config = config)
 }

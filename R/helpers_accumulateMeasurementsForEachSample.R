@@ -1,5 +1,21 @@
 library(tidyverse)
 
+#' accumulateMeasurementsForEachSample
+#'
+#' Average the delta.O18, delta.H2 and d.Excess values for each 
+#' sample and calculate the standard deviation.
+#' 
+#' Uses the config parameter 'average_over_last_n_inj'. If it is
+#' -1 or 'all', all injections are used to calculate the averages
+#' and standard deviations.
+#'
+#' @param datasets A named list of data.frames
+#' @param config A named list. Needs to contain the component
+#'               'average_over_last_n_inj'.
+#'
+#' @return A named list of data.frames. The list elements are named 
+#'         like the input list "datasets". 
+#'
 accumulateMeasurementsForEachSample <- function(datasets, config){
   
   map(datasets, accumulateMeasurementsForSingleDataset, config = config)

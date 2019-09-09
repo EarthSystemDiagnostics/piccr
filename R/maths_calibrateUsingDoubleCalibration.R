@@ -11,7 +11,7 @@ library(tidyverse)
 #'               and "use_three_point_calibration".
 #'
 #' @return A list. The list elements are named like the input list "datasets". 
-#'         Each element of the list is a list is a dataframe with calibrated data.
+#'         Each element of the list is a dataframe with calibrated data.
 calibrateUsingDoubleCalibration <- function(datasets, config){
   
   map(datasets, doubleCalibrationForSingleDataset, config = config)

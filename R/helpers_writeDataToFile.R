@@ -1,5 +1,22 @@
 library(tidyverse)
 
+#' writeDataToFile
+#'
+#' Save processed datasets to disc. Note that the component 
+#' 'datasets$processed' contains the dataframes that are
+#' saved.
+#' 
+#' Uses the following config arguments:
+#'   - 'output_directory'
+#'   - 'include_standards_in_output'
+#'   
+#' @param datasets A nested list, as output by processData(..).
+#'                 Contains the component $processed.
+#' @param config A named list. Needs to contain at least the components
+#'               'output_directory' and 'include_standards_in_output'.
+#'
+#' @return No relevant return value
+#'
 writeDataToFile <- function(datasets, config){
   config$output_directory %>%
     createOutputDirectory() %>%
@@ -8,7 +25,7 @@ writeDataToFile <- function(datasets, config){
 
 createOutputDirectory <- function(folder){
   dir.create(folder, showWarnings = FALSE)
-  return(folder)
+  return(folder) # make function usable in a pipe
 }
 
 writeDatasets <- function(folder, datasets, config){
