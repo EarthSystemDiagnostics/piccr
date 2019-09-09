@@ -1,46 +1,103 @@
-library(readr)
+library(tidyverse)
 
+#' outputSummaryFile
+#' 
+#' Write a summary file to disc. The summary file contains
+#' quality indicators and consists of three sections: 
+#'   - AVERAGE OVER ALL FILES: This section contains the
+#'     pooled standard deviation (O18 and H2) averaged 
+#'     over all files.
+#'     (More parameters will be added in the future.)
+#'   - VALUES FOR EACH FILE: This section contains the 
+#'     pooled standard deviation (O18 and H2) for each file.
+#'   - INTER STANDARD BIAS TO LITERATURE VALUES FOR EACH FILE:
+#'     This section displays the deviation of the measured
+#'     delta.O18 and delta.H2 values to the true values for
+#'     each file.
+#'
+#' @param processedData A list as output by processData(..). 
+#'                      It needs to contain the components
+#'                      $pooledStdDev (a named list where each
+#'                      element is of the form 'list(d18O = .., dD = ..)')
+#'                      and $processed (a named list of dataframes).
+#' @param outputFile A character vector. Path to the output file.
+#' @param config A named list. Needs to contain the component 
+#'               $standards (A list of lists. Each innermost list is
+#'               of the form 'list(name = .., o18_True = .., H2_True = ..)').
+#'
+#' @return No relevant return value
+#' 
 outputSummaryFile <- function(processedData, outputFile, config){
+  
+  firstSection  <- buildFirstSection(processedData)
+  secondSection <- buildSecondSection(processedData)
+  thirdSection  <- buildThirdSection(processedData, config)
+  
+  summaryText <- str_c(
+    firstSection, 
+    "\n\n", 
+    secondSection, 
+    "\n\n", 
+    thirdSection
+  )
+  
+  write_file(summaryText, outputFile)
+}
+
+#' Build section "AVERAGE OVER ALL FILES"
+buildFirstSection <- function(processedData){
   
   meanPooledSdO18 <- mean(map_dbl(processedData$pooledStdDev, ~ .$d18O))
   meanPooledSdH2  <- mean(map_dbl(processedData$pooledStdDev, ~ .$dD))
   
-  averageOverAllFiles <- sprintf(
+  sprintf(
     str_c("### AVERAGE OVER ALL FILES: ###\n\n",
           "pooled standard deviation delta O18: %.2f\n",
-          "pooled standard deviation delta H2: %.2f\n\n"),
+          "pooled standard deviation delta H2: %.2f"),
     meanPooledSdO18, meanPooledSdH2
   )
+}
+
+#' Build section "VALUES FOR EACH FILE"
+buildSecondSection <- function(processedData){
   
-  valuesForEachFile <- str_c(
+  tableAsString <- map2_chr(processedData$pooledStdDev, names(processedData$pooledStdDev), 
+                            ~ sprintf("%s, %.2f, %.2f", .y, .x$d18O, .x$dD)) %>%
+                   paste(collapse = "\n")
+  str_c(
     "### VALUES FOR EACH FILE: ###\n\n",
     "file name, pooled sd delta O18, pooled sd delta H2\n",
-    paste(map2_chr(processedData$pooledStdDev, names(processedData$pooledStdDev), 
-                   ~ sprintf("%s, %.2f, %.2f", .y, .x$d18O, .x$dD)), collapse = "\n"),
-    "\n\n"
+    tableAsString
   )
+}
 
+#' Build section "INTER STANDARD BIAS TO LITERATURE VALUES FOR EACH FILE"
+buildThirdSection <- function(processedData, config){
   
-  trueValues <- map(config$standards, ~ list(o18_True = .$o18_True, 
-                                             H2_True = .$H2_True))
+  # make true values easily accessible
+  trueValues <- map(
+    config$standards, 
+    ~ list(o18_True = .$o18_True, H2_True = .$H2_True)
+  )
   names(trueValues) <- map_chr(config$standards, ~ .$name)
   
-  print(trueValues)
+  # construct list of biases
+  biasesList <- map2(
+    processedData$processed, names(processedData$processed), ~ apply(.x, 1, function(row){
+      block <- row[["block"]]
+      name <- row[["Identifier 1"]]
+      if(!is.na(block)) # if the block is na the sample is a standard
+        sprintf("%s, %s, %.f, %.2f, %.2f", .y, name, as.numeric(block), 
+                as.numeric(row[["delta.O18"]]) - trueValues[[name]][["o18_True"]],
+                as.numeric(row[["delta.H2"]]) - trueValues[[name]][["H2_True"]])
+    })
+  )
+  # convert list of biases to string
+  biasesText <- paste(unlist(biasesList), collapse = "\n")
   
-  standardBias <- str_c(
+  str_c(
     "### INTER STANDARD BIAS TO LITERATURE VALUES FOR EACH FILE: ###\n\n",
     "file name, standard, block, bias O18, bias H2\n",
-    paste(unlist(map2(
-      processedData$processed, names(processedData$processed), ~ apply(.x, 1, function(row){
-        block <- row[["block"]]
-        name <- row[["Identifier 1"]]
-        print(row)
-        if(!is.na(block)) 
-          sprintf("%s, %s, %.f, %.2f, %.2f", .y, name, as.numeric(block), 
-                  as.numeric(row[["delta.O18"]]) - trueValues[[name]][["o18_True"]],
-                  as.numeric(row[["delta.H2"]]) - trueValues[[name]][["H2_True"]])
-    }))), collapse = "\n")
+    biasesText
   )
-  
-  write_file(str_c(averageOverAllFiles, valuesForEachFile, standardBias), outputFile)
 }
