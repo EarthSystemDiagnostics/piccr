@@ -103,8 +103,19 @@ buildThirdSection <- function(processedData, config){
   # convert list of biases to string
   biasesText <- paste(unlist(biasesList), collapse = "\n")
   
+  # create output text for the true values
+  trueValuesText <- config$standards %>%
+    map_chr(~ sprintf("%s, %.2f, %.2f", .$name, .$o18_True, .$H2_True)) %>%
+    paste(collapse = "\n")
+  
+  # join text sections into one
   str_c(
     "### INTER STANDARD BIAS TO LITERATURE VALUES FOR EACH FILE: ###\n\n",
+    "## LITERATURE VALUES ##\n",
+    "standard, O18, H2",
+    trueValuesText,
+    "\n\n",
+    "## BIAS ##\n",
     "file name, standard, block, bias O18, bias H2\n",
     biasesText
   )
