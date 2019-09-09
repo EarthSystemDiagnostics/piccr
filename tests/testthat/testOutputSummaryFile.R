@@ -42,7 +42,7 @@ test_that("test", {
   
   # ----------- CALL FUNCTION UNDER TEST ----------
   
-  outputSummaryFile(processedData, file, config)
+  outputSummaryFile(processedData, config, file)
   
   # ----------- MAKE EXPECTATIONS --------------
   

@@ -35,8 +35,8 @@ test_that("test return value and outputs", {
 
   # check saved files
   outputFiles <- list.files(outputDir)
-  expect_length(outputFiles, 3)
   expect_equal(outputFiles, c("HIDS2041_IsoWater_20151125_111138.csv",  
                               "HIDS2041_IsoWater_20151126_115726.csv", 
-                              "HIDS2041_IsoWater_20151127_143940.csv"))
+                              "HIDS2041_IsoWater_20151127_143940.csv",
+                              "run.info"))
 })

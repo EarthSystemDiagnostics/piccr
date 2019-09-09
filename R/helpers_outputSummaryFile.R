@@ -20,14 +20,22 @@ library(tidyverse)
 #'                      $pooledStdDev (a named list where each
 #'                      element is of the form 'list(d18O = .., dD = ..)')
 #'                      and $processed (a named list of dataframes).
-#' @param outputFile A character vector. Path to the output file.
 #' @param config A named list. Needs to contain the component 
 #'               $standards (A list of lists. Each innermost list 
 #'               contains the components $name, $o18_True, and  $H2_True).
+#'               Should contain $output_directory if no explicit
+#'               value is given for the argument outputFile.
+#' @param outputFile (Optional) A character vector. Path to the output file.
+#'                   If it is not given, the file 'run.info' in the
+#'                   directory config$output_directory is used.
 #'
 #' @return No relevant return value
 #' 
-outputSummaryFile <- function(processedData, outputFile, config){
+outputSummaryFile <- function(processedData, config, outputFile = NULL){
+  
+  # set default value for outputFile if needed
+  if(is.null(outputFile)) 
+    outputFile <- file.path(config$output_directory, "run.info")
   
   firstSection  <- buildFirstSection(processedData)
   secondSection <- buildSecondSection(processedData)

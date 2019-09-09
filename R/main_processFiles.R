@@ -22,6 +22,7 @@ processFiles <- function(configFile){
     processData(config)
   
   writeDataToFile(processedData, config)
+  outputSummaryFile(processedData, config)
   
   return(processedData)
 }
