@@ -22,8 +22,8 @@ library(tidyverse)
 #'                      and $processed (a named list of dataframes).
 #' @param outputFile A character vector. Path to the output file.
 #' @param config A named list. Needs to contain the component 
-#'               $standards (A list of lists. Each innermost list is
-#'               of the form 'list(name = .., o18_True = .., H2_True = ..)').
+#'               $standards (A list of lists. Each innermost list 
+#'               contains the components $name, $o18_True, and  $H2_True).
 #'
 #' @return No relevant return value
 #' 
