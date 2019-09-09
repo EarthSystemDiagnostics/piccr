@@ -2,8 +2,6 @@ library(testthat)
 
 context("Test parse config")
 
-# test fails covr::package_coverage() for unknown reasons
-# TODO: fix covr issue
 test_that("Config parsed correctly", {
   config <- parseConfig(system.file("extdata", "config.yaml", package = "piccr"))
   expect_type(config, "list")
