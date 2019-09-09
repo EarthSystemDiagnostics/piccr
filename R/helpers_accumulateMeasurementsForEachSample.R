@@ -1,13 +1,35 @@
 library(tidyverse)
 
-accumulateMeasurementsForEachSample <- function(datasets){
+accumulateMeasurementsForEachSample <- function(datasets, config){
   
-  map(datasets, accumulateMeasurementsForSingleDataset)
+  map(datasets, accumulateMeasurementsForSingleDataset, config = config)
 }
 
-accumulateMeasurementsForSingleDataset <- function(dataset){
+accumulateMeasurementsForSingleDataset <- function(dataset, config){
+    
+  accumulatedData <- dataset %>%
+    getLastNInjectionsForEachSample(config) %>%
+    doAccumulate() %>% 
+    rearrange()
   
-  # TODO: use config arg average_over_last_n_inj
+  return(accumulatedData)
+}
+
+getLastNInjectionsForEachSample <- function(dataset, config){
+  
+  n <- config$average_over_last_n_inj
+  
+  # exit early if all injections should be kept
+  if (n %in% c(-1, "all")) return(dataset)
+  
+  dataset %>%
+    group_by(`Identifier 1`, block) %>% 
+    slice((n() - n + 1):n()) %>%
+    ungroup() %>%
+    arrange(Line)
+}
+
+doAccumulate <- function(dataset){
   
   dataset %>%
     group_by(`Identifier 1`, block) %>%
@@ -18,8 +40,13 @@ accumulateMeasurementsForSingleDataset <- function(dataset){
               sd.H2 = sd(`d(D_H)Mean`),
               d.Excess = mean(dExcess),
               sd.d.Excess = sd(dExcess),
-              Line = min(Line)) %>%
+              Line = min(Line))
+}
+
+rearrange <- function(dataset){
+  
+  dataset %>%
     arrange(Line) %>%  # preserve original order of samples
     select(-Line) %>%
-    rowid_to_column("Line")
+    rowid_to_column("Line")  # use continous row numbers
 }

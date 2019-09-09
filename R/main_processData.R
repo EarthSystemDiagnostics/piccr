@@ -61,7 +61,7 @@ processData <- function(datasets, config){
   calibratedDatasets <- addColumnDExcess(calibratedDatasets)
   pooledStdDev <- calculatePoooledStdDev(calibratedDatasets)
   
-  processedData <- accumulateMeasurementsForEachSample(calibratedDatasets)
+  processedData <- accumulateMeasurementsForEachSample(calibratedDatasets, config)
   
   list(memoryCorrected = memoryCorrected,
        calibrated = calibratedDatasets,
