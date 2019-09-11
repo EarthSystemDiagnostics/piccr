@@ -8,7 +8,7 @@ library(magrittr)
 #' 
 #' Relies on processData(..) to do the actual processing.
 #' 
-#' @param configFile A string. The path to a config file.
+#' @param configFile A character string naming the config file.
 #'
 #' @return A list. See the documentation for processData(..) for details.
 #' 
