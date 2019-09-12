@@ -5,7 +5,7 @@ context("test calibrateUsingSimpleDriftCorrection")
 
 # this dataset does not have drift. -> drift slope: 0
 dataset1 <- tribble(
-  ~`Identifier 1`, ~block, ~TimeCode,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~useForDriftCorr,
+  ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~useForDriftCorr,
   # ------------ / ----- / ---------------------- / -------------- / ------------ / ----------------
   "Std_A",         1,      "2019/11/2504:47:06",    1,               2,             TRUE,
   "Std_A",         1,      "2019/11/2504:55:10",    1,               2,             TRUE,
@@ -24,7 +24,7 @@ dataset1 <- tribble(
 
 # this dataset has a constant drift. -> drift slope: d18O: 1 / sec; dD: -0.5 / sec
 dataset2 <- tribble(
-  ~`Identifier 1`, ~block, ~TimeCode,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~useForDriftCorr,
+  ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~useForDriftCorr,
   # ------------ / ----- / ---------------------- / -------------- / ------------ / ----------------
   "Std_A",         1,      "2019/11/2510:00:00",    0,                -3,            TRUE,
   "Std_B",         1,      "2019/11/2510:05:00",    300,              -145,          TRUE,
@@ -37,7 +37,7 @@ dataset2 <- tribble(
   "Std_B",         3,      "2019/11/2510:40:00",    2400,             -1195,         TRUE
 )
 expected2 <- tribble(
-  ~`Identifier 1`, ~block, ~TimeCode,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~useForDriftCorr,
+  ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~useForDriftCorr,
   # ------------ / ----- / ---------------------- / -------------- / ------------ / ----------------
   "Std_A",         1,      "2019/11/2510:00:00",    0,                -3,            TRUE,
   "Std_B",         1,      "2019/11/2510:05:00",    0,                5,             TRUE,
@@ -54,7 +54,7 @@ expected2 <- tribble(
 # d18O: Std_A 1/sec; Std_B 2/sec
 # dD: StdA -0.5/sec; Std_B 0.5/sec
 dataset3 <- tribble(
-  ~`Identifier 1`, ~block, ~TimeCode,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~useForDriftCorr,
+  ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~useForDriftCorr,
   # ------------ / ----- / ---------------------- / -------------- / ------------ / ----------------
   "Std_A",         1,      "2019/11/2510:00:00",    0,                0,             TRUE,
   "Std_B",         1,      "2019/11/2510:05:00",    600,              150,           TRUE,
@@ -67,7 +67,7 @@ dataset3 <- tribble(
   "Std_B",         3,      "2019/11/2510:40:00",    4800,             1200,          TRUE
 )
 expected3 <- tribble(
-  ~`Identifier 1`, ~block, ~TimeCode,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~useForDriftCorr,
+  ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~useForDriftCorr,
   # ------------ / ----- / ---------------------- / -------------- / ------------ / ----------------
   "Std_A",         1,      "2019/11/2510:00:00",    0,                0,             TRUE,
   "Std_B",         1,      "2019/11/2510:05:00",    150,              150,           TRUE,
@@ -142,7 +142,7 @@ test_that("test use only standards specified in config", {
   # d18O: Std_A 1/sec; Std_B 2/sec
   # dD: StdA -0.5/sec; Std_B 0.5/sec
   dataset3 <- tribble(
-    ~`Identifier 1`, ~block, ~TimeCode,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~useForDriftCorr,
+    ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~useForDriftCorr,
     # ------------ / ----- / ---------------------- / -------------- / ------------ / ----------------
     "Std_A",         1,      "2019/11/2510:00:00",    0,                0,             TRUE,
     "Std_B",         1,      "2019/11/2510:05:00",    600,              150,           FALSE,
