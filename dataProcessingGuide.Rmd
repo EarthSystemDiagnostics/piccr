@@ -164,10 +164,10 @@ and use Eqs. (\ref{eq:mem.effect}--\ref{eq:mem.coef.est}) to obtain
 
 ### Estimating memory coefficients
 
-To estimate the memory coefficients for a specific measurement sequence, $n_s$
+To estimate the memory coefficients for a specific measurement sequence, $N_s$
 standard vials with different isotopic composition are placed in block
 $b_1$. Each standard is injected $n_I$ times (typically, $n_I = 12$). From the
-raw measurement data for each standard of number $2$ to $n_s$, memory
+raw measurement data for each standard of number $2$ to $N_s$, memory
 coefficients can then be estimated in three different ways:
 
 1. 
@@ -175,7 +175,7 @@ Estimate the $m_i$ for each standard from Eq. (\ref{eq:mem.coef.est}). For this,
 the $\delta_v$ values are approximated by the last injection of the respective
 standard (alternatively, one could also use the mean across the last 3
 injections of the  respective standard). Take the average $m_i$ across the
-$n_s-1$ standards used (currently implemented in **piccr**).
+$N_s-1$ standards used (currently implemented in **piccr**).
 2. 
 Estimate the $m_i$ as before and fit an exponential of the form
 $1-\exp(-\mu\cdot i)$,
@@ -184,7 +184,7 @@ parameter, the general memory coefficient follows as
 $\tilde{m}=e^{-\mu}$.
 3. 
 Estimate the $m_i$ by minimising the combined standard deviation of the
-injections across the $n_s$ standards; see the description in van Geldern and
+injections across the $N_s$ standards; see the description in van Geldern and
 Barth (2012). This method is not yet impemented in **piccr** but could lead to
 more accurate memory corrections.
 
@@ -195,7 +195,7 @@ more accurate memory corrections.
 The raw output data (i.e. memory-corrected or not) from Picarro Inc. devices
 need to be calibrated to the international VSMOW/SLAP scale of water isotopic
 composition. For this, standards with known isotopic composition are used. The
-calibration is performed by linearly regressing the true values of $n_s$
+calibration is performed by linearly regressing the true values of $N_s$
 standards measured in block $b_i$ against the measured values from the
 injections (if memory correction is applied, all injections can be used, else
 only the last three injections to avoid the memory effect from affecting the
@@ -268,7 +268,7 @@ data are then calibrated to the true scale using
 
 ### Drift
 
-For longer measurement runs Picarro devices exhibit drift (van Geldern and
+For longer measurement runs Picarro Inc. devices exhibit drift (van Geldern and
 Barth, 2012), i.e. the measured delta values gradually shift over
 time. This has an influence on the calibration parameters depending on the type
 of the drift.
@@ -313,7 +313,7 @@ measured (memory-corrected) delta values,
 
 where $t$ is the measurement time (van Geldern and Barth, 2012). Subsequently,
 one calculates the calibration parameters from the standards in $b_1$ (intercept
-$I_0$, slope $s_0$), and then applies Eq. (\ref{eq:calibration}). This is
+$I_1$, slope $s_1$), and then applies Eq. (\ref{eq:calibration}). This is
 currently implemented in the original **piccr** version.
 
 If we neglect the small difference in measurement time that passes between the
@@ -325,8 +325,8 @@ time between $b_1$ and $b_3$ according to the drift rate $\alpha$
 
 \begin{subequations}
 \begin{align}
-I(t) &= I_0 + \alpha t,\\
-s(t) &= s_0 = \text{const.}.
+I(t) &= I_1 + \alpha t,\\
+s(t) &= s_1 = \text{const.}.
 \end{align}
 \end{subequations}
 
@@ -354,8 +354,8 @@ according to
 
 \begin{subequations}
 \begin{align}
-I(t) &= I_0 + \alpha t,\\
-s(t) &= s_0 + \beta t.
+I(t) &= I_1 + \alpha t,\\
+s(t) &= s_1 + \beta t.
 \end{align}
 \end{subequations}
 
@@ -365,22 +365,129 @@ calibration parameters (i.e. intercept and slope) from both the $b_1$ and $b_3$
 blocks (or, additionally, from the $b_2$ block), and regressing these parameters
 against the measurement time. The slopes of each regression then yield the
 $\alpha$ and $\beta$ rates, respectively. More specifically, the $b_1$
-calibration yields $I_0$ and $s_0$, the $b_3$ calibration $I_1$ and $s_1$. Then,
+calibration yields $I_1$ and $s_1$, the $b_3$ calibration $I_3$ and $s_3$. Then,
 the rates are given by
 
 \begin{align}
-\alpha \simeq \frac{I_1 - I_0}{\Delta t},\\
-\beta \simeq \frac{s_1 - s_0}{\Delta t}.
+\alpha \simeq \frac{I_3 - I_1}{\Delta t},\\
+\beta \simeq \frac{s_3 - s_1}{\Delta t}.
 \end{align}
 
 The raw (memory-corrected) data are
 then drift-corrected and calibrated using $I(t)$ and $s(t)$ in
 Eq. (\ref{eq:calibration}).
 
+## Sample value from injection average
+
+To reduce measurement uncertainty, the isotopic value of a given measured sample
+should be obtained from averaging a given number of injections. Without memory
+correction, the first injections should be discarded from the average to limit
+the influence of the memory effect on the mean sample value. However, since
+**piccr** provides an active memory correction, all injections can be used to
+calculate the sample average. 
+
+Hence, possible options in **piccr** include to average over all injections (set
+the correponding parameter in the _YAML_ configuration file to "all"), or to
+average across the last $n$ injections (set the parameter to $n$).
+
+## Quality control
+
+Quality control of the measured and processed data is possible with **piccr** on
+three levels: on (1) a per-injection basis, (2) a per-sample basis, and (3) a
+per-file basis.
+
+### Per-injection basis
+
+On this level, the following quality control information is obtained directly
+from the Picarro measurement files:
+
+* standard deviation of the injection value for each measured isotopic species
+  from the measurement integration time in the cavity;
+* water vapour level (mean and standard deviation) during the injection.
+
+The cavity water vapour level during an injection should typically lie between
+$18000$ and $22000\,\text{ppm}$. Deviations from this optimal range may result
+in large standard deviations of the measured isotope values. Taken together,
+these information can be used to sort out "bad" injections.
+
+Since **piccr** also returns the raw data, as read in from the measurement files,
+these quality control information are readily available for further analysis.
+
+### Per-sample basis
+
+The isotopic value of the sample is obtained from averaging across a certain
+(settable) number of injections. From the injection average, **piccr**
+calculates the following quality control information:
+
+* the mean water vapour level and its standard deviation;
+* the standard deviation of the mean isotope value for each isotopic species;
+* the deviation from the true isotope value (only for standards).
+
+These data are a measure for the overall goodness of the measured value of the
+sample and can provide information on the stability of consecutive measurements
+or help to identify outliers.
+
+The deviation of the measured standard values from their true values is used to
+calculate an overall measurement uncertainty for the run (per-file basis, see
+below).
+
+### Per-file basis
+
+On the per-file basis, **piccr** provides the following quality control
+information:
+
+* the specific deviation from the true value for the independent quality control
+  standard;
+* the root mean square deviation across the deviations of all measured standards
+  from their true values;
+* the pooled standard deviation across all measured samples and standards;
+* quality control information from the memory correction process (memory
+  coefficients: mean values and values for each analysed standard);
+* quality control information from the calibration process (such as standard
+  deviation of residuals, p-value of regression) [tbd];
+* quality control information from the drift correction process (drift slopes,
+  p-value of regression) [tbd].
+  
+Here, the root mean square deviation is defined as
+
+\begin{equation}\label{eq:rmsd}
+\sigma_\text{rmsd} = 
+\sqrt{\frac{1}{k}\sum_{i=1}^{k}{\left(\Delta\delta_i\right)^2}},
+\end{equation}
+
+where $\Delta \delta_i$ is the deviation for standard $i$ of the measured value
+from its true value, $\Delta\delta_i=\delta_t - \delta_m$, and $k$ is the number
+of standards; and the pooled standard deviation $\sigma_\text{p}$ is the square
+root of the pooled variance which is defined as
+
+\begin{equation}\label{eq:sigma.pooled}
+\sigma_\text{p}^2 =
+\frac{\sum_{i=1}^{N}{(n_i-1)\sigma_i^2}}{\sum_{i=0}^{N}{(n_i-1)}},
+\end{equation}
+
+where $\sigma_i$ is the standard deviation of the mean isotope value for vial
+$i$ from averaging across $n_i$ injections, and $N$ is the total number of
+analysed vials. The pooled variance is an estimate of the fixed common variance
+from populations that have different means. If the number of injections is the
+same for all vials (populations), $n_i=n=\text{const}$, the pooled variance is
+simply the average across all variances $\sigma_i^2$.
+
+The overall measurement uncertainty for a given measurement project, which
+contains $M$ single measurements (i.e. Picarro files), can then be assessed with
+the root mean square deviation of the quality control standards,
+
+\begin{equation}\label{eq:qlty.contr}
+\sigma_\text{rmsd}^{\text{project}} = 
+\sqrt{\frac{1}{M}\sum_{i=1}^{M}{\left(\Delta\delta_{i}^{\text{qlty-contr}}\right)^2}},
+\end{equation}
+
+where $\Delta\delta_{i}^{\text{qlty-contr}}$ is the deviation for measurement
+file $i$ of the quality control standard from its true value.
+
 ## Programme work flow
 
 The basic programme workflow in **piccr** for correcting and calibrating the raw
-data is hence:
+data is:
 
 1.
 if (use\_memory\_correction):
@@ -389,7 +496,11 @@ if (use\_memory\_correction):
       Eq. (\ref{eq:delta.mem.corr.}) for the time being).
 
 2.
-if (use\_simple\_drift\_correction):
+if (use\_no\_drift\_correction):
+	+ obtain calibration intercept and slope from $b_1$ standards;
+	+ apply calibration (Eq. \ref{eq:calibration}).
+
+    else if (use\_simple\_drift\_correction):
     + calculate drift slope $\alpha$;
 	+ drift-correct data (Eq. \ref{eq:drift.corr.});
 	+ obtain calibration intercept and slope from $b_1$ standards;
@@ -401,10 +512,10 @@ if (use\_simple\_drift\_correction):
 	+ apply calibration (Eq. \ref{eq:calibration}).
 
 3.
-calculate quality control information.
+calculate average values across injections.
 
 4.
-calculate average values across injections.
+obtain quality control information.
 
 ## References
 
