@@ -45,14 +45,37 @@ calculateMemoryCoefficients <- function(dataset) {
 
 applyMemoryCorrection <- function(dataset, memoryCoefficients){
   
-  deltaTrueAndDeltaTruePrev <- getDeltaTrueAndDeltaTruePrevForEachSample(dataset, `Identifier 1`, block)
+  # get list with one dataframe per sample
+  samples <- dataset %>%
+    group_split(`Identifier 1`, block)
+  sampleOrder <- order(map_dbl(samples, ~ first(.$Line)))
+  samples <- samples[sampleOrder]
   
-  memoryCorrectedCols <- inner_join(deltaTrueAndDeltaTruePrev, memoryCoefficients, by = c("Inj Nr")) %>%
-    transmute(memoryCorrectedD18O = formulaCorrectMem(.$`d(18_16)Mean`, .$memoryCoeffD18O, .$deltaTruePrevD18O),
-              memoryCorrectedDD = formulaCorrectMem(.$`d(D_H)Mean`, .$memoryCoeffDD, .$deltaTruePrevDD))
+  # store state in these vars
+  memoryCorrectedO18 <- list(rep(NA, nrow(samples[[1]])))
+  memoryCorrectedH2 <- list(rep(NA, nrow(samples[[1]])))
+  deltaTruePrevO18 <- mean(tail(samples[[1]]$`d(18_16)Mean`, 3), na.rm = T)
+  deltaTruePrevH2 <- mean(tail(samples[[1]]$`d(D_H)Mean`, 3), na.rm = T)
   
-  dataset[["d(18_16)Mean"]] <- memoryCorrectedCols$memoryCorrectedD18O
-  dataset[["d(D_H)Mean"]] <- memoryCorrectedCols$memoryCorrectedDD
+  for (i in 2:length(samples)){
+    
+    sampleData <- samples[[i]]
+    
+    joinedData <- inner_join(sampleData, memoryCoefficients, by = c("Inj Nr"))
+    o18MemoryCorrected <- formulaCorrectMem(
+      joinedData$`d(18_16)Mean`, joinedData$memoryCoeffD18O, deltaTruePrevO18)
+    dDMemoryCorrected <- formulaCorrectMem(
+      joinedData$`d(D_H)Mean`, joinedData$memoryCoeffDD, deltaTruePrevH2)
+    
+    memoryCorrectedO18[[i]] <- o18MemoryCorrected
+    memoryCorrectedH2[[i]]  <- dDMemoryCorrected
+    
+    deltaTruePrevO18 <- mean(o18MemoryCorrected, na.rm = T)
+    deltaTruePrevH2  <- mean(dDMemoryCorrected, na.rm = T)
+  }
+  
+  dataset[["d(18_16)Mean"]] <- unlist(memoryCorrectedO18)
+  dataset[["d(D_H)Mean"]]   <- unlist(memoryCorrectedH2)
   
   return(dataset)
 }
