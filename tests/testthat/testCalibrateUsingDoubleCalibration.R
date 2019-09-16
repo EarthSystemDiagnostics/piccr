@@ -6,7 +6,7 @@ context("test calibrateUsingDoubleCalibration")
 test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and intercept 0)", {
   
   dataset <- tribble(
-    ~`Identifier 1`, ~block, ~TimeCode,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
+    ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
     # ------------ / ----- / ---------------------- / -------------- / ------------ / -------- / ------- / ------------------
     "Std_A",         1,      "2019/11/2504:47:06",    1,               2,             1,         2,        TRUE,
     "Std_A",         1,      "2019/11/2504:55:10",    1,               2,             1,         2,        TRUE,
@@ -79,7 +79,7 @@ test_that("test getCalibrationSlopes (case slopes are not zero)", {
 test_that("test applyDoubleCalibration", {
   
   dataset <- tribble(
-    ~`Identifier 1`, ~block, ~TimeCode,               ~`d(18_16)Mean`, ~`d(D_H)Mean`,
+    ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`,
     # ------------ / ----- / ---------------------- / -------------- / ------------
     "Std_A",         1,      "2019/11/2504:47:06",    1,               2,
     "Std_A",         1,      "2019/11/2504:55:10",    1,               2,
@@ -105,7 +105,7 @@ test_that("test applyDoubleCalibration", {
   )
   
   expected <- tribble(
-    ~`Identifier 1`, ~block, ~TimeCode,               ~`d(18_16)Mean`, ~`d(D_H)Mean`,
+    ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`,
     # ------------ / ----- / ---------------------- / -------------- / ------------
     "Std_A",         1,      "2019/11/2504:47:06",    -2,              8,
     "Std_A",         1,      "2019/11/2504:55:10",    724,             -234,

@@ -38,6 +38,9 @@ getLastNInjectionsForEachSample <- function(dataset, config){
   # exit early if all injections should be kept
   if (n %in% c(-1, "all")) return(dataset)
   
+  # don't fail if n is a string containing a number
+  n <- as.numeric(n)
+  
   dataset %>%
     group_by(`Identifier 1`, block) %>% 
     slice((n() - n + 1):n()) %>%
