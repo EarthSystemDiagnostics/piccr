@@ -75,10 +75,10 @@ getTrainingData <- function(dataset, config, useBlock) {
 }
 
 selectGroupsForTwoPointCalib <- function(groups){
-  
-  orderedByLine <- order(map_dbl(groups, ~ .$Line[[1]]))
-  firstAndLastElement <- groups[c(orderedByLine[1], tail(orderedByLine, 1))]
-  return(firstAndLastElement)
+
+  orderedByIsotopeVal <- order(map_dbl(groups, ~ mean(.$`d(18_16)Mean`)))
+  highestAndLowestIsotopeVal <- groups[c(orderedByIsotopeVal[1], tail(orderedByIsotopeVal, 1))]
+  return(highestAndLowestIsotopeVal)
 }
 
 applyCalibration <- function(dataset, calibrationParams){
