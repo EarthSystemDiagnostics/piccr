@@ -36,14 +36,16 @@ linearCalibrationSingleDataset <- function(dataset, config, block){
 getCalibInterceptAndSlope <- function(dataset, config, useBlock){
   
   trainingData <- getTrainingData(dataset, config, useBlock)
+
+  # params from inverse regression to have least noise on predictor variable
+
+  d18OModel <- lm(`d(18_16)Mean` ~ o18_True, data = trainingData)
+  d18OIntercept <- -1 * coef(d18OModel)[[1]] / coef(d18OModel)[[2]]
+  d18OSlope <- 1 / coef(d18OModel)[[2]]
   
-  d18OModel <- lm(o18_True ~ `d(18_16)Mean`, data = trainingData)
-  d18OIntercept <- coef(d18OModel)[[1]]
-  d18OSlope <- coef(d18OModel)[[2]]
-  
-  dDModel <- lm(H2_True ~ `d(D_H)Mean`, data = trainingData)
-  dDIntercept <- coef(dDModel)[[1]]
-  dDSlope <- coef(dDModel)[[2]]
+  dDModel <- lm(`d(D_H)Mean` ~ H2_True, data = trainingData)
+  dDIntercept <- -1 * coef(dDModel)[[1]] / coef(dDModel)[[2]]
+  dDSlope <- 1 / coef(dDModel)[[2]]
   
   list(
     d18O = list(intercept = d18OIntercept, slope = d18OSlope),

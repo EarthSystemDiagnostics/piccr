@@ -3,39 +3,41 @@ library(tidyverse)
 
 context("Test simple calibration without drift correction")
 
+# In this data set, o18_True is calculated from d(18_16)Mean applying
+# a slope = 0.9 and an intercept = -2.
 dataset1 <- tribble(
   ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
   # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
-   1,    "A",             1,         1.05,            1,      -5,            1,         -5,       TRUE,
-   2,    "A",             2,         1,               1,      -5,            1,         -5,       TRUE,
-   3,    "A",             3,         1.1,             1,      -5,            1,         -5,       TRUE,
-   4,    "C",             1,         2,               1,      4,             2,         4,        TRUE,
-   5,    "C",             2,         2.3,             1,      4,             2,         4,        TRUE,
-   6,    "C",             3,         2.05,            1,      4,             2,         4,        TRUE,
-   7,    "B",             1,         3,               1,      7,             3,         7,        TRUE,
-   8,    "B",             2,         3.1,             1,      7,             3,         7,        TRUE,
-   9,    "B",             3,         3,               1,      7,             3,         7,        TRUE
+   1,    "A",             1,         1,               1,      -5,            -1.1,      -5,       TRUE,
+   2,    "A",             2,         1,               1,      -5,            -1.1,      -5,       TRUE,
+   3,    "A",             3,         1,               1,      -5,            -1.1,      -5,       TRUE,
+   4,    "C",             1,         2,               1,      4,             -0.2,      4,        TRUE,
+   5,    "C",             2,         2,               1,      4,             -0.2,      4,        TRUE,
+   6,    "C",             3,         2,               1,      4,             -0.2,      4,        TRUE,
+   7,    "B",             1,         3,               1,      7,             0.7,       7,        TRUE,
+   8,    "B",             2,         3,               1,      7,             0.7,       7,        TRUE,
+   9,    "B",             3,         3,               1,      7,             0.7,       7,        TRUE
 )
 expected1 <- tribble(
   ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
   # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
-  1,    "A",             1,         0.99,             1,      -5,            1,         -5,       TRUE,
-  2,    "A",             2,         0.94,             1,      -5,            1,         -5,       TRUE,
-  3,    "A",             3,         1.04,             1,      -5,            1,         -5,       TRUE,
-  4,    "C",             1,         1.93,             1,      4,             2,         4,        TRUE,
-  5,    "C",             2,         2.23,             1,      4,             2,         4,        TRUE,
-  6,    "C",             3,         1.98,             1,      4,             2,         4,        TRUE,
-  7,    "B",             1,         2.93,             1,      7,             3,         7,        TRUE,
-  8,    "B",             2,         3.03,             1,      7,             3,         7,        TRUE,
-  9,    "B",             3,         2.93,             1,      7,             3,         7,        TRUE
+  1,    "A",             1,         -1.1,             1,      -5,            -1.1,      -5,       TRUE,
+  2,    "A",             2,         -1.1,             1,      -5,            -1.1,      -5,       TRUE,
+  3,    "A",             3,         -1.1,             1,      -5,            -1.1,      -5,       TRUE,
+  4,    "C",             1,         -0.2,             1,      4,             -0.2,      4,        TRUE,
+  5,    "C",             2,         -0.2,             1,      4,             -0.2,      4,        TRUE,
+  6,    "C",             3,         -0.2,             1,      4,             -0.2,      4,        TRUE,
+  7,    "B",             1,         0.7,              1,      7,             0.7,       7,        TRUE,
+  8,    "B",             2,         0.7,              1,      7,             0.7,       7,        TRUE,
+  9,    "B",             3,         0.7,              1,      7,             0.7,       7,        TRUE
 )
 
 config <- list(use_memory_correction = TRUE, use_three_point_calibration = TRUE)
 
 test_that("test getCalibInterceptAndSlope", {
   
-  o18InterceptExpected <- -0.05801953
-  o18SlopeExpected <- 0.9958159
+  o18InterceptExpected <- -2.
+  o18SlopeExpected <- 0.9
   H2InterceptExpected <- 0
   H2SlopeExpected <- 1
   
