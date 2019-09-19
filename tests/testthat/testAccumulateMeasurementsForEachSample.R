@@ -3,10 +3,6 @@ library(tidyverse)
 
 context("test accumulateMeasurementsForEachSample")
 
-test_that("this test should fail", {
-  expect_equal(1,2) 
-})
-
 test_that("mean values are correct", {
 
   dataset1 <- tribble(
