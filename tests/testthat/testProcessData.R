@@ -18,7 +18,23 @@ test_that("check that no NAs were introduced", {
   }
   config <- yaml::yaml.load(configContents)
 
-  datasets <- list(
+    datasets <- list(
+    HIDS2041_IsoWater_20151126_115726.csv =
+      read_csv("test_data/HIDS2041_IsoWater_20151126_115726.csv")
+    )
+
+    actual <- processData(datasets, config)
+
+    expect_length(actual, 1)
+    expect_true(is.list(actual))
+    expect_true(is.list(actual[[1]]))
+
+    expect_true(is.vector(actual[[1]]$name))
+    expect_length(is.vector(actual[[1]]$name), 1)
+    expect_true(is.data.frame(actual[[1]]$raw))
+    expect_true(is.data.frame(actual[[1]]$processed))
+
+    datasets <- list(
     HIDS2041_IsoWater_20151126_115726.csv = read_csv("test_data/HIDS2041_IsoWater_20151126_115726.csv"),
     HIDS2041_IsoWater_20151125_111138.csv = read_csv("test_data/HIDS2041_IsoWater_20151125_111138.csv"),  
     HIDS2041_IsoWater_20151127_143940.csv = read_csv("test_data/HIDS2041_IsoWater_20151127_143940.csv")
@@ -26,8 +42,7 @@ test_that("check that no NAs were introduced", {
   
   actual <- processData(datasets, config)
   
-  expect_length(actual, 4)
-  expect_length(actual$processed, 3)
+  expect_length(actual, 3)
   
   for (dataset in actual$processed) {
     expect_equal(sum(is.na(dataset$`delta.O18`)), 1)

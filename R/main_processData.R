@@ -36,7 +36,33 @@
 #' @export
 #'
 processData <- function(datasets, config){
+
+  # initialize output structure
   
+  outputTemplate <- list(
+    
+    name = NULL,
+    
+    raw = NULL,
+    memoryCorrected = NULL,
+    calibrated = NULL,
+    calibratedAndDriftCorrected = NULL,
+    processed = NULL,
+
+    deviationsFromTrue = NULL,
+    rmsdDeviationsFromTrue = NULL,
+    deviationOfControlStandard = NULL,
+    pooledSD = NULL,
+    memoryCoefficients = NULL,
+    calibrationParams = NULL,
+    driftParams = NULL
+  )
+
+  output <- list()
+  for (i in 1 : length(datasets)) {
+    output[[i]] <- outputTemplate
+  }
+ 
   datasets <- groupStandardsInBlocks(datasets, config) %>%
     associateStandardsWithConfigInfo(config)
   
@@ -62,9 +88,32 @@ processData <- function(datasets, config){
   pooledStdDev <- calculatePoooledStdDev(calibratedDatasets)
   
   processedData <- accumulateMeasurementsForEachSample(calibratedDatasets, config)
-  
-  list(memoryCorrected = memoryCorrected,
-       calibrated = calibratedDatasets,
-       processed = processedData,
-       pooledStdDev = pooledStdDev)
+
+  # fill output structure
+
+  namesOfDatasets <- names(datasets)
+
+  for (i in 1 : length(datasets)) {
+
+    output[[i]]$name <- namesOfDatasets[i]
+    
+    output[[i]]$raw <- datasets[[i]]
+    
+    output[[i]]$processed <- processedData[[i]]
+    
+  }
+
+  return(output)
+
 }
+    ## output[[i]]$memoryCorrected <- memoryCorrectedDatasets[[i]]
+    ## output[[i]]$calibrated <- NA
+    ## output[[i]]$calibratedAndDriftCorrected <- NA
+
+    ## output[[i]]$deviationsFromTrue <- NA
+    ## output[[i]]$rmsdDeviationsFromTrue <- NA
+    ## output[[i]]$deviationOfControlStandard <- NA
+    ## output[[i]]$pooledSD <- NA
+    ## output[[i]]$memoryCoefficients <- NA
+    ## output[[i]]$calibrationParams <- NA
+    ## output[[i]]$driftParams <- NA
