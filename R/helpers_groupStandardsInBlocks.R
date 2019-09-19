@@ -14,6 +14,7 @@ library(purrr)
 #' @return A named list of dataframes. The names are the same as
 #'         the names of the input 'datasets'. 
 #'
+#' @export
 groupStandardsInBlocks <- function(datasets, config){
   map(datasets, groupStandardsInBlocksForDataset, config = config)
 }

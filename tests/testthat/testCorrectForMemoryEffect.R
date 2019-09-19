@@ -160,3 +160,40 @@ test_that("test memory coefficients", {
     memCoeffExpected2
   )
 })
+
+test_that("test that NA values don't spread in applyCalibration", {
+  
+  dataset <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`,
+    # -- / -------------- / -------- / -------------- / ----- / -------------
+    1,    "A",           1,         0.5,                1,      NA,
+    2,    "A",           2,         0.75,               1,      NA,
+    3,    "A",           3,         1,                  1,      NA,
+    4,    "C",           1,         NA,                 1,      1.3,
+    5,    "C",           2,         NA,                 1,      3.1,
+    6,    "C",           3,         NA,                 1,      3.91,
+    7,    "B",           1,         2.5,                1,      1.173,
+    8,    "B",           2,         2.75,               1,      0.391,
+    9,    "B",           3,         3,                  1,      0.0391
+  )
+  memCoeff <- tribble(
+    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD,
+    # ------ / --------------- / --------------
+    1,         0.75,             0.76,
+    2,         1.0,              1.05,
+    3,         1.25,             1.18
+  )
+  expected <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`,
+    # -- / -------------- / -------- / -------------- / ----- / -------------
+    1,    "A",           1,         NA,               1,      NA,
+    2,    "A",           2,         NA,               1,      NA,
+    3,    "A",           3,         NA,               1,      NA,
+    4,    "C",           1,         1.75,             1,      3.26,
+    5,    "C",           2,         1.75,             1,      2.69,
+    6,    "C",           3,         1.75,             1,      2.52,
+    7,    "B",           1,         2.75,             1,      0.66,
+    8,    "B",           2,         2.75,             1,      0.51,
+    9,    "B",           3,         2.75,             1,      0.47
+  )
+})
