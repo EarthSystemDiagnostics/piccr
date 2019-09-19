@@ -131,32 +131,31 @@ test_that("test memory corrected datasets", {
 test_that("test memory coefficients", {
   
   memCoeffExpected1 <- tribble(
-    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD,
-    # ------ / --------------- / --------------
-    1,         0.75,             0.76,
-    2,         1.0,              1.05,
-    3,         1.25,             1.18
+    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD, ~AD18O,   ~ADD,       ~BD18O, ~BDD,  ~CD18O, ~CDD,
+    # ------ / --------------- / -------------| -------- | --------- | ----- | ---- | ------ | ----
+    1,         0.75,             0.76,          NA_real_,  NA_real_,  0.75,   0.71,   0.75,  0.81,
+    2,         1.0,              1.05,          NA_real_,  NA_real_,  1,      1.06,   1,     1.04,
+    3,         1.25,             1.18,          NA_real_,  NA_real_,  1.25,   1.22,   1.25,  1.15,
   )
   
   memCoeffExpected2 <- tribble(
-    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD,
-    # ------ / --------------- / --------------
-    1,         0.985,             0.992,
-    2,         0.990,             0.986,
-    3,         0.995,             0.992,
-    4,         1.0,               1.002,
-    5,         1.005,             1.007
+    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD, ~AD18O,   ~ADD,      ~BD18O, ~BDD,  ~CD18O,  ~CDD,
+    # ------ / --------------- / ------------- | -------- | ------- | ----- | ----- | ----- | ----
+    1,         0.985,             0.992,         NA_real_, NA_real_,  0.984,  0.992,  0.985,  0.992,
+    2,         0.990,             0.986,         NA_real_, NA_real_,  0.990,  0.986,  0.990,  0.986,
+    3,         0.995,             0.992,         NA_real_, NA_real_,  0.995,  0.992,  0.995,  0.992,
+    4,         1.0,               1.002,         NA_real_, NA_real_,  1.000,  1.002,  1.000,  1.002,
+    5,         1.005,             1.007,         NA_real_, NA_real_,  1.005,  1.007,  1.005,  1.007
   )
   
   actual <- correctForMemoryEffect(list(df1 = dataset1, df2 = dataset2))
   
-  
-  expect_equal(
-    round(actual$df1$memoryCoefficients, 2), 
-    memCoeffExpected1
-  )
   expect_equal(
     round(actual$df2$memoryCoefficients, 3), 
     memCoeffExpected2
+  )
+  expect_equal(
+    round(actual$df1$memoryCoefficients, 2), 
+    memCoeffExpected1
   )
 })
