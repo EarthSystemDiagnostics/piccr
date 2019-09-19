@@ -19,20 +19,21 @@
 #'                               $H2_True (numerical), $use_for_drift_correction (logical), 
 #'                               $use_for_calibration (logical))
 #'
-#' @return A named, nested list. List structure:
-#'             $memoryCorrected (list of lists, the names are the names 
-#'                               of the input parameter 'datasets')
-#'                 $datasetMemoryCorrected (data.frame)
-#'                 $memoryCoefficients (data.frame)
-#'             $calibrated (list of data.frames, the names are the names 
-#'                          of the input parameter 'datasets'))
-#'             $processed (list of data.frames, the names are the names 
-#'                         of the input parameter 'datasets'))
-#'             $pooledStdDev (list of lists, the names are the names 
-#'                            of the input parameter 'datasets'))
-#'                 $d18O (numerical)
-#'                 $dD (numerical)
-#' 
+#' @return A list of the same length as \code{datasets}. Each list element is
+#'   again a list of 13 elements with the following structure:
+#'             $name (character vector with the name of the data set (file name))
+#'             $raw (data frame with the raw input isotope data)
+#'             $memoryCorrected (data frame of memory-corrected data)
+#'             $calibrated (data frame of data calibrated without drift correction)
+#'             $calibratedAndDriftCorrected (data frame of calibrated and drift-corrected data)
+#'             $processed (data frame of final processed data)
+#'             $deviationsFromTrue (data frame with the deviations from the true values for all measured standards)
+#'             $rmsdDeviationsFromTrue (named list (elements \code{d18O} and \code{dD}) with the rmsd of deviationsFromTrue)
+#'             $deviationOfControlStandard (named list (elements \code{d18O} and \code{dD}) with the deviation from the true value for the quality control standard)
+#'             $pooledSD (named list (elements \code{d18O} and \code{dD}) of pooled standard deviations for the data set)
+#'             $memoryCoefficients (data frame of memory coefficients)
+#'             $calibrationParams (data frame of calibration regression parameters)
+#'             $driftParams (data frame of drift regression parameters)
 #' @export
 #'
 processData <- function(datasets, config){
