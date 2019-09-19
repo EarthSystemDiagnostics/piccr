@@ -58,7 +58,8 @@ doAccumulate <- function(dataset){
               sd.O18 = sd(`d(18_16)Mean`),
               sd.H2 = sd(`d(D_H)Mean`),
               d.Excess = mean(dExcess),
-              sd.d.Excess = sd(dExcess),
+              sd.d.Excess =
+                  sqrt((sd(`d(D_H)Mean`))^2 + 64 * (sd(`d(18_16)Mean`)^2)),
               Line = min(Line))
 }
 

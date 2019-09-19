@@ -22,17 +22,16 @@ test_that("mean values are correct", {
   expected1 <- tribble(
     ~Line, ~`Identifier 1`, ~`Identifier 2`, ~block, ~delta.O18, ~delta.H2, ~sd.O18, ~sd.H2, ~d.Excess, ~sd.d.Excess,
     # -- / -------------- / -------------- / ----- / --------- / -------- / ------ / ----- / -------  / -----------
-    1,     "C",             "x",             1,      2,          20,        1,       5,      20,        5,
-    2,     "A",             "y",             NA,     4.5,        0,         0.71,    0,      4.5,       0.71,
-    3,     "B",             "z",             2,      10,         -5,        1.41,    0.42,   10,        1.41,
-    4,     "C",             "x",             3,      -3,         0,         1.41,    2.83,   0,         2.83
+    1,     "C",             "x",             1,      2,          20,        1,       5,      20,        9.43,
+    2,     "A",             "y",             NA,     4.5,        0,         0.71,    0,      4.5,       5.66,
+    3,     "B",             "z",             2,      10,         -5,        1.41,    0.42,   10,        11.32,
+    4,     "C",             "x",             3,      -3,         0,         1.41,    2.83,   0,         11.66
   )
     
   actual <- accumulateMeasurementsForEachSample(list(df1 = dataset1), list(average_over_last_n_inj = "all"))
   actualRounded <- mutate_if(actual$df1, is.numeric, ~ round(., 2))
   
   expect_length(actual, 1)
-
   expect_equal(actualRounded, expected1)
 })
 
@@ -57,10 +56,10 @@ test_that("use only last 2 injections to calculate average", {
   expected1 <- tribble(
     ~Line, ~`Identifier 1`, ~`Identifier 2`, ~block, ~delta.O18, ~delta.H2, ~sd.O18, ~sd.H2, ~d.Excess, ~sd.d.Excess,
     # -- / -------------- / -------------- / ----- / --------- / -------- / ------ / ----- / -------  / -----------
-    1,     "C",             "x",             1,      2.5,        22.5,      0.71,    3.54,   22.5,      3.54,
-    2,     "A",             "y",             NA,     4.5,        0,         0.71,    0,      4.5,       0.71,
-    3,     "B",             "z",             2,      10,         -5,        1.41,    0.42,   10,        1.41,
-    4,     "C",             "x",             3,      -3,         0,         1.41,    2.83,   0,         2.83
+    1,     "C",             "x",             1,      2.5,        22.5,      0.71,    3.54,   22.5,      6.67,
+    2,     "A",             "y",             NA,     4.5,        0,         0.71,    0,      4.5,       5.66,
+    3,     "B",             "z",             2,      10,         -5,        1.41,    0.42,   10,        11.32,
+    4,     "C",             "x",             3,      -3,         0,         1.41,    2.83,   0,         11.66
   )
   
   actual <- accumulateMeasurementsForEachSample(list(df1 = dataset1), list(average_over_last_n_inj = "2"))
