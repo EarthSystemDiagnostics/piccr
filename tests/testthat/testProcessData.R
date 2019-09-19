@@ -34,6 +34,9 @@ test_that("check that no NAs were introduced", {
     expect_true(is.data.frame(actual[[1]]$raw))
     expect_true(is.data.frame(actual[[1]]$processed))
 
+    expect_true(is.list(actual[[1]]$pooledSD))
+    expect_length(actual[[1]]$pooledSD, 2)
+
     datasets <- list(
     HIDS2041_IsoWater_20151126_115726.csv = read_csv("test_data/HIDS2041_IsoWater_20151126_115726.csv"),
     HIDS2041_IsoWater_20151125_111138.csv = read_csv("test_data/HIDS2041_IsoWater_20151125_111138.csv"),  

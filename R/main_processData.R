@@ -101,6 +101,8 @@ processData <- function(datasets, config){
     output[[i]]$raw <- datasets[[i]]
     
     output[[i]]$processed <- processedData[[i]]
+
+    output[[i]]$pooledSD <- pooledStdDev[[i]]
     
   }
 
@@ -114,7 +116,6 @@ processData <- function(datasets, config){
     ## output[[i]]$deviationsFromTrue <- NA
     ## output[[i]]$rmsdDeviationsFromTrue <- NA
     ## output[[i]]$deviationOfControlStandard <- NA
-    ## output[[i]]$pooledSD <- NA
     ## output[[i]]$memoryCoefficients <- NA
     ## output[[i]]$calibrationParams <- NA
     ## output[[i]]$driftParams <- NA
