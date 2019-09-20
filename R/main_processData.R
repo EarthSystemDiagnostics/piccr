@@ -17,7 +17,7 @@
 #'                   $use_memory_correction (logical)
 #'                   $standards (named list of $name (character), $o18_True (numerical), 
 #'                               $H2_True (numerical), $use_for_drift_correction (logical), 
-#'                               $use_for_calibration (logical))
+#'                               $use_for_calibration (logical)), $use_as_control_standard(logical)
 #'
 #' @return A list of the same length as \code{datasets}. Each list element is
 #'   again a list of 13 elements with the following structure:
