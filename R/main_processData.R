@@ -64,14 +64,16 @@ processData <- function(datasets, config){
     output[[i]] <- outputTemplate
   }
  
-  datasets <- groupStandardsInBlocks(datasets, config) %>%
+  datasets <- datasets %>%
+    groupStandardsInBlocks(config) %>%
+    normalizeInjectionNumbers() %>%
     associateStandardsWithConfigInfo(config)
   
   if (config$use_memory_correction) {
     memoryCorrected <- correctForMemoryEffect(datasets)
     memoryCorrectedDatasets <- map(memoryCorrected, ~ .$datasetMemoryCorrected)
+    memoryCoefficients <- map(memoryCorrected, ~ .$memoryCoefficients)
   } else {
-    memoryCorrected <- NULL
     memoryCorrectedDatasets <- datasets
   }
   
@@ -99,6 +101,11 @@ processData <- function(datasets, config){
     output[[i]]$name <- namesOfDatasets[i]
     
     output[[i]]$raw <- datasets[[i]]
+
+    if (config$use_memory_correction) {
+      output[[i]]$memoryCorrected <- memoryCorrectedDatasets[[i]]
+      output[[i]]$memoryCoefficients <- memoryCoefficients[[i]]
+    }
     
     output[[i]]$processed <- processedData[[i]]
 
@@ -109,13 +116,11 @@ processData <- function(datasets, config){
   return(output)
 
 }
-    ## output[[i]]$memoryCorrected <- memoryCorrectedDatasets[[i]]
     ## output[[i]]$calibrated <- NA
     ## output[[i]]$calibratedAndDriftCorrected <- NA
 
     ## output[[i]]$deviationsFromTrue <- NA
     ## output[[i]]$rmsdDeviationsFromTrue <- NA
     ## output[[i]]$deviationOfControlStandard <- NA
-    ## output[[i]]$memoryCoefficients <- NA
     ## output[[i]]$calibrationParams <- NA
     ## output[[i]]$driftParams <- NA

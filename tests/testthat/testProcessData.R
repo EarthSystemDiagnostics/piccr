@@ -28,10 +28,16 @@ test_that("check that no NAs were introduced", {
     expect_length(actual, 1)
     expect_true(is.list(actual))
     expect_true(is.list(actual[[1]]))
+    expect_length(actual[[1]], 13)
 
     expect_true(is.vector(actual[[1]]$name))
     expect_length(is.vector(actual[[1]]$name), 1)
     expect_true(is.data.frame(actual[[1]]$raw))
+
+    expect_true(is.data.frame(actual[[1]]$memoryCorrected))
+    expect_true(is.data.frame(actual[[1]]$memoryCoefficients))
+    expect_equal(ncol(actual[[1]]$memoryCoefficients), 11)
+
     expect_true(is.data.frame(actual[[1]]$processed))
 
     expect_true(is.list(actual[[1]]$pooledSD))

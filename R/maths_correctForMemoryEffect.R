@@ -35,12 +35,25 @@ calculateMemoryCoefficients <- function(dataset) {
     mutate(memoryCoeffD18O = formulaMemCoeff(.$`d(18_16)Mean`, .$deltaTrueD18O, .$deltaTruePrevD18O),
            memoryCoeffDD = formulaMemCoeff(.$`d(D_H)Mean`, .$deltaTrueDD, .$deltaTruePrevDD))
   
+  # get the mean mem coeff as a dataframe
   meanMemoryCoefficients <- memoryCoefficients %>%
     group_by(`Inj Nr`) %>%
     summarise(memoryCoeffD18O = mean(memoryCoeffD18O, na.rm = T), 
               memoryCoeffDD = mean(memoryCoeffDD, na.rm = T))
   
-  return(meanMemoryCoefficients)
+  # extract the mem coeff for each standard as a list of dataframes
+  memoryCoeffForEachStandard <- memoryCoefficients %>% 
+    select(`Inj Nr`, `Identifier 1`, memoryCoeffD18O, memoryCoeffDD) %>% 
+    split(.$`Identifier 1`) 
+  memoryCoeffForEachStandard <- map(names(memoryCoeffForEachStandard), ~ {
+    data <- select(memoryCoeffForEachStandard[[.]], - `Identifier 1`, - `Inj Nr`)
+    setNames(data, c(str_c(., "D18O"), str_c(., "DD")))
+  })
+  
+  # join the mean mem coeff and the mem coeff for each standard into one dataframe
+  memCoeffOutput <- bind_cols(meanMemoryCoefficients, memoryCoeffForEachStandard)
+  
+  return(memCoeffOutput)
 }
 
 applyMemoryCorrection <- function(dataset, memoryCoefficients){

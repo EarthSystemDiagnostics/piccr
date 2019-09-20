@@ -108,6 +108,25 @@ expected2 <- tribble(
   30,    "Probe3",        2,         19.91,           NA,     4.81,
   31,    "Probe3",        3,         19.91,           NA,     4.81
 )
+# in this dataset: 
+# d18O: m1 = 0.5, m2 = 0.75, m3 = 0.875, m4 = 1
+# dD: m1 = 0.4, m2 = 0.6, m3 = 0.8, m4 = 1
+dataset3 <- tribble(
+  ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`,
+  # -- / -------------- / -------- / -------------- / ----- / -------------
+   1,    "A",           1,         1,               1,      -5,
+   2,    "A",           2,         1,               1,      -5,
+   3,    "A",           1,         1,               1,      -5,
+   4,    "A",           2,         1,               1,      -5,
+   5,    "C",           1,         1.5,             1,      -4.2,
+   6,    "C",           2,         1.75,            1,      -3.8,
+   7,    "C",           1,         1.875,           1,      -3.4,
+   8,    "C",           2,         2.0,             1,      -3.0,
+   9,    "B",           1,         2.5,             1,      -2.2,
+   10,   "B",           2,         2.75,            1,      -1.8,
+   11,   "B",           1,         2.875,           1,      -1.4,
+   12,   "B",           2,         3,               1,      -1
+)
 
 # -------------- tests ------------------------------
 
@@ -131,32 +150,42 @@ test_that("test memory corrected datasets", {
 test_that("test memory coefficients", {
   
   memCoeffExpected1 <- tribble(
-    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD,
-    # ------ / --------------- / --------------
-    1,         0.75,             0.76,
-    2,         1.0,              1.05,
-    3,         1.25,             1.18
+    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD, ~AD18O,   ~ADD,       ~BD18O, ~BDD,  ~CD18O, ~CDD,
+    # ------ / --------------- / -------------| -------- | --------- | ----- | ---- | ------ | ----
+    1,         0.75,             0.76,          NA_real_,  NA_real_,  0.75,   0.71,   0.75,  0.81,
+    2,         1.0,              1.05,          NA_real_,  NA_real_,  1,      1.06,   1,     1.04,
+    3,         1.25,             1.18,          NA_real_,  NA_real_,  1.25,   1.22,   1.25,  1.15,
   )
   
   memCoeffExpected2 <- tribble(
-    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD,
-    # ------ / --------------- / --------------
-    1,         0.985,             0.992,
-    2,         0.990,             0.986,
-    3,         0.995,             0.992,
-    4,         1.0,               1.002,
-    5,         1.005,             1.007
+    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD, ~AD18O,   ~ADD,      ~BD18O, ~BDD,  ~CD18O,  ~CDD,
+    # ------ / --------------- / ------------- | -------- | ------- | ----- | ----- | ----- | ----
+    1,         0.985,             0.992,         NA_real_, NA_real_,  0.984,  0.992,  0.985,  0.992,
+    2,         0.990,             0.986,         NA_real_, NA_real_,  0.990,  0.986,  0.990,  0.986,
+    3,         0.995,             0.992,         NA_real_, NA_real_,  0.995,  0.992,  0.995,  0.992,
+    4,         1.0,               1.002,         NA_real_, NA_real_,  1.000,  1.002,  1.000,  1.002,
+    5,         1.005,             1.007,         NA_real_, NA_real_,  1.005,  1.007,  1.005,  1.007
   )
   
   actual <- correctForMemoryEffect(list(df1 = dataset1, df2 = dataset2))
   
-  
-  expect_equal(
-    round(actual$df1$memoryCoefficients, 2), 
-    memCoeffExpected1
-  )
   expect_equal(
     round(actual$df2$memoryCoefficients, 3), 
     memCoeffExpected2
   )
+  expect_equal(
+    round(actual$df1$memoryCoefficients, 2), 
+    memCoeffExpected1
+  )
+})
+
+test_that("test injection range of mean memory coefficients", {
+
+  actual <- calculateMemoryCoefficients(dataset1)
+  expect_length(actual$`Inj Nr`, 3)
+
+  dataset3 <- normalizeInjectionNumbers(list(dataset3))[[1]]
+  actual <- calculateMemoryCoefficients(dataset3)
+  expect_length(actual$`Inj Nr`, 4)
+
 })
