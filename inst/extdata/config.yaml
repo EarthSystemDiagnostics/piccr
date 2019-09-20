@@ -14,9 +14,9 @@ use_memory_correction:	yes			  # signal memory correction: yes/no
 
 # -------- set standards --------
 standards:
-  - name: KARA
-    o18_True: -0.10
-    H2_True: -0.6
+  - name: HGL-0
+    o18_True: 0.
+    H2_True: 0.
     use_for_drift_correction: no
     use_for_calibration: no
     use_as_control_standard: no
