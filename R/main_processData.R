@@ -64,7 +64,9 @@ processData <- function(datasets, config){
     output[[i]] <- outputTemplate
   }
  
-  datasets <- groupStandardsInBlocks(datasets, config) %>%
+  datasets <- datasets %>%
+    groupStandardsInBlocks(config) %>%
+    normalizeInjectionNumbers() %>%
     associateStandardsWithConfigInfo(config)
   
   if (config$use_memory_correction) {

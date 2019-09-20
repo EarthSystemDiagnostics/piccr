@@ -184,6 +184,7 @@ test_that("test injection range of mean memory coefficients", {
   actual <- calculateMemoryCoefficients(dataset1)
   expect_length(actual$`Inj Nr`, 3)
 
+  dataset3 <- normalizeInjectionNumbers(list(dataset3))[[1]]
   actual <- calculateMemoryCoefficients(dataset3)
   expect_length(actual$`Inj Nr`, 4)
 
