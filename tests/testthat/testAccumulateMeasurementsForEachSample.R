@@ -3,7 +3,6 @@ library(tidyverse)
 
 context("test accumulateMeasurementsForEachSample")
 
-
 test_that("mean values are correct", {
 
   dataset1 <- tribble(

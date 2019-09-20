@@ -6,7 +6,7 @@ r_packages:
   - covr
 
 script:
-  - make test
+  - R CMD check .
 
 after_success:
   - Rscript -e 'covr::codecov()'

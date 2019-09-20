@@ -1,7 +1,9 @@
 Package: piccr
 Title: Correct and Calibrate Picarro CRDS Stable Isotope Data.
 Version: 0.1.0
-Authors@R: person("Thomas", "Muench", email = "thomas.muench@awi.de", role = c("aut", "cre"))
+Author: Thomas Muench [aut, cre],
+    Tom Wollnik [aut]
+Maintainer: Thomas Muench <thomas.muench@awi.de>
 Description: This R package implements a method to correct and calibrate the
      raw stable isotopologue data of water measured by Picarro Inc. cavity
      ring-down spectroscopy measurement devices.
