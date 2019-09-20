@@ -108,6 +108,25 @@ expected2 <- tribble(
   30,    "Probe3",        2,         19.91,           NA,     4.81,
   31,    "Probe3",        3,         19.91,           NA,     4.81
 )
+# in this dataset: 
+# d18O: m1 = 0.5, m2 = 0.75, m3 = 0.875, m4 = 1
+# dD: m1 = 0.4, m2 = 0.6, m3 = 0.8, m4 = 1
+dataset3 <- tribble(
+  ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`,
+  # -- / -------------- / -------- / -------------- / ----- / -------------
+   1,    "A",           1,         1,               1,      -5,
+   2,    "A",           2,         1,               1,      -5,
+   3,    "A",           1,         1,               1,      -5,
+   4,    "A",           2,         1,               1,      -5,
+   5,    "C",           1,         1.5,             1,      -4.2,
+   6,    "C",           2,         1.75,            1,      -3.8,
+   7,    "C",           1,         1.875,           1,      -3.4,
+   8,    "C",           2,         2.0,             1,      -3.0,
+   9,    "B",           1,         2.5,             1,      -2.2,
+   10,   "B",           2,         2.75,            1,      -1.8,
+   11,   "B",           1,         2.875,           1,      -1.4,
+   12,   "B",           2,         3,               1,      -1
+)
 
 # -------------- tests ------------------------------
 
@@ -158,4 +177,14 @@ test_that("test memory coefficients", {
     round(actual$df1$memoryCoefficients, 2), 
     memCoeffExpected1
   )
+})
+
+test_that("test injection range of mean memory coefficients", {
+
+  actual <- calculateMemoryCoefficients(dataset1)
+  expect_length(actual$`Inj Nr`, 3)
+
+  actual <- calculateMemoryCoefficients(dataset3)
+  expect_length(actual$`Inj Nr`, 4)
+
 })
