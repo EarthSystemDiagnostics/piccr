@@ -5,7 +5,7 @@ context("Test the memory correction logic")
 
 # -------------- define test data and expected output ------------
 
-# in this dataset: 
+# in this dataset:
 # d18O: m1 = 0.5, m2 = 0.75, m3 = 1
 # dD: m1 = 0.7, m2 = 0.9, m3 = 0.99
 dataset1 <- tribble(
@@ -35,7 +35,7 @@ expected1 <- tribble(
    9,    "B",           3,         2.75,             1,      0.47
 )
 
-# in this dataset: 
+# in this dataset:
 # d18O: m1 = 0.98, m2 = 0.985, m3 = 0.99, m4 = 0.995, m5 = 0.9999
 # dD: ḿ1 = 0.98, m2 = 0.975, m3 = 0.98, m4 = 0.99, m5 = 0.995
 dataset2 <- tribble(
@@ -133,22 +133,22 @@ dataset3 <- tribble(
 test_that("test memory corrected datasets", {
 
   actual <- correctForMemoryEffect(list(df1 = dataset1, df2 = dataset2))
-  
+
   expect_length(actual, 2)
-  
-  df1Rounded <- mutate(actual$df1$datasetMemoryCorrected, 
+
+  df1Rounded <- mutate(actual$df1$datasetMemoryCorrected,
                        `d(D_H)Mean` = round(`d(D_H)Mean`, 2),
                        `d(18_16)Mean` = round(`d(18_16)Mean`, 2))
   expect_equal(df1Rounded, expected1)
-  
-  df2Rounded <- mutate(actual$df2$datasetMemoryCorrected, 
-                       `d(D_H)Mean` = round(`d(D_H)Mean`, 2), 
+
+  df2Rounded <- mutate(actual$df2$datasetMemoryCorrected,
+                       `d(D_H)Mean` = round(`d(D_H)Mean`, 2),
                        `d(18_16)Mean` = round(`d(18_16)Mean`, 2))
   expect_equal(df2Rounded, expected2)
 })
 
 test_that("test memory coefficients", {
-  
+
   memCoeffExpected1 <- tribble(
     ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD, ~AD18O,   ~ADD,       ~BD18O, ~BDD,  ~CD18O, ~CDD,
     # ------ / --------------- / -------------| -------- | --------- | ----- | ---- | ------ | ----
@@ -156,7 +156,7 @@ test_that("test memory coefficients", {
     2,         1.0,              1.05,          NA_real_,  NA_real_,  1,      1.06,   1,     1.04,
     3,         1.25,             1.18,          NA_real_,  NA_real_,  1.25,   1.22,   1.25,  1.15,
   )
-  
+
   memCoeffExpected2 <- tribble(
     ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD, ~AD18O,   ~ADD,      ~BD18O, ~BDD,  ~CD18O,  ~CDD,
     # ------ / --------------- / ------------- | -------- | ------- | ----- | ----- | ----- | ----
@@ -166,17 +166,79 @@ test_that("test memory coefficients", {
     4,         1.0,               1.002,         NA_real_, NA_real_,  1.000,  1.002,  1.000,  1.002,
     5,         1.005,             1.007,         NA_real_, NA_real_,  1.005,  1.007,  1.005,  1.007
   )
-  
+
   actual <- correctForMemoryEffect(list(df1 = dataset1, df2 = dataset2))
   
   expect_equal(
-    round(actual$df2$memoryCoefficients, 3), 
-    memCoeffExpected2
-  )
-  expect_equal(
-    round(actual$df1$memoryCoefficients, 2), 
+    round(actual$df1$memoryCoefficients, 2),
     memCoeffExpected1
   )
+  expect_equal(
+    round(actual$df2$memoryCoefficients, 3),
+    memCoeffExpected2
+  )
+})
+
+test_that("test that NA values don't spread in applyCalibration", {
+  
+  dataset1 <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`,
+    # -- / -------------- / -------- / -------------- / ----- / -------------
+    1,    "A",           1,         0.5,                1,      5,
+    2,    "A",           2,         0.75,               1,      5,
+    3,    "A",           3,         1,                  1,      5,
+    4,    "B",           1,         2.5,                1,      1.173,
+    5,    "B",           2,         2.75,               1,      0.391,
+    6,    "B",           3,         3,                  1,      0.0391,
+    7,    "C",           1,         NA,                 NA,      NA,
+    8,    "C",           2,         NA,                 NA,      NA,
+    9,    "C",           3,         NA,                 NA,      NA,
+    10,   "B",           1,         2.5,                2,       NA,
+    11,   "B",           2,         2.75,               2,       NA,
+    12,   "B",           3,         3,                  2,       NA
+  )
+  dataset2 <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`,
+    #--- / -------------- / -------- / -------------- / ----- / -------------
+    4,     "A",             1,         1.18,            1,      6.56,
+    5,     "A",             2,         NA,              1,      6.45,
+    6,     "A",             3,         1.09,            1,      6.56,
+    7,     "A",             4,         1.045,           1,      6.78,
+    8,     "A",             5,         1.0009,          1,      6.89,
+    9,     "B",             1,         1.980018,        1,      -11.6222,
+    10,    "B",             2,         1.985013,        1,      -11.52775,
+    11,    "B",             3,         1.990009,        1,      -11.6222,
+    12,    "B",             4,         1.995005,        1,      NA,
+    13,    "B",             5,         1.9999,          1,      -11.90555,
+    14,    "C",             1,         2.979998,        1,      58.56189,
+    15,    "C",             2,         2.984999,        1,      58.20236,
+    16,    "C",             3,         2.989999,        1,      58.56189,
+    17,    "C",             4,         NA,              1,      59.28094,
+    18,    "C",             5,         2.9999,          1,      59.64047,
+    19,    "Probe2",        1,         -4.840002,       NA,     -77.20719,
+    20,    "Probe2",        2,         -4.880002,       NA,     -77.20719,
+    21,    "Probe2",        3,         -4.920001,       NA,     -78.6036,
+    22,    "Probe2",        4,         -4.960001,       NA,     -79.3018,
+    23,    "A",             1,         NA,              2,      NA,
+    24,    "A",             2,         NA,              2,      NA,
+    25,    "A",             3,         NA,              2,      NA,
+    26,    "B",             1,         1.978808,        2,      NA,
+    27,    "B",             2,         1.984106,        2,      NA,
+    28,    "B",             3,         1.989404,        2,      NA,
+    29,    "Probe3",        1,         19.63979,        NA,     4.666915,
+    30,    "Probe3",        2,         19.72984,        NA,     4.583644,
+    31,    "Probe3",        3,         19.81989,        NA,     4.666915
+  )
+  
+  actual <- correctForMemoryEffect(list(df1 = dataset1, df2 = dataset2))
+  
+  actual1 <- actual$df1$datasetMemoryCorrected
+  actual2 <- actual$df2$datasetMemoryCorrected
+  
+  expect_equal(sum(is.na(select(actual1, `d(18_16)Mean`))), 6)
+  expect_equal(sum(is.na(select(actual1, `d(D_H)Mean`))), 9)
+  expect_equal(sum(is.na(select(actual2, `d(18_16)Mean`))), 9)
+  expect_equal(sum(is.na(select(actual2, `d(D_H)Mean`))), 12)
 })
 
 test_that("test injection range of mean memory coefficients", {
