@@ -36,6 +36,7 @@ test_that("check that no NAs were introduced", {
 
     expect_true(is.data.frame(actual[[1]]$memoryCorrected))
     expect_true(is.data.frame(actual[[1]]$memoryCoefficients))
+    expect_equal(ncol(actual[[1]]$memoryCoefficients), 11)
 
     expect_true(is.data.frame(actual[[1]]$processed))
 
