@@ -1,13 +1,12 @@
 library(tidyverse)
 
-#' accumulateMeasurementsForEachSample
+#' Process data for output
 #'
-#' Average the delta.O18, delta.H2 and d.Excess values for each 
-#' sample and calculate the standard deviation.
+#' Calculate the injection average of the samples and obtain the quality control
+#' information based on the true standard values.
 #' 
 #' Uses the config parameter 'average_over_last_n_inj'. If it is
-#' -1 or 'all', all injections are used to calculate the averages
-#' and standard deviations.
+#' -1 or 'all', all injections are used to calculate the sample averages.
 #'
 #' @param datasets A named list of data.frames
 #' @param config A named list. Needs to contain the component
@@ -16,18 +15,40 @@ library(tidyverse)
 #' @return A named list of data.frames. The list elements are named 
 #'         like the input list "datasets". 
 #'
-accumulateMeasurementsForEachSample <- function(datasets, config){
-  
-  map(datasets, accumulateMeasurementsForSingleDataset, config = config)
+processDataForOutput <- function(datasets, config) {
+
+  map(datasets, processSingleDatasetForOutput, config = config)
 }
 
+processSingleDatasetForOutput <- function(dataset, config) {
+
+  accumulatedData <- accumulateMeasurementsForSingleDataset(dataset, config)
+
+  return(accumulatedData)
+}
+
+#' accumulateMeasurementsForSingleDataset
+#'
+#' Average the delta.O18, delta.H2 and d.Excess values for each 
+#' sample from a dataset and calculate their standard deviation.
+#' 
+#' Uses the config parameter 'average_over_last_n_inj'. If it is
+#' -1 or 'all', all injections are used to calculate the averages
+#' and standard deviations.
+#'
+#' @param datasets A data frame with the data set.
+#' @param config A named list. Needs to contain the component
+#'               'average_over_last_n_inj'.
+#'
+#' @return A data frame.
+#'
 accumulateMeasurementsForSingleDataset <- function(dataset, config){
-    
+
   accumulatedData <- dataset %>%
     getLastNInjectionsForEachSample(config) %>%
     doAccumulate() %>% 
     rearrange()
-  
+
   return(accumulatedData)
 }
 

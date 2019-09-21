@@ -92,7 +92,7 @@ processData <- function(datasets, config){
   calibratedDatasetsWithDExcess <- addColumnDExcess(calibratedDatasets)
   pooledStdDev <- calculatePoooledStdDev(calibratedDatasetsWithDExcess)
   
-  processedData <- accumulateMeasurementsForEachSample(
+  processedData <- processDataForOutput(
     calibratedDatasetsWithDExcess, config)
 
   # fill output structure
