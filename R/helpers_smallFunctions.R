@@ -1,12 +1,13 @@
 library(tidyverse)
 library(lubridate)
+library(yaml)
 
-#' Read configuration file
-#'
 #' Read the specified YAML configuration file for piccr processing.
+#' 
 #' @param configFile A character string naming the config file.
+#' 
 #' @return A list.
-#' @export
+#' 
 parseConfig <- function(configFile){
   
   tryCatch({
@@ -17,7 +18,7 @@ parseConfig <- function(configFile){
   })
 }
 
-#' readFiles
+#' Read files
 #' 
 #' Read all files from a given input directory that have a 
 #' given file extension. Only works for csv files.
@@ -58,6 +59,7 @@ readFiles <- function(config) {
 #' @return The same named list of data frames where for each data set the
 #'         column of injection numbers has been re-calculated accounting for
 #'         possible consecutive vials of the same probe.
+#'         
 normalizeInjectionNumbers <- function(datasets) {
   
   map(datasets, function(dataset){
@@ -69,7 +71,7 @@ normalizeInjectionNumbers <- function(datasets) {
   })
 }
 
-#' associateStandardsWithConfigInfo
+#' Associate standards with config info
 #' 
 #' Associate each standard in the given datasets with the 
 #' config info for that standard (true values for 018 
@@ -104,7 +106,7 @@ associateStandardsWithConfigInfo <- function(datasets, config){
   }, config = config)
 }
 
-#' groupStandardsInBlocks
+#' Group standards in blocks
 #'
 #' For each standard injection, determine which standard block
 #' it belongs to. The results are stored in the column 'block'.
@@ -144,6 +146,15 @@ groupStandardsInBlocks <- function(datasets, config){
   }, config = config)
 }
 
+#' Add the column 'SecondsSinceStart' to the given dataset.
+#' 
+#' @param dataset A data.frame. Needs to contain the column
+#'                'Time Code'. The elements of 'Time Code' should
+#'                be character vectors of the format 'yyyy/mm/ddhh:mm:ss'
+#'                (e.g. '2019/11/2510:00:00').
+#'
+#' @return A data.frame that includes the column 'SecondsSinceStart'.
+#' 
 addColumnSecondsSinceStart <- function(dataset){
   
   dataset %>%
@@ -152,6 +163,15 @@ addColumnSecondsSinceStart <- function(dataset){
     mutate(SecondsSinceStart = cumsum(.$SecondsSinceStart))
 }
 
+#' Determine if a given ID belongs to a standard.
+#'
+#' @param id1 A character vector. The id to test for.
+#' @param config A named list. Needs to contain the component 'standards'.
+#'               'standards' is a list, each element needs to contain the
+#'               component 'name'.
+#'
+#' @return A logical. 
+#' 
 isStandard <- function(id1, config){
   id1 %in% map(config$standards, ~ .$name)
 }
