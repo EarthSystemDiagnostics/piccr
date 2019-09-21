@@ -27,6 +27,33 @@ processSingleDatasetForOutput <- function(dataset, config) {
   return(accumulatedData)
 }
 
+getQualityControlInfo <- function(dataset, accumulatedDataset) {
+
+  infoDataOnStd <- dataset %>%
+    group_by(`Identifier 1`, block) %>%
+    summarise(Line = min(Line),
+              d18OTrue = `o18_True`[[1]],
+              dDTrue = `H2_True`[[1]],
+              useAsControlStandard = useAsControlStandard[[1]]) %>%
+    rearrange()
+
+  deviationDataOfStandards <- accumulatedDataset %>%
+    inner_join(infoDataOnStd) %>%
+    mutate(d18ODeviation = d18OTrue - delta.O18,
+           dDDeviation = dDTrue - delta.H2) %>%
+    select(Line, block,
+           d18OMeasured = delta.O18, d18OTrue, d18ODeviation,
+           dDMeasured = delta.H2, dDTrue, dDDeviation,
+           useAsControlStandard) %>%
+    drop_na()
+
+  return(list(
+    deviationsFromTrue = select(deviationDataOfStandards,
+                                -Line, -useAsControlStandard)
+  ))
+
+}
+
 #' accumulateMeasurementsForSingleDataset
 #'
 #' Average the delta.O18, delta.H2 and d.Excess values for each 
