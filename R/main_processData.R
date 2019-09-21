@@ -76,9 +76,11 @@ processData <- function(datasets, config){
   } else {
     memoryCorrectedDatasets <- datasets
   }
+
+  calibrated <- linearCalibration(memoryCorrectedDatasets, config, block = 1)
   
   if (config$calibration_method == 0){
-    calibratedDatasets <- linearCalibration(memoryCorrectedDatasets, config, block = 1)
+    calibratedDatasets <- calibrated
   }
   else if (config$calibration_method == 1) {
     calibratedDatasets <- calibrateUsingSimpleDriftCorrection(memoryCorrectedDatasets, config)
@@ -87,10 +89,11 @@ processData <- function(datasets, config){
     calibratedDatasets <- calibrateUsingDoubleCalibration(memoryCorrectedDatasets, config)
   }
   
-  calibratedDatasets <- addColumnDExcess(calibratedDatasets)
-  pooledStdDev <- calculatePoooledStdDev(calibratedDatasets)
+  calibratedDatasetsWithDExcess <- addColumnDExcess(calibratedDatasets)
+  pooledStdDev <- calculatePoooledStdDev(calibratedDatasetsWithDExcess)
   
-  processedData <- accumulateMeasurementsForEachSample(calibratedDatasets, config)
+  processedData <- accumulateMeasurementsForEachSample(
+    calibratedDatasetsWithDExcess, config)
 
   # fill output structure
 
@@ -106,7 +109,9 @@ processData <- function(datasets, config){
       output[[i]]$memoryCorrected <- memoryCorrectedDatasets[[i]]
       output[[i]]$memoryCoefficients <- memoryCoefficients[[i]]
     }
-    
+
+    output[[i]]$calibrated <- calibrated[[i]]
+    output[[i]]$calibratedAndDriftCorrected <- calibratedDatasets[[i]]
     output[[i]]$processed <- processedData[[i]]
 
     output[[i]]$pooledSD <- pooledStdDev[[i]]

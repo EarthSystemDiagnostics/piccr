@@ -39,6 +39,9 @@ test_that("check general output structure", {
   expect_true(is.data.frame(actual[[1]]$memoryCoefficients))
   expect_equal(ncol(actual[[1]]$memoryCoefficients), 11)
 
+  expect_true(is.data.frame(actual[[1]]$calibrated))
+  expect_true(is.data.frame(actual[[1]]$calibratedAndDriftCorrected))
+
   expect_true(is.data.frame(actual[[1]]$processed))
 
   expect_true(is.list(actual[[1]]$pooledSD))
