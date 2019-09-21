@@ -12,10 +12,5 @@ library(tidyverse)
 #'         "dExcess".
 addColumnDExcess <- function(datasets){
   
-  map(datasets, addColumnDExcessForSingleDataset)
-}
-
-addColumnDExcessForSingleDataset <- function(dataset){
-  
-  mutate(dataset, dExcess = `d(D_H)Mean` - `d(18_16)Mean` * 8)
+  map(datasets, ~ mutate(., dExcess = `d(D_H)Mean` - `d(18_16)Mean` * 8))
 }
