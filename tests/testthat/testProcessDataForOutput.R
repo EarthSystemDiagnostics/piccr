@@ -37,12 +37,10 @@ test_that("test quality control output structure", {
   expected2 <- list(`Identifier 1` = "QC", d18O = -0.1, dD = 1.25)
   expected3 <- list(d18O = 0.194, dD = 0.836)
   
-  actual <- processDataForOutput(list(df1 = dataset1),
-                                 list(average_over_last_n_inj = "all"))
+  accumulatedData <- accumulateMeasurementsForSingleDataset(
+    dataset1, list(average_over_last_n_inj = "all"))
 
-  expect_length(actual, 1)
-
-  actual <- getQualityControlInfo(dataset1, actual$df1)
+  actual <- getQualityControlInfo(dataset1, accumulatedData)
 
   expect_length(actual, 3)
 
@@ -56,5 +54,10 @@ test_that("test quality control output structure", {
 
   expect_true(is.list(actual$rmsdDeviationsFromTrue))
   expect_equal(lapply(actual$rmsdDeviationsFromTrue, round, 3), expected3)
+
+  actual <- processDataForOutput(list(df1 = dataset1),
+                                 list(average_over_last_n_inj = "all"))
+  expect_length(actual, 1)
+  expect_length(actual$df1, 4)
   
 })

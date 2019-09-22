@@ -47,6 +47,10 @@ test_that("check general output structure", {
   expect_true(is.list(actual[[1]]$pooledSD))
   expect_length(actual[[1]]$pooledSD, 2)
 
+  expect_true(is.data.frame(actual[[1]]$deviationsFromTrue))
+  expect_true(is.list(actual[[1]]$rmsdDeviationsFromTrue))
+  expect_true(is.list(actual[[1]]$deviationOfControlStandard))
+
   actual <- processData(datasets, config)
 
   expect_length(actual, 3)

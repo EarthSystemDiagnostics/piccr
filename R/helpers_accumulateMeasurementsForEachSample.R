@@ -24,7 +24,15 @@ processSingleDatasetForOutput <- function(dataset, config) {
 
   accumulatedData <- accumulateMeasurementsForSingleDataset(dataset, config)
 
-  return(accumulatedData)
+  qualityControlData <- getQualityControlInfo(dataset, accumulatedData)
+
+  return(
+    list(
+      accumulatedData = accumulatedData,
+      deviationsFromTrue = qualityControlData$deviationsFromTrue,
+      rmsdDeviationsFromTrue = qualityControlData$rmsdDeviationsFromTrue,
+      deviationOfControlStandard = qualityControlData$deviationOfControlStandard)
+  )
 }
 
 getQualityControlInfo <- function(dataset, accumulatedDataset) {
@@ -63,8 +71,8 @@ getQualityControlInfo <- function(dataset, accumulatedDataset) {
   return(list(
     deviationsFromTrue = select(deviationDataOfStandards,
                                 -Line, -useAsControlStandard),
-    deviationOfControlStandard = deviationOfControlStandard,
-    rmsdDeviationsFromTrue = rmsdDeviationDataOfStandards
+    rmsdDeviationsFromTrue = rmsdDeviationDataOfStandards,
+    deviationOfControlStandard = deviationOfControlStandard
   ))
 
 }

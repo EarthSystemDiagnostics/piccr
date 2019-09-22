@@ -112,8 +112,11 @@ processData <- function(datasets, config){
 
     output[[i]]$calibrated <- calibrated[[i]]
     output[[i]]$calibratedAndDriftCorrected <- calibratedDatasets[[i]]
-    output[[i]]$processed <- processedData[[i]]
+    output[[i]]$processed <- processedData[[i]]$accumulatedData
 
+    output[[i]]$deviationsFromTrue <- processedData[[i]]$deviationsFromTrue
+    output[[i]]$rmsdDeviationsFromTrue <- processedData[[i]]$rmsdDeviationsFromTrue
+    output[[i]]$deviationOfControlStandard <- processedData[[i]]$deviationOfControlStandard
     output[[i]]$pooledSD <- pooledStdDev[[i]]
     
   }
@@ -121,11 +124,5 @@ processData <- function(datasets, config){
   return(output)
 
 }
-    ## output[[i]]$calibrated <- NA
-    ## output[[i]]$calibratedAndDriftCorrected <- NA
-
-    ## output[[i]]$deviationsFromTrue <- NA
-    ## output[[i]]$rmsdDeviationsFromTrue <- NA
-    ## output[[i]]$deviationOfControlStandard <- NA
     ## output[[i]]$calibrationParams <- NA
     ## output[[i]]$driftParams <- NA
