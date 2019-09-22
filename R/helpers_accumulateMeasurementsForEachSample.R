@@ -12,8 +12,10 @@ library(tidyverse)
 #' @param config A named list. Needs to contain the component
 #'               'average_over_last_n_inj'.
 #'
-#' @return A named list of data.frames. The list elements are named 
-#'         like the input list "datasets". 
+#' @return A named list of data.frames. The list elements are named like the
+#'   input list "datasets". Each list element is a list with the collected
+#'   output of \code{accumulateMeasurementsForSingleDataset()} and
+#'   \code{getQualityControlInfo().}
 #'
 processDataForOutput <- function(datasets, config) {
 
@@ -35,6 +37,25 @@ processSingleDatasetForOutput <- function(dataset, config) {
   )
 }
 
+#' Obtain quality control information
+#'
+#' Obtain the quality control information for a data set based on the deviations
+#' of the measured standards from their true values.
+#' 
+#' @param dataset a data frame with corrected and calibrated measurement data
+#' of a specific data set.
+#' @param accumulatedDataset a data frame with the accumulated
+#' (i.e. injection-averaged) measurement data for this data set.
+#' 
+#' @return A list with three elements:
+#'   $deviationsFromTrue (data frame with the deviations from the true value for
+#'    each measured standard.)
+#'   $rmsdDeviationsFromTrue (list with elements \code{d18O} and \code{dD} with
+#'    the rmsd across \code{deviationsFromTrue} (very first standard excluded).)
+#'   $deviationOfControlStandard (list with elements \code{Identifier 1},
+#'   \code{d18O} and \code{dD} with the deviations from the true value for the
+#'   quality control standard(s) in \code{Identifier 1}.) 
+#' 
 getQualityControlInfo <- function(dataset, accumulatedDataset) {
 
   infoDataOnStd <- dataset %>%
