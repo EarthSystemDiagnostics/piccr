@@ -47,9 +47,16 @@ getQualityControlInfo <- function(dataset, accumulatedDataset) {
            useAsControlStandard) %>%
     drop_na()
 
+  deviationOfControlStandard <- deviationDataOfStandards %>%
+    filter(useAsControlStandard == TRUE) %>%
+    select(d18O = d18ODeviation, dD = dDDeviation) %>%
+    ungroup() %>%  # to remove grouping attributes
+    as.list()
+
   return(list(
     deviationsFromTrue = select(deviationDataOfStandards,
-                                -Line, -useAsControlStandard)
+                                -Line, -useAsControlStandard),
+    deviationOfControlStandard = deviationOfControlStandard
   ))
 
 }
