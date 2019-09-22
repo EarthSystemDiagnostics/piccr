@@ -53,10 +53,18 @@ getQualityControlInfo <- function(dataset, accumulatedDataset) {
     ungroup() %>%  # to remove grouping attributes
     as.list()
 
+  rmsdDeviationDataOfStandards <- deviationDataOfStandards %>%
+    filter(Line > 1) %>%  # do not use very first standard for rmsd calculation
+    ungroup() %>%
+    summarise(d18O = calculateRMSD(d18OMeasured, d18OTrue),
+              dD = calculateRMSD(dDMeasured, dDTrue)) %>%
+    as.list()
+
   return(list(
     deviationsFromTrue = select(deviationDataOfStandards,
                                 -Line, -useAsControlStandard),
-    deviationOfControlStandard = deviationOfControlStandard
+    deviationOfControlStandard = deviationOfControlStandard,
+    rmsdDeviationsFromTrue = rmsdDeviationDataOfStandards
   ))
 
 }

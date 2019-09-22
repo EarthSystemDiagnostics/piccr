@@ -35,6 +35,7 @@ test_that("test quality control output structure", {
     "C",             3,      2.375,         2,         -0.375,         20.9,        20,      -0.9
     )
   expected2 <- list(`Identifier 1` = "QC", d18O = -0.1, dD = 1.25)
+  expected3 <- list(d18O = 0.194, dD = 0.836)
   
   actual <- processDataForOutput(list(df1 = dataset1),
                                  list(average_over_last_n_inj = "all"))
@@ -43,7 +44,7 @@ test_that("test quality control output structure", {
 
   actual <- getQualityControlInfo(dataset1, actual$df1)
 
-  expect_length(actual, 2)
+  expect_length(actual, 3)
 
   expect_true(is.data.frame(actual$deviationsFromTrue))
   ## TODO: expect_equal(actual$deviationsFromTrue, expected1)
@@ -52,5 +53,8 @@ test_that("test quality control output structure", {
 
   expect_true(is.list(actual$deviationOfControlStandard))
   expect_equal(actual$deviationOfControlStandard, expected2)
+
+  expect_true(is.list(actual$rmsdDeviationsFromTrue))
+  expect_equal(lapply(actual$rmsdDeviationsFromTrue, round, 3), expected3)
   
 })
