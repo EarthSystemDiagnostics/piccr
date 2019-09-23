@@ -251,3 +251,25 @@ test_that("test injection range of mean memory coefficients", {
   expect_length(actual$`Inj Nr`, 4)
 
 })
+
+test_that("different numbers of injections for the block 1 standards", {
+  
+  dataset <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`,
+    # -- / -------------- / -------- / -------------- / ----- / -------------
+    1,    "A",           1,         0.5,             1,      -5,
+    2,    "A",           2,         0.75,            1,      -5,
+    3,    "A",           3,         1,               1,      -5,
+    4,    "A",           4,         1,               1,      -5,
+    5,    "C",           1,         1.5,             1,      1.3,
+    6,    "C",           2,         1.75,            1,      3.1,
+    7,    "C",           3,         2,               1,      3.91,
+    8,    "B",           1,         2.5,             1,      1.173,
+    9,    "B",           2,         2.75,            1,      0.391,
+    10,   "B",           3,         3,               1,      0.0391
+  )
+  
+  actual <- correctForMemoryEffect(list(data = dataset))
+  
+  expect_is(actual, "list")
+})
