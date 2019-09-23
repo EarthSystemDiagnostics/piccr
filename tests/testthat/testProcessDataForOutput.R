@@ -34,20 +34,19 @@ test_that("test quality control output structure", {
     "B",             3,      3,             3,         0,              29.75,       30,      0.25,
     "C",             3,      2.375,         2,         -0.375,         20.9,        20,      -0.9
     )
-  expected2 <- list(`Identifier 1` = "QC", d18O = -0.1, dD = 1.25)
+  expected2 <- list(d18O = -0.1, dD = 1.25)
   expected3 <- list(d18O = 0.194, dD = 0.836)
   
   accumulatedData <- accumulateMeasurementsForSingleDataset(
     dataset1, list(average_over_last_n_inj = "all"))
 
   actual <- getQualityControlInfo(dataset1, accumulatedData)
-
+  actualDeviationsFromTrue <- mutate_if(actual$deviationsFromTrue, is.numeric, round, digits = 5)
+  
   expect_length(actual, 3)
 
   expect_true(is.data.frame(actual$deviationsFromTrue))
-  ## TODO: expect_equal(actual$deviationsFromTrue, expected1)
-  expect_equal(nrow(actual$deviationsFromTrue), 5)
-  expect_equal(ncol(actual$deviationsFromTrue), 8)
+  expect_equal(actualDeviationsFromTrue, expected1)
 
   expect_true(is.list(actual$deviationOfControlStandard))
   expect_equal(actual$deviationOfControlStandard, expected2)

@@ -78,8 +78,8 @@ getQualityControlInfo <- function(dataset, accumulatedDataset) {
 
   deviationOfControlStandard <- deviationDataOfStandards %>%
     filter(useAsControlStandard == TRUE) %>%
-    select(d18O = d18ODeviation, dD = dDDeviation) %>%
     ungroup() %>%  # to remove grouping attributes
+    select(d18O = d18ODeviation, dD = dDDeviation) %>%
     as.list()
 
   rmsdDeviationDataOfStandards <- deviationDataOfStandards %>%
