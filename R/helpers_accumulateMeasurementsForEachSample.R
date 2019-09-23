@@ -1,33 +1,125 @@
 library(tidyverse)
 
-#' accumulateMeasurementsForEachSample
+#' Process data for output
 #'
-#' Average the delta.O18, delta.H2 and d.Excess values for each 
-#' sample and calculate the standard deviation.
+#' Calculate the injection average of the samples and obtain the quality control
+#' information based on the true standard values.
 #' 
 #' Uses the config parameter 'average_over_last_n_inj'. If it is
-#' -1 or 'all', all injections are used to calculate the averages
-#' and standard deviations.
+#' -1 or 'all', all injections are used to calculate the sample averages.
 #'
 #' @param datasets A named list of data.frames
 #' @param config A named list. Needs to contain the component
 #'               'average_over_last_n_inj'.
 #'
-#' @return A named list of data.frames. The list elements are named 
-#'         like the input list "datasets". 
+#' @return A named list of data.frames. The list elements are named like the
+#'   input list "datasets". Each list element is a list with the collected
+#'   output of \code{accumulateMeasurementsForSingleDataset()} and
+#'   \code{getQualityControlInfo().}
 #'
-accumulateMeasurementsForEachSample <- function(datasets, config){
-  
-  map(datasets, accumulateMeasurementsForSingleDataset, config = config)
+processDataForOutput <- function(datasets, config) {
+
+  map(datasets, processSingleDatasetForOutput, config = config)
 }
 
+processSingleDatasetForOutput <- function(dataset, config) {
+
+  accumulatedData <- accumulateMeasurementsForSingleDataset(dataset, config)
+
+  qualityControlData <- getQualityControlInfo(dataset, accumulatedData)
+
+  return(
+    list(
+      accumulatedData = accumulatedData,
+      deviationsFromTrue = qualityControlData$deviationsFromTrue,
+      rmsdDeviationsFromTrue = qualityControlData$rmsdDeviationsFromTrue,
+      deviationOfControlStandard = qualityControlData$deviationOfControlStandard)
+  )
+}
+
+#' Obtain quality control information
+#'
+#' Obtain the quality control information for a data set based on the deviations
+#' of the measured standards from their true values.
+#' 
+#' @param dataset a data frame with corrected and calibrated measurement data
+#' of a specific data set.
+#' @param accumulatedDataset a data frame with the accumulated
+#' (i.e. injection-averaged) measurement data for this data set.
+#' 
+#' @return A list with three elements:
+#'   $deviationsFromTrue (data frame with the deviations from the true value for
+#'    each measured standard.)
+#'   $rmsdDeviationsFromTrue (list with elements \code{d18O} and \code{dD} with
+#'    the rmsd across \code{deviationsFromTrue} (very first standard excluded).)
+#'   $deviationOfControlStandard (list with elements \code{Identifier 1},
+#'   \code{d18O} and \code{dD} with the deviations from the true value for the
+#'   quality control standard(s) in \code{Identifier 1}.) 
+#' 
+getQualityControlInfo <- function(dataset, accumulatedDataset) {
+
+  infoDataOnStd <- dataset %>%
+    group_by(`Identifier 1`, block) %>%
+    summarise(Line = min(Line),
+              d18OTrue = `o18_True`[[1]],
+              dDTrue = `H2_True`[[1]],
+              useAsControlStandard = useAsControlStandard[[1]]) %>%
+    rearrange()
+
+  deviationDataOfStandards <- accumulatedDataset %>%
+    inner_join(infoDataOnStd) %>%
+    mutate(d18ODeviation = d18OTrue - delta.O18,
+           dDDeviation = dDTrue - delta.H2) %>%
+    select(Line, block,
+           d18OMeasured = delta.O18, d18OTrue, d18ODeviation,
+           dDMeasured = delta.H2, dDTrue, dDDeviation,
+           useAsControlStandard) %>%
+    drop_na()
+
+  deviationOfControlStandard <- deviationDataOfStandards %>%
+    filter(useAsControlStandard == TRUE) %>%
+    ungroup() %>%  # to remove grouping attributes
+    select(d18O = d18ODeviation, dD = dDDeviation) %>%
+    as.list()
+
+  rmsdDeviationDataOfStandards <- deviationDataOfStandards %>%
+    filter(Line > 1) %>%  # do not use very first standard for rmsd calculation
+    ungroup() %>%
+    summarise(d18O = calculateRMSD(d18OMeasured, d18OTrue),
+              dD = calculateRMSD(dDMeasured, dDTrue)) %>%
+    as.list()
+
+  return(list(
+    deviationsFromTrue = select(deviationDataOfStandards,
+                                -Line, -useAsControlStandard),
+    rmsdDeviationsFromTrue = rmsdDeviationDataOfStandards,
+    deviationOfControlStandard = deviationOfControlStandard
+  ))
+
+}
+
+#' accumulateMeasurementsForSingleDataset
+#'
+#' Average the delta.O18, delta.H2 and d.Excess values for each 
+#' sample from a dataset and calculate their standard deviation.
+#' 
+#' Uses the config parameter 'average_over_last_n_inj'. If it is
+#' -1 or 'all', all injections are used to calculate the averages
+#' and standard deviations.
+#'
+#' @param datasets A data frame with the data set.
+#' @param config A named list. Needs to contain the component
+#'               'average_over_last_n_inj'.
+#'
+#' @return A data frame.
+#'
 accumulateMeasurementsForSingleDataset <- function(dataset, config){
-    
+
   accumulatedData <- dataset %>%
     getLastNInjectionsForEachSample(config) %>%
     doAccumulate() %>% 
     rearrange()
-  
+
   return(accumulatedData)
 }
 
