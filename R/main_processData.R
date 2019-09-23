@@ -64,17 +64,17 @@ processData <- function(datasets, config){
     output[[i]] <- outputTemplate
   }
  
-  datasets <- datasets %>%
+  preparedDatasets <- datasets %>%
     groupStandardsInBlocks(config) %>%
     normalizeInjectionNumbers() %>%
     associateStandardsWithConfigInfo(config)
   
   if (config$use_memory_correction) {
-    memoryCorrected <- correctForMemoryEffect(datasets)
+    memoryCorrected <- correctForMemoryEffect(preparedDatasets)
     memoryCorrectedDatasets <- map(memoryCorrected, ~ .$datasetMemoryCorrected)
     memoryCoefficients <- map(memoryCorrected, ~ .$memoryCoefficients)
   } else {
-    memoryCorrectedDatasets <- datasets
+    memoryCorrectedDatasets <- preparedDatasets
   }
 
   calibrated <- linearCalibration(memoryCorrectedDatasets, config, block = 1)

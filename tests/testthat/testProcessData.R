@@ -34,6 +34,8 @@ test_that("check general output structure", {
   expect_true(is.vector(actual[[1]]$name))
   expect_length(is.vector(actual[[1]]$name), 1)
   expect_true(is.data.frame(actual[[1]]$raw))
+  expect_true(all(!c("useForCalibration", "block", "o18_True", "H2_True", 
+                 "useForDriftCorr", "useAsControlStandard") %in% colnames(actual[[1]]$raw)))
 
   expect_true(is.data.frame(actual[[1]]$memoryCorrected))
   expect_true(is.data.frame(actual[[1]]$memoryCoefficients))
