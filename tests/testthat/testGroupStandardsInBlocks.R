@@ -15,9 +15,9 @@ test_that("test for dataframe with single row (contains standard)", {
     val = 3,
     block = 1
   )
-  dfWithGroupedStandardsActual <- groupStandardsInBlocksForDataset(df, config)
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(list(df), config)
   
-  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual[[1]])
 })
 
 test_that("test for dataframe with single row (does not contain standard)", {
@@ -30,9 +30,9 @@ test_that("test for dataframe with single row (does not contain standard)", {
     val = 3,
     block = NA
   )
-  dfWithGroupedStandardsActual <- groupStandardsInBlocksForDataset(df, config)
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(list(df), config)
   
-  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual[[1]])
 })
 
 test_that("test for dataframe with mulitple rows (first standard, then probe)", {
@@ -45,9 +45,9 @@ test_that("test for dataframe with mulitple rows (first standard, then probe)", 
     val = c(3, 7),
     block = c(1, NA)
   )
-  dfWithGroupedStandardsActual <- groupStandardsInBlocksForDataset(df, config)
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(list(df), config)
   
-  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual[[1]])
 })
 
 test_that("test for dataframe with mulitple rows (probe, standard, probe)", {
@@ -60,9 +60,9 @@ test_that("test for dataframe with mulitple rows (probe, standard, probe)", {
     val = c(1, 3, 7),
     block = c(NA, 1, NA)
   )
-  dfWithGroupedStandardsActual <- groupStandardsInBlocksForDataset(df, config)
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(list(df), config)
   
-  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual[[1]])
 })
 
 test_that("test for dataframe with mulitple rows (standard, probe, standard)", {
@@ -75,9 +75,9 @@ test_that("test for dataframe with mulitple rows (standard, probe, standard)", {
     val = c(1, 3, 7),
     block = c(1, NA, 2)
   )
-  dfWithGroupedStandardsActual <- groupStandardsInBlocksForDataset(df, config)
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(list(df), config)
   
-  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual[[1]])
 })
 
 test_that("test for list of dataframes with mulitple rows (standard, probe, standard, probe, standard)", {
@@ -90,9 +90,9 @@ test_that("test for list of dataframes with mulitple rows (standard, probe, stan
     val = 1:7,
     block = c(1, NA, NA, 2, 2, NA, 3)
   )
-  dfWithGroupedStandardsActual <- groupStandardsInBlocksForDataset(df, config)
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(list(df), config)
   
-  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual[[1]])
 })
 
 test_that("test for list of dataframes", {

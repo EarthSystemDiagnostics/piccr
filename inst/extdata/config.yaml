@@ -14,28 +14,33 @@ use_memory_correction:	yes			  # signal memory correction: yes/no
 
 # -------- set standards --------
 standards:
-  - name: KARA
-    o18_True: -0.10
-    H2_True: -0.6
+  - name: HGL-0
+    o18_True: 0.
+    H2_True: 0.
     use_for_drift_correction: no
     use_for_calibration: no
+    use_as_control_standard: no
   - name: DML
     o18_True: -42.50
     H2_True: -341.0
     use_for_drift_correction: yes
     use_for_calibration: yes
+    use_as_control_standard: no
   - name: TD1
     o18_True: -33.90
     H2_True: -266.2
     use_for_drift_correction: yes
     use_for_calibration: yes
+    use_as_control_standard: no
   - name: JASE
     o18_True: -50.22
     H2_True: -392.5
     use_for_drift_correction: yes
     use_for_calibration: yes
+    use_as_control_standard: no
   - name: NGT
     o18_True: -34.40
     H2_True: -265.5
     use_for_drift_correction: no
     use_for_calibration: no
+    use_as_control_standard: yes

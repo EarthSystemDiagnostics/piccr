@@ -35,12 +35,25 @@ calculateMemoryCoefficients <- function(dataset) {
     mutate(memoryCoeffD18O = formulaMemCoeff(.$`d(18_16)Mean`, .$deltaTrueD18O, .$deltaTruePrevD18O),
            memoryCoeffDD = formulaMemCoeff(.$`d(D_H)Mean`, .$deltaTrueDD, .$deltaTruePrevDD))
   
+  # get the mean mem coeff as a dataframe
   meanMemoryCoefficients <- memoryCoefficients %>%
     group_by(`Inj Nr`) %>%
     summarise(memoryCoeffD18O = mean(memoryCoeffD18O, na.rm = T), 
               memoryCoeffDD = mean(memoryCoeffDD, na.rm = T))
   
-  return(meanMemoryCoefficients)
+  # extract the mem coeff for each standard as a list of dataframes
+  memoryCoeffForEachStandard <- memoryCoefficients %>% 
+    select(`Inj Nr`, `Identifier 1`, memoryCoeffD18O, memoryCoeffDD) %>% 
+    split(.$`Identifier 1`) 
+  memoryCoeffForEachStandard <- map(names(memoryCoeffForEachStandard), ~ {
+    data <- select(memoryCoeffForEachStandard[[.]], - `Identifier 1`, - `Inj Nr`)
+    setNames(data, c(str_c(., "D18O"), str_c(., "DD")))
+  })
+  
+  # join the mean mem coeff and the mem coeff for each standard into one dataframe
+  memCoeffOutput <- bind_cols(meanMemoryCoefficients, memoryCoeffForEachStandard)
+  
+  return(memCoeffOutput)
 }
 
 applyMemoryCorrection <- function(dataset, memoryCoefficients){
@@ -71,9 +84,13 @@ applyMemoryCorrection <- function(dataset, memoryCoefficients){
     dDMemoryCorrected <- formulaCorrectMem(
       joinedData$`d(D_H)Mean`, joinedData$memoryCoeffDD, deltaTruePrevH2)
     
-    # update state and add memory corr values to result
-    deltaTruePrevO18        <- mean(o18MemoryCorrected, na.rm = T)
-    deltaTruePrevH2         <- mean(dDMemoryCorrected, na.rm = T)
+    # update delta true prev. If the new value is NA use the last known value.
+    deltaTruePrevO18New <- mean(o18MemoryCorrected, na.rm = T)
+    deltaTruePrevH2New  <- mean(dDMemoryCorrected, na.rm = T)
+    if (!is.na(deltaTruePrevO18New)) deltaTruePrevO18 <- deltaTruePrevO18New
+    if (!is.na(deltaTruePrevH2New)) deltaTruePrevH2 <- deltaTruePrevH2New
+    
+    # add memory corr values to result
     memoryCorrectedO18[[i]] <- o18MemoryCorrected
     memoryCorrectedH2[[i]]  <- dDMemoryCorrected
   }
@@ -91,8 +108,8 @@ getDeltaTrueAndDeltaTruePrevForEachSample <- function(dataset, ...){
     slice((n()-2):n())
   
   deltaTrue <-lastThreeInj  %>%
-    summarise(deltaTrueD18O = mean(`d(18_16)Mean`),
-              deltaTrueDD = mean(`d(D_H)Mean`), 
+    summarise(deltaTrueD18O = mean(`d(18_16)Mean`, na.rm = T),
+              deltaTrueDD = mean(`d(D_H)Mean`, na.rm = T), 
               Line = min(Line))
   
   deltaTrueInCorrectOrder <- deltaTrue %>%

@@ -9,9 +9,9 @@ test_that("test return value and outputs", {
   # ---------- INITIALIZE INPUTS -------------
   
   newConfigPath <- file.path(tempdir(), "config.yaml")
-  outputDir <- file.path(tempdir(), "fullRunOutput")
+  outputDir <- file.path(tempdir(), "fullRunOutput2")
   on.exit(file.remove(newConfigPath))
-  on.exit(unlink(file.path(outputDir)))
+  on.exit(unlink(outputDir, recursive = TRUE))
   
   configPath <- system.file("extdata", "config.yaml", package = "piccr")
   configContents <- rlist::list.load(configPath)
@@ -27,11 +27,21 @@ test_that("test return value and outputs", {
   # --------- MAKE EXPECTATIONS --------------------
   
   # check format of return value
-  expect_length(processedData, 4)
-  expect_length(processedData$memoryCorrected, 3)
-  expect_length(processedData$calibrated, 3)
-  expect_length(processedData$processed, 3)
-  expect_length(processedData$pooledStdDev, 3)
+  expect_true(is.list(processedData))
+  expect_length(processedData, 3)
+  for (dataset in processedData){
+    expect_is(dataset$name, "character")
+    expect_is(dataset$raw, "data.frame")
+    expect_is(dataset$memoryCorrected, "data.frame")
+    expect_is(dataset$calibrated, "data.frame")
+    expect_is(dataset$calibratedAndDriftCorrected, "data.frame")
+    expect_is(dataset$processed, "data.frame")
+    expect_is(dataset$deviationsFromTrue, "data.frame")
+    expect_is(dataset$deviationOfControlStandard, "list")
+    expect_is(dataset$rmsdDeviationsFromTrue, "list")
+    expect_is(dataset$pooledSD, "list")
+    expect_is(dataset$memoryCoefficients, "data.frame")
+  }
 
   # check saved files
   outputFiles <- list.files(outputDir)
