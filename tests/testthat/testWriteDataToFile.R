@@ -8,8 +8,10 @@ d1Content <- "Identifier 1,a,b\na,1.2,3.1\n"
 d2Content <- "Identifier 1,c,d\na,3.1,\nb,9,-2\n"
 
 config <- list(output_directory = tempdir(), include_standards_in_output = TRUE)
-datasets <- list(processed = list(d1.csv = read_csv(d1Content), 
-                                  d2.csv = read_csv(d2Content)))
+datasets <- list(
+  list(name = "d1.csv", processed = read_csv(d1Content)), 
+  list(name = "d2.csv", processed = read_csv(d2Content))
+)
 
 test_that("test correct files are created (output dir exists)", {
   writeDataToFile(datasets, config)

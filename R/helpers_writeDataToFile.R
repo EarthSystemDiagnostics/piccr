@@ -29,15 +29,13 @@ createOutputDirectory <- function(folder){
 }
 
 writeDatasets <- function(folder, datasets, config){
-  processedDatasets <- datasets$processed
-  walk(names(processedDatasets), writeSingleDataset, folder = folder, 
-       datasets = processedDatasets, config = config)
+  walk(datasets, writeSingleDataset, folder = folder, config = config)
 }
 
-writeSingleDataset <- function(nameOfDataset, folder, datasets, config){
-  datasets[[nameOfDataset]] %>%
+writeSingleDataset <- function(dataset, folder, config){
+  dataset$processed %>%
     removeStandardsFromDataIfRequested(config) %>%
-    write_csv(path = file.path(folder, nameOfDataset), na = "")
+    write_csv(path = file.path(folder, dataset$name), na = "")
 }
 
 removeStandardsFromDataIfRequested <- function(dataset, config){
