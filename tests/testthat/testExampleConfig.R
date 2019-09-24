@@ -38,6 +38,7 @@ test_that("test return value and outputs", {
     expect_is(dataset$processed, "data.frame")
     expect_is(dataset$deviationsFromTrue, "data.frame")
     expect_is(dataset$deviationOfControlStandard, "list")
+    expect_length(dataset$deviationOfControlStandard[[1]], 1)
     expect_is(dataset$rmsdDeviationsFromTrue, "list")
     expect_is(dataset$pooledSD, "list")
     expect_is(dataset$memoryCoefficients, "data.frame")
