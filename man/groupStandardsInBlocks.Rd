@@ -4,18 +4,17 @@
 \alias{groupStandardsInBlocks}
 \title{Group standards in blocks}
 \usage{
-groupStandardsInBlocks(datasets, config)
+groupStandardsInBlocks(dataset, config)
 }
 \arguments{
-\item{datasets}{A named list of dataframes.}
+\item{dataset}{A data.frame.}
 
 \item{config}{A named list. Needs to contain the component
 $standards; a list of lists where each innermost
 list needs to contain the component $name.}
 }
 \value{
-A named list of dataframes. The names are the same as
-        the names of the input 'datasets'.
+A data.frame.
 }
 \description{
 For each standard injection, determine which standard block

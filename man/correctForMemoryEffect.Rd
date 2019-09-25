@@ -2,21 +2,17 @@
 % Please edit documentation in R/maths_correctForMemoryEffect.R
 \name{correctForMemoryEffect}
 \alias{correctForMemoryEffect}
-\title{correctForMemoryEffect}
+\title{Correct for memory effect}
 \usage{
-correctForMemoryEffect(datasets)
+correctForMemoryEffect(dataset)
 }
 \arguments{
-\item{datasets}{A named list of data frames. Each dataframe is one Picarro
-isotope file. Each dataframe should contain the additional column
-"block" (not included in the raw Picarro output).}
+\item{dataset}{A data.frame.}
 }
 \value{
-A list. The list elements are named like the input list "datasets". 
-        Each element of the list is a list with the two named elements
+A list. It contains the two named elements
         "datasetMemoryCorrected" and "memoryCoefficients".
 }
 \description{
-Take a list of dataframes with isotope measurement data and apply memory correction
-to each dataset in the list.
+Take a data.frame with isotope measurement data and apply memory correction to it.
 }

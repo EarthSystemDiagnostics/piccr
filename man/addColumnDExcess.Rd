@@ -2,19 +2,17 @@
 % Please edit documentation in R/maths_addColumnDExcess.R
 \name{addColumnDExcess}
 \alias{addColumnDExcess}
-\title{addColumnDExcess}
+\title{Add column dExcess}
 \usage{
-addColumnDExcess(datasets)
+addColumnDExcess(dataset)
 }
 \arguments{
-\item{datasets}{A named list of dataframes.}
+\item{dataset}{A data.frame.}
 }
 \value{
-A list. The list elements are named like the input list "datasets". 
-        Each element of the list is a dataframe that includes the column
-        "dExcess".
+A data.frame.
 }
 \description{
-Add the column "dExcess" to every dataframe in datasets. dExcess is 
+Add the column "dExcess" to the dataset. dExcess is 
 calculated as dExcess = dD - 8 * d18O.
 }

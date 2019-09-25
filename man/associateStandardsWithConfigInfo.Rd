@@ -4,10 +4,10 @@
 \alias{associateStandardsWithConfigInfo}
 \title{Associate standards with config info}
 \usage{
-associateStandardsWithConfigInfo(datasets, config)
+associateStandardsWithConfigInfo(dataset, config)
 }
 \arguments{
-\item{datasets}{A named list of dataframes.}
+\item{dataset}{A data.frame.}
 
 \item{config}{A named list. Needs to contain the component
 'standards'; a named list with the components
@@ -15,16 +15,15 @@ associateStandardsWithConfigInfo(datasets, config)
 'use_for_calibration', and 'use_as_control_standard'.}
 }
 \value{
-A named list of dataframes. The names are equal to the names
-        of the input 'datasets'.
+A data.frame.
 }
 \description{
-Associate each standard in the given datasets with the 
+Associate each standard in the given dataset with the 
 config info for that standard (true values for 018 
 and H2, use for drift correction, use for calibration).
 }
 \details{
-The output datasets will contain the columns o18_True, H2_True,
+The output dataset will contain the columns o18_True, H2_True,
 useForDriftCorrection, and useForCalibration. The values will
 be NA for probes.
 }
