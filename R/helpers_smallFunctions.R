@@ -189,7 +189,7 @@ isStandard <- function(id1, config){
 #' @return A nested list structure
 #'
 buildOutputList <- function(name, config, dataset, memoryCorrected, memoryCoefficients, 
-                            calibrated, calibratedAndDriftCorrected, processedData){
+                            calibrated, calibratedAndDriftCorrected, accumulated, qualityControlInfo){
   
   list(
     name = name,
@@ -198,13 +198,13 @@ buildOutputList <- function(name, config, dataset, memoryCorrected, memoryCoeffi
     memoryCorrected = if (config$use_memory_correction) memoryCorrected else dataset,
     calibrated = calibrated,
     calibratedAndDriftCorrected = calibratedAndDriftCorrected,
-    processed = processedData$accumulatedData,
+    processed = accumulated,
     
     memoryCoefficients = if (config$use_memory_correction) memoryCoefficients else NULL,
-    deviationsFromTrue = processedData$deviationsFromTrue,
-    rmsdDeviationsFromTrue = processedData$rmsdDeviationsFromTrue,
-    deviationOfControlStandard = processedData$deviationOfControlStandard,
-    pooledSD = processedData$pooledSD,
+    deviationsFromTrue = qualityControlInfo$deviationsFromTrue,
+    rmsdDeviationsFromTrue = qualityControlInfo$rmsdDeviationsFromTrue,
+    deviationOfControlStandard = qualityControlInfo$deviationOfControlStandard,
+    pooledSD = qualityControlInfo$pooledSD,
     
     # TODO
     calibrationParams = NA,

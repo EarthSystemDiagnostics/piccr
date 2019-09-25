@@ -38,41 +38,54 @@
 #'
 processData <- function(datasets, config){
   
-  map(names(datasets), function(name, datasets, config){
-    
-    dataset <- datasets[[name]]
-    
-    preProcessed <- dataset %>%
-      groupStandardsInBlocks(config) %>%
-      normalizeInjectionNumbers() %>%
-      associateStandardsWithConfigInfo(config)
-    
-    if (config$use_memory_correction) {
-      temp <- correctForMemoryEffect(preProcessed)
-      memoryCorrected    <- temp$datasetMemoryCorrected
-      memoryCoefficients <- temp$memoryCoefficients
-    } else {
-      memoryCorrected <- preProcessed
-    }
+  map(names(datasets), processSingleDataset, config = config, datasets = datasets)
+}
 
-    calibrated <- linearCalibration(memoryCorrected, config, block = 1)
-    
-    if (config$calibration_method == 0){
-      calibratedAndDriftCorrected <- calibrated
-    }
-    else if (config$calibration_method == 1) {
-      calibratedAndDriftCorrected <- calibrateUsingSimpleDriftCorrection(memoryCorrected, config)
-    } 
-    else if (config$calibration_method == 2) {
-      calibratedAndDriftCorrected <- calibrateUsingDoubleCalibration(memoryCorrected, config)
-    }
-    
-    calibratedWithDExcess <- addColumnDExcess(calibratedAndDriftCorrected)
-    processedData <- processDataForOutput(calibratedWithDExcess, config)
-    
-    output <- buildOutputList(name, config, dataset, memoryCorrected, memoryCoefficients, 
-                              calibrated, calibratedAndDriftCorrected, processedData)
-    return(output)
-    
-  }, config = config, datasets = datasets)
+processSingleDataset <- function(name, datasets, config){
+  
+  dataset <- datasets[[name]]
+  
+  # pre-process the input dataset
+  preProcessed <- dataset %>%
+    groupStandardsInBlocks(config) %>%
+    normalizeInjectionNumbers() %>%
+    associateStandardsWithConfigInfo(config)
+  
+  # apply memory correction if requested
+  if (config$use_memory_correction) {
+    temp <- correctForMemoryEffect(preProcessed)
+    memoryCorrected    <- temp$datasetMemoryCorrected
+    memoryCoefficients <- temp$memoryCoefficients
+  } else {
+    memoryCorrected <- preProcessed
+  }
+  
+  # calibrate the memory corrected data. Only used for output.
+  calibrated <- linearCalibration(memoryCorrected, config, block = 1)
+  
+  # apply calibration and drift correction based on the requested calibration method
+  if (config$calibration_method == 0){
+    calibratedAndDriftCorrected <- calibrated
+  }
+  else if (config$calibration_method == 1) {
+    calibratedAndDriftCorrected <- calibrateUsingSimpleDriftCorrection(memoryCorrected, config)
+  } 
+  else if (config$calibration_method == 2) {
+    calibratedAndDriftCorrected <- calibrateUsingDoubleCalibration(memoryCorrected, config)
+  }
+  
+  # calculate the d-excess values for all samples
+  calibratedWithDExcess <- addColumnDExcess(calibratedAndDriftCorrected)
+  
+  # accumulate data for each sample
+  accumulated <- accumulateMeasurements(calibratedWithDExcess, config)
+  
+  # get quality control info
+  qualityControlInfo <- getQualityControlInfo(calibratedWithDExcess, accumulated)
+
+  # synthesize output list for this dataset and return it  
+  output <- buildOutputList(name, config, dataset, memoryCorrected, memoryCoefficients, 
+                            calibrated, calibratedAndDriftCorrected, accumulated, qualityControlInfo)
+  return(output)
+  
 }

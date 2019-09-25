@@ -1,37 +1,5 @@
 library(tidyverse)
 
-#' Process data for output
-#'
-#' Calculate the injection average of the samples and obtain the quality control
-#' information based on the true standard values.
-#' 
-#' Uses the config parameter 'average_over_last_n_inj'. If it is
-#' -1 or 'all', all injections are used to calculate the sample averages.
-#'
-#' @param dataset A data.frame.
-#' @param config A named list. Needs to contain the component
-#'               'average_over_last_n_inj'.
-#'
-#' @return A named list  with the collected output of 
-#'         \code{accumulateMeasurements()} and
-#'         \code{getQualityControlInfo()}.
-#'
-processDataForOutput <- function(dataset, config) {
-
-  accumulatedData <- accumulateMeasurements(dataset, config)
-
-  qualityControlData <- getQualityControlInfo(dataset, accumulatedData)
-
-  return(
-    list(
-      accumulatedData = accumulatedData,
-      pooledSD = qualityControlData$pooledSD,
-      deviationsFromTrue = qualityControlData$deviationsFromTrue,
-      rmsdDeviationsFromTrue = qualityControlData$rmsdDeviationsFromTrue,
-      deviationOfControlStandard = qualityControlData$deviationOfControlStandard)
-  )
-}
-
 #' Obtain quality control information
 #'
 #' Obtain the quality control information for a data set based on the deviations
