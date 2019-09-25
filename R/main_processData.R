@@ -37,32 +37,6 @@
 #' @export
 #'
 processData <- function(datasets, config){
-
-  # initialize output structure
-  
-  outputTemplate <- list(
-    
-    name = NULL,
-    
-    raw = NULL,
-    memoryCorrected = NULL,
-    calibrated = NULL,
-    calibratedAndDriftCorrected = NULL,
-    processed = NULL,
-
-    deviationsFromTrue = NULL,
-    rmsdDeviationsFromTrue = NULL,
-    deviationOfControlStandard = NULL,
-    pooledSD = NULL,
-    memoryCoefficients = NULL,
-    calibrationParams = NULL,
-    driftParams = NULL
-  )
-
-  output <- list()
-  for (i in 1 : length(datasets)) {
-    output[[i]] <- outputTemplate
-  }
  
   preparedDatasets <- datasets %>%
     groupStandardsInBlocks(config) %>%
@@ -80,49 +54,22 @@ processData <- function(datasets, config){
   calibrated <- linearCalibration(memoryCorrectedDatasets, config, block = 1)
   
   if (config$calibration_method == 0){
-    calibratedDatasets <- calibrated
+    calibratedAndDriftCorrected <- calibrated
   }
   else if (config$calibration_method == 1) {
-    calibratedDatasets <- calibrateUsingSimpleDriftCorrection(memoryCorrectedDatasets, config)
+    calibratedAndDriftCorrected <- calibrateUsingSimpleDriftCorrection(memoryCorrectedDatasets, config)
   } 
   else if (config$calibration_method == 2) {
-    calibratedDatasets <- calibrateUsingDoubleCalibration(memoryCorrectedDatasets, config)
+    calibratedAndDriftCorrected <- calibrateUsingDoubleCalibration(memoryCorrectedDatasets, config)
   }
   
-  calibratedDatasetsWithDExcess <- addColumnDExcess(calibratedDatasets)
+  calibratedDatasetsWithDExcess <- addColumnDExcess(calibratedAndDriftCorrected)
   pooledStdDev <- calculatePoooledStdDev(calibratedDatasetsWithDExcess)
   
-  processedData <- processDataForOutput(
-    calibratedDatasetsWithDExcess, config)
+  processedData <- processDataForOutput(calibratedDatasetsWithDExcess, config)
 
-  # fill output structure
-
-  namesOfDatasets <- names(datasets)
-
-  for (i in 1 : length(datasets)) {
-
-    output[[i]]$name <- namesOfDatasets[i]
-    
-    output[[i]]$raw <- datasets[[i]]
-
-    if (config$use_memory_correction) {
-      output[[i]]$memoryCorrected <- memoryCorrectedDatasets[[i]]
-      output[[i]]$memoryCoefficients <- memoryCoefficients[[i]]
-    }
-
-    output[[i]]$calibrated <- calibrated[[i]]
-    output[[i]]$calibratedAndDriftCorrected <- calibratedDatasets[[i]]
-    output[[i]]$processed <- processedData[[i]]$accumulatedData
-
-    output[[i]]$deviationsFromTrue <- processedData[[i]]$deviationsFromTrue
-    output[[i]]$rmsdDeviationsFromTrue <- processedData[[i]]$rmsdDeviationsFromTrue
-    output[[i]]$deviationOfControlStandard <- processedData[[i]]$deviationOfControlStandard
-    output[[i]]$pooledSD <- pooledStdDev[[i]]
-    
-  }
-
+  output <- buildOutputStructure(config, datasets, memoryCorrectedDatasets, memoryCoefficients, calibrated, 
+                                 calibratedAndDriftCorrected, processedData, pooledStdDev)
+  
   return(output)
-
 }
-    ## output[[i]]$calibrationParams <- NA
-    ## output[[i]]$driftParams <- NA

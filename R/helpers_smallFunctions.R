@@ -175,3 +175,52 @@ addColumnSecondsSinceStart <- function(dataset){
 isStandard <- function(id1, config){
   id1 %in% map(config$standards, ~ .$name)
 }
+
+#' Build output structure
+#' 
+#' This is the final processing step. After all the processing is done, input
+#' all relevant information and construct the output for the function
+#' processData(..).
+#' 
+#' Note: If you change the output of this function, don't forget to update
+#' the roxygen docstring (section return value) of the function processData(..).
+#'
+#' @param config A list. Needs to contain the component $use_memory_correction, a logical.
+#' @param datasets A named list of data.frames.
+#' @param memoryCorrectedDatasets  A named list of data.frames.
+#' @param memoryCoefficients A named list of data.frames.
+#' @param calibrated A named list of data.frames.
+#' @param calibratedAndDriftCorrected A named list of data.frames.
+#' @param processedData A named list of lists. Each innermost list has the
+#'                      components $accumulatedData (a data.frame), 
+#'                      $deviationsFromTrue (a data.frame), $rmsdDeviationsFromTrue
+#'                      (a list), and $deviationOfControlStandard (a list).
+#' @param pooledStdDev A named list of lists.
+#'
+#' @return A nested list structure
+#'
+buildOutputStructure <- function(config, datasets, memoryCorrectedDatasets, memoryCoefficients, calibrated, 
+                                 calibratedAndDriftCorrected, processedData, pooledStdDev){
+  
+  map(names(datasets), function(name){
+    list(
+      name = name,
+      
+      raw = datasets[[name]],
+      memoryCorrected = if (config$use_memory_correction) memoryCorrectedDatasets[[name]] else datasets[[name]],
+      calibrated = calibrated[[name]],
+      calibratedAndDriftCorrected = calibratedAndDriftCorrected[[name]],
+      processed = processedData[[name]]$accumulatedData,
+      
+      memoryCoefficients = if (config$use_memory_correction) memoryCoefficients[[name]] else NULL,
+      deviationsFromTrue = processedData[[name]]$deviationsFromTrue,
+      rmsdDeviationsFromTrue = processedData[[name]]$rmsdDeviationsFromTrue,
+      deviationOfControlStandard = processedData[[name]]$deviationOfControlStandard,
+      pooledSD = pooledStdDev[[name]],
+      
+      # TODO
+      calibrationParams = NA,
+      driftParams = NA
+    )
+  })
+}
