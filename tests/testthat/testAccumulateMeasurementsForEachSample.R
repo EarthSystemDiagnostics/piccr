@@ -27,7 +27,7 @@ test_that("mean values are correct", {
     4,     "C",             "x",             3,      -3,         0,         1.41,    2.83,   0,         11.66
   )
     
-  actual <- accumulateMeasurementsForSingleDataset(dataset1, list(average_over_last_n_inj = "all"))
+  actual <- accumulateMeasurements(dataset1, list(average_over_last_n_inj = "all"))
   actualRounded <- mutate_if(actual, is.numeric, ~ round(., 2))
   
   expect_true(is.data.frame(actual))
@@ -61,7 +61,7 @@ test_that("use only last 2 injections to calculate average", {
     4,     "C",             "x",             3,      -3,         0,         1.41,    2.83,   0,         11.66
   )
   
-  actual <- accumulateMeasurementsForSingleDataset(dataset1, list(average_over_last_n_inj = "2"))
+  actual <- accumulateMeasurements(dataset1, list(average_over_last_n_inj = "2"))
   actualRounded <- mutate_if(actual, is.numeric, ~ round(., 2))
   
   expect_true(is.data.frame(actual))

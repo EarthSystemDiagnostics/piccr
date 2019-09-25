@@ -104,7 +104,7 @@ test_that("test applyCalibration", {
 
 test_that("test calibrateNoDriftSingleDataset", {
   
-  actual <- linearCalibrationSingleDataset(dataset1, config = config, block = 1)
+  actual <- linearCalibration(dataset1, config = config, block = 1)
   actual <- mutate(actual, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
   
   expect_equal(actual, expected1)
@@ -112,11 +112,10 @@ test_that("test calibrateNoDriftSingleDataset", {
 
 test_that("test calibrateWithoutDriftCorrection", {
   
-  actual <- linearCalibration(list(df1 = dataset1), config = config)
-  actual[[1]] <- mutate(actual[[1]], `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
+  actual <- linearCalibration(dataset1, config = config)
+  actual <- mutate(actual, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
   
-  expect_length(actual, 1)
-  expect_equal(actual$df1, expected1)
+  expect_equal(actual, expected1)
 })
 
 test_that("test use only last three injections if memory correction is not used", {

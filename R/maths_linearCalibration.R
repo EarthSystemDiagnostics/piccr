@@ -2,8 +2,8 @@ library(tidyverse)
 
 #' linearCalibration
 #'
-#' Take a list of dataframes with isotope measurement data and 
-#' calibrate each dataframe. Does not include drift correction.
+#' Take a data.frame with isotope measurement data and 
+#' calibrate it. Does not include drift correction.
 #' Note: 
 #'  - If config$use_memory_correction is TRUE all injections are used for 
 #'    calibration, else only the last three injections are used.
@@ -11,21 +11,16 @@ library(tidyverse)
 #'    block are used for calibration. If it is FALSE, only the first and last
 #'    standards are used.
 #'    
-#' @param datasets A named list of dataframes with isotope measurement data.
-#'                 Each dataframe should contain the additional columns "block" and 
-#'                 "useForMemCorr" (not included in the raw Picarro output).
+#' @param dataset A data.frame with isotope measurement data. It dataframe should 
+#'                contain the additional columns "block" and 
+#'                "useForMemCorr" (not included in the raw Picarro output).
 #' @param config A named list. Need to contain the boolean elements "use_memory_correction"
 #'               and "use_three_point_calibration".
 #' @param block A number. Use the standards in this block for calibration. Default: 1.
 #'
-#' @return A list. The list elements are named like the input list "datasets". 
-#'         Each element of the list is a list is a dataframe with calibrated data.
-linearCalibration <- function(datasets, config, block = 1){
-  
-  map(datasets, linearCalibrationSingleDataset, config = config, block = block)
-}
-
-linearCalibrationSingleDataset <- function(dataset, config, block){
+#' @return A data.frame.
+#' 
+linearCalibration <- function(dataset, config, block = 1){
   
   calibrationParams <- getCalibInterceptAndSlope(dataset, config, block)
   calibratedDataset <- applyCalibration(dataset, calibrationParams)

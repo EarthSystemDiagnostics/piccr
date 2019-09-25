@@ -132,16 +132,15 @@ dataset3 <- tribble(
 
 test_that("test memory corrected datasets", {
 
-  actual <- correctForMemoryEffect(list(df1 = dataset1, df2 = dataset2))
+  actual1 <- correctForMemoryEffect(dataset1)
+  actual2 <- correctForMemoryEffect(dataset2)
 
-  expect_length(actual, 2)
-
-  df1Rounded <- mutate(actual$df1$datasetMemoryCorrected,
+  df1Rounded <- mutate(actual1$datasetMemoryCorrected,
                        `d(D_H)Mean` = round(`d(D_H)Mean`, 2),
                        `d(18_16)Mean` = round(`d(18_16)Mean`, 2))
   expect_equal(df1Rounded, expected1)
 
-  df2Rounded <- mutate(actual$df2$datasetMemoryCorrected,
+  df2Rounded <- mutate(actual2$datasetMemoryCorrected,
                        `d(D_H)Mean` = round(`d(D_H)Mean`, 2),
                        `d(18_16)Mean` = round(`d(18_16)Mean`, 2))
   expect_equal(df2Rounded, expected2)
@@ -167,14 +166,15 @@ test_that("test memory coefficients", {
     5,         1.005,             1.007,         NA_real_, NA_real_,  1.005,  1.007,  1.005,  1.007
   )
 
-  actual <- correctForMemoryEffect(list(df1 = dataset1, df2 = dataset2))
+  actual1 <- correctForMemoryEffect(dataset1)
+  actual2 <- correctForMemoryEffect(dataset2)
   
   expect_equal(
-    round(actual$df1$memoryCoefficients, 2),
+    round(actual1$memoryCoefficients, 2),
     memCoeffExpected1
   )
   expect_equal(
-    round(actual$df2$memoryCoefficients, 3),
+    round(actual2$memoryCoefficients, 3),
     memCoeffExpected2
   )
 })
@@ -230,10 +230,11 @@ test_that("test that NA values don't spread in applyCalibration", {
     31,    "Probe3",        3,         19.81989,        NA,     4.666915
   )
   
-  actual <- correctForMemoryEffect(list(df1 = dataset1, df2 = dataset2))
+  actual1 <- correctForMemoryEffect(dataset1)
+  actual2 <- correctForMemoryEffect(dataset2)
   
-  actual1 <- actual$df1$datasetMemoryCorrected
-  actual2 <- actual$df2$datasetMemoryCorrected
+  actual1 <- actual1$datasetMemoryCorrected
+  actual2 <- actual2$datasetMemoryCorrected
   
   expect_equal(sum(is.na(select(actual1, `d(18_16)Mean`))), 6)
   expect_equal(sum(is.na(select(actual1, `d(D_H)Mean`))), 9)
@@ -246,13 +247,13 @@ test_that("test injection range of mean memory coefficients", {
   actual <- calculateMemoryCoefficients(dataset1)
   expect_length(actual$`Inj Nr`, 3)
 
-  dataset3 <- normalizeInjectionNumbers(list(dataset3))[[1]]
+  dataset3 <- normalizeInjectionNumbers(dataset3)
   actual <- calculateMemoryCoefficients(dataset3)
   expect_length(actual$`Inj Nr`, 4)
 
 })
 
-test_that("different numbers of injections for the block 1 standards", {
+test_that("different numbers of injections for the block 1 standards does not cause error", {
   
   dataset <- tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`,
@@ -269,7 +270,7 @@ test_that("different numbers of injections for the block 1 standards", {
     10,   "B",           3,         3,               1,      0.0391
   )
   
-  actual <- correctForMemoryEffect(list(data = dataset))
+  actual <- correctForMemoryEffect(dataset)
   
   expect_is(actual, "list")
 })

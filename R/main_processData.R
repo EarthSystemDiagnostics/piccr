@@ -37,39 +37,42 @@
 #' @export
 #'
 processData <- function(datasets, config){
- 
-  preparedDatasets <- datasets %>%
-    groupStandardsInBlocks(config) %>%
-    normalizeInjectionNumbers() %>%
-    associateStandardsWithConfigInfo(config)
   
-  if (config$use_memory_correction) {
-    memoryCorrected <- correctForMemoryEffect(preparedDatasets)
-    memoryCorrectedDatasets <- map(memoryCorrected, ~ .$datasetMemoryCorrected)
-    memoryCoefficients <- map(memoryCorrected, ~ .$memoryCoefficients)
-  } else {
-    memoryCorrectedDatasets <- preparedDatasets
-  }
+  map(names(datasets), function(name, datasets, config){
+    
+    dataset <- datasets[[name]]
+    
+    preProcessed <- dataset %>%
+      groupStandardsInBlocks(config) %>%
+      normalizeInjectionNumbers() %>%
+      associateStandardsWithConfigInfo(config)
+    
+    if (config$use_memory_correction) {
+      temp <- correctForMemoryEffect(preProcessed)
+      memoryCorrected    <- temp$datasetMemoryCorrected
+      memoryCoefficients <- temp$memoryCoefficients
+    } else {
+      memoryCorrected <- preProcessed
+    }
 
-  calibrated <- linearCalibration(memoryCorrectedDatasets, config, block = 1)
-  
-  if (config$calibration_method == 0){
-    calibratedAndDriftCorrected <- calibrated
-  }
-  else if (config$calibration_method == 1) {
-    calibratedAndDriftCorrected <- calibrateUsingSimpleDriftCorrection(memoryCorrectedDatasets, config)
-  } 
-  else if (config$calibration_method == 2) {
-    calibratedAndDriftCorrected <- calibrateUsingDoubleCalibration(memoryCorrectedDatasets, config)
-  }
-  
-  calibratedDatasetsWithDExcess <- addColumnDExcess(calibratedAndDriftCorrected)
-  pooledStdDev <- calculatePoooledStdDev(calibratedDatasetsWithDExcess)
-  
-  processedData <- processDataForOutput(calibratedDatasetsWithDExcess, config)
-
-  output <- buildOutputStructure(config, datasets, memoryCorrectedDatasets, memoryCoefficients, calibrated, 
-                                 calibratedAndDriftCorrected, processedData, pooledStdDev)
-  
-  return(output)
+    calibrated <- linearCalibration(memoryCorrected, config, block = 1)
+    
+    if (config$calibration_method == 0){
+      calibratedAndDriftCorrected <- calibrated
+    }
+    else if (config$calibration_method == 1) {
+      calibratedAndDriftCorrected <- calibrateUsingSimpleDriftCorrection(memoryCorrected, config)
+    } 
+    else if (config$calibration_method == 2) {
+      calibratedAndDriftCorrected <- calibrateUsingDoubleCalibration(memoryCorrected, config)
+    }
+    
+    calibratedWithDExcess <- addColumnDExcess(calibratedAndDriftCorrected)
+    processedData <- processDataForOutput(calibratedWithDExcess, config)
+    
+    output <- buildOutputList(name, config, dataset, memoryCorrected, memoryCoefficients, 
+                              calibrated, calibratedAndDriftCorrected, processedData)
+    return(output)
+    
+  }, config = config, datasets = datasets)
 }

@@ -8,29 +8,24 @@ library(tidyverse)
 #' Uses the config parameter 'average_over_last_n_inj'. If it is
 #' -1 or 'all', all injections are used to calculate the sample averages.
 #'
-#' @param datasets A named list of data.frames
+#' @param dataset A data.frame.
 #' @param config A named list. Needs to contain the component
 #'               'average_over_last_n_inj'.
 #'
-#' @return A named list of data.frames. The list elements are named like the
-#'   input list "datasets". Each list element is a list with the collected
-#'   output of \code{accumulateMeasurementsForSingleDataset()} and
-#'   \code{getQualityControlInfo().}
+#' @return A named list  with the collected output of 
+#'         \code{accumulateMeasurements()} and
+#'         \code{getQualityControlInfo()}.
 #'
-processDataForOutput <- function(datasets, config) {
+processDataForOutput <- function(dataset, config) {
 
-  map(datasets, processSingleDatasetForOutput, config = config)
-}
-
-processSingleDatasetForOutput <- function(dataset, config) {
-
-  accumulatedData <- accumulateMeasurementsForSingleDataset(dataset, config)
+  accumulatedData <- accumulateMeasurements(dataset, config)
 
   qualityControlData <- getQualityControlInfo(dataset, accumulatedData)
 
   return(
     list(
       accumulatedData = accumulatedData,
+      pooledSD = qualityControlData$pooledSD,
       deviationsFromTrue = qualityControlData$deviationsFromTrue,
       rmsdDeviationsFromTrue = qualityControlData$rmsdDeviationsFromTrue,
       deviationOfControlStandard = qualityControlData$deviationOfControlStandard)
@@ -90,15 +85,15 @@ getQualityControlInfo <- function(dataset, accumulatedDataset) {
     as.list()
 
   return(list(
-    deviationsFromTrue = select(deviationDataOfStandards,
-                                -Line, -useAsControlStandard),
+    deviationsFromTrue = select(deviationDataOfStandards, -Line, -useAsControlStandard),
+    pooledSD = calculatePoooledSD(dataset),
     rmsdDeviationsFromTrue = rmsdDeviationDataOfStandards,
     deviationOfControlStandard = deviationOfControlStandard
   ))
 
 }
 
-#' accumulateMeasurementsForSingleDataset
+#' accumulate measurements
 #'
 #' Average the delta.O18, delta.H2 and d.Excess values for each 
 #' sample from a dataset and calculate their standard deviation.
@@ -113,7 +108,7 @@ getQualityControlInfo <- function(dataset, accumulatedDataset) {
 #'
 #' @return A data frame.
 #'
-accumulateMeasurementsForSingleDataset <- function(dataset, config){
+accumulateMeasurements <- function(dataset, config){
 
   accumulatedData <- dataset %>%
     getLastNInjectionsForEachSample(config) %>%
