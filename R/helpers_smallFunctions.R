@@ -195,12 +195,12 @@ buildOutputList <- function(name, config, dataset, memoryCorrected, memoryCoeffi
     name = name,
     
     raw = dataset,
-    memoryCorrected = if (config$use_memory_correction) memoryCorrected else dataset,
+    memoryCorrected = if (config$use_memory_correction) memoryCorrected,
     calibrated = calibrated,
-    calibratedAndDriftCorrected = calibratedAndDriftCorrected,
+    calibratedAndDriftCorrected = if (config$calibration_method != 0) calibratedAndDriftCorrected,
     processed = accumulated,
     
-    memoryCoefficients = if (config$use_memory_correction) memoryCoefficients else NULL,
+    memoryCoefficients = if (config$use_memory_correction) memoryCoefficients,
     deviationsFromTrue = qualityControlInfo$deviationsFromTrue,
     rmsdDeviationsFromTrue = qualityControlInfo$rmsdDeviationsFromTrue,
     deviationOfControlStandard = qualityControlInfo$deviationOfControlStandard,
