@@ -9,7 +9,7 @@ include_standards_in_output:	yes	# format of desired csv-file output: flag=no->o
 # -------- data processing options --------
 average_over_last_n_inj: all      # use the last n injections for each sample to calculate the mean d18O etc. To use all injections, pass "all".
 use_three_point_calibration: yes  # If yes, use three-point calibration. If no, use two-point calibration.
-calibration_method:	0		        	# set type of desired calibration: flag=1->drift-correction+three-point calibration/flag=2->double three-point calibration
+calibration_method:	1		        	# set type of desired calibration: flag=1->drift-correction+three-point calibration/flag=2->double three-point calibration
 use_memory_correction:	yes			  # signal memory correction: yes/no
 
 # -------- set standards --------
