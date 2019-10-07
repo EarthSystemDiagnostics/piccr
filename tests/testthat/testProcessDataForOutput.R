@@ -37,7 +37,7 @@ test_that("test quality control output structure", {
   expected2 <- list(d18O = -0.1, dD = 1.25)
   expected3 <- list(d18O = 0.194, dD = 0.836)
   
-  actual1 <- accumulateMeasurements(dataset1, list(average_over_last_n_inj = "all"))
+  actual1 <- accumulateMeasurements(dataset1, list(average_over_inj = "all"))
   actual2 <- getQualityControlInfo(dataset1, actual1)
   
   expect_is(actual1, "data.frame")
