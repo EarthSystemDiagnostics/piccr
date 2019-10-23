@@ -25,13 +25,11 @@ test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and
   
   config <- list(use_memory_correction = TRUE, use_three_point_calibration = TRUE)
   
-  actual <- calibrateUsingDoubleCalibration(list(df1 = dataset), config)
-  actual$df1 <- mutate(actual$df1, `d(18_16)Mean` = round(actual$df1$`d(18_16)Mean`, 10), 
-                                   `d(D_H)Mean` = round(actual$df1$`d(D_H)Mean`, 10))
+  actual <- calibrateUsingDoubleCalibration(dataset, config)
+  actual <- mutate(actual, `d(18_16)Mean` = round(actual$`d(18_16)Mean`, 10), 
+                                   `d(D_H)Mean` = round(actual$`d(D_H)Mean`, 10))
   
-  expect_is(actual, "list")
-  expect_length(actual, 1)
-  expect_equal(actual$df1, dataset)
+  expect_equal(actual, dataset)
 })
 
 test_that("test getCalibrationSlopes (case slopes are zero)", {

@@ -2,22 +2,21 @@
 % Please edit documentation in R/maths_calibrateUsingDoubleCalibration.R
 \name{calibrateUsingDoubleCalibration}
 \alias{calibrateUsingDoubleCalibration}
-\title{calibrateUsingDoubleCalibration}
+\title{Calibrate the given dataset using double calibration}
 \usage{
-calibrateUsingDoubleCalibration(datasets, config)
+calibrateUsingDoubleCalibration(dataset, config)
 }
 \arguments{
-\item{datasets}{A named list of dataframes with isotope measurement data.
-Each dataframe should contain the additional columns "block" and 
+\item{dataset}{A data.frame with isotope measurement data.
+Should contain the additional columns "block" and 
 "useForMemCorr" (not included in the raw Picarro output).}
 
 \item{config}{A named list. Need to contain the boolean elements "use_memory_correction"
 and "use_three_point_calibration".}
 }
 \value{
-A list. The list elements are named like the input list "datasets". 
-        Each element of the list is a dataframe with calibrated data.
+A data.frame.
 }
 \description{
-Calibrate the given datasets using double calibration
+Calibrate the given dataset using double calibration
 }

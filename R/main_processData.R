@@ -11,7 +11,7 @@
 #' @param datasets A named list of data.frames. The isotope measurement data
 #'                 as output by the Picarro device.
 #' @param config A named list. Required fiels: 
-#'                   $average_over_last_n_inj (a number or "all")
+#'                   $average_over_inj (a number or "all")
 #'                   $use_three_point_calibration (logical)
 #'                   $calibration_method (1, 2, or 3)
 #'                   $use_memory_correction (logical)
@@ -37,92 +37,55 @@
 #' @export
 #'
 processData <- function(datasets, config){
-
-  # initialize output structure
   
-  outputTemplate <- list(
-    
-    name = NULL,
-    
-    raw = NULL,
-    memoryCorrected = NULL,
-    calibrated = NULL,
-    calibratedAndDriftCorrected = NULL,
-    processed = NULL,
+  map(names(datasets), processSingleDataset, config = config, datasets = datasets)
+}
 
-    deviationsFromTrue = NULL,
-    rmsdDeviationsFromTrue = NULL,
-    deviationOfControlStandard = NULL,
-    pooledSD = NULL,
-    memoryCoefficients = NULL,
-    calibrationParams = NULL,
-    driftParams = NULL
-  )
-
-  output <- list()
-  for (i in 1 : length(datasets)) {
-    output[[i]] <- outputTemplate
-  }
- 
-  preparedDatasets <- datasets %>%
+processSingleDataset <- function(name, datasets, config){
+  
+  dataset <- datasets[[name]]
+  
+  # pre-process the input dataset
+  preProcessed <- dataset %>%
     groupStandardsInBlocks(config) %>%
     normalizeInjectionNumbers() %>%
     associateStandardsWithConfigInfo(config)
   
+  # apply memory correction if requested
   if (config$use_memory_correction) {
-    memoryCorrected <- correctForMemoryEffect(preparedDatasets)
-    memoryCorrectedDatasets <- map(memoryCorrected, ~ .$datasetMemoryCorrected)
-    memoryCoefficients <- map(memoryCorrected, ~ .$memoryCoefficients)
+    temp <- correctForMemoryEffect(preProcessed)
+    memoryCorrected    <- temp$datasetMemoryCorrected
+    memoryCoefficients <- temp$memoryCoefficients
   } else {
-    memoryCorrectedDatasets <- preparedDatasets
+    memoryCorrected <- preProcessed
   }
-
-  calibrated <- linearCalibration(memoryCorrectedDatasets, config, block = 1)
   
+  # calibrate the memory corrected data. Only used for output.
+  calibrated <- linearCalibration(memoryCorrected, config, block = 1)
+  
+  # apply calibration and drift correction based on the requested calibration method
   if (config$calibration_method == 0){
-    calibratedDatasets <- calibrated
+    calibratedAndDriftCorrected <- calibrated
   }
   else if (config$calibration_method == 1) {
-    calibratedDatasets <- calibrateUsingSimpleDriftCorrection(memoryCorrectedDatasets, config)
+    calibratedAndDriftCorrected <- calibrateUsingSimpleDriftCorrection(memoryCorrected, config)
   } 
   else if (config$calibration_method == 2) {
-    calibratedDatasets <- calibrateUsingDoubleCalibration(memoryCorrectedDatasets, config)
+    calibratedAndDriftCorrected <- calibrateUsingDoubleCalibration(memoryCorrected, config)
   }
   
-  calibratedDatasetsWithDExcess <- addColumnDExcess(calibratedDatasets)
-  pooledStdDev <- calculatePoooledStdDev(calibratedDatasetsWithDExcess)
+  # calculate the d-excess values for all samples
+  calibratedWithDExcess <- addColumnDExcess(calibratedAndDriftCorrected)
   
-  processedData <- processDataForOutput(
-    calibratedDatasetsWithDExcess, config)
+  # accumulate data for each sample
+  accumulated <- accumulateMeasurements(calibratedWithDExcess, config)
+  
+  # get quality control info
+  qualityControlInfo <- getQualityControlInfo(calibratedWithDExcess, accumulated)
 
-  # fill output structure
-
-  namesOfDatasets <- names(datasets)
-
-  for (i in 1 : length(datasets)) {
-
-    output[[i]]$name <- namesOfDatasets[i]
-    
-    output[[i]]$raw <- datasets[[i]]
-
-    if (config$use_memory_correction) {
-      output[[i]]$memoryCorrected <- memoryCorrectedDatasets[[i]]
-      output[[i]]$memoryCoefficients <- memoryCoefficients[[i]]
-    }
-
-    output[[i]]$calibrated <- calibrated[[i]]
-    output[[i]]$calibratedAndDriftCorrected <- calibratedDatasets[[i]]
-    output[[i]]$processed <- processedData[[i]]$accumulatedData
-
-    output[[i]]$deviationsFromTrue <- processedData[[i]]$deviationsFromTrue
-    output[[i]]$rmsdDeviationsFromTrue <- processedData[[i]]$rmsdDeviationsFromTrue
-    output[[i]]$deviationOfControlStandard <- processedData[[i]]$deviationOfControlStandard
-    output[[i]]$pooledSD <- pooledStdDev[[i]]
-    
-  }
-
+  # synthesize output list for this dataset and return it  
+  output <- buildOutputList(name, config, dataset, memoryCorrected, memoryCoefficients, 
+                            calibrated, calibratedAndDriftCorrected, accumulated, qualityControlInfo)
   return(output)
-
+  
 }
-    ## output[[i]]$calibrationParams <- NA
-    ## output[[i]]$driftParams <- NA

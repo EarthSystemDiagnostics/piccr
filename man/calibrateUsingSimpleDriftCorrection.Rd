@@ -2,26 +2,24 @@
 % Please edit documentation in R/maths_calibrateUsingSimpleDriftCorrection.R
 \name{calibrateUsingSimpleDriftCorrection}
 \alias{calibrateUsingSimpleDriftCorrection}
-\title{calibrateUsingSimpleDriftCorrection}
+\title{Calibrate using simple drift correction}
 \usage{
-calibrateUsingSimpleDriftCorrection(datasets, config)
+calibrateUsingSimpleDriftCorrection(dataset, config)
 }
 \arguments{
-\item{datasets}{A named list of dataframes with isotope measurement data.
-Each dataframe should contain the additional columns "block", 
-"useForDriftCorr", and "useForMemCorr" (not included in the 
-raw Picarro output).}
-
 \item{config}{A named list of config arguments. The required config arguments 
 are the same as for the function "linearDriftCorrection".}
+
+\item{datasets}{A data.frame with isotope measurement data.
+Should contain the additional columns "block", 
+"useForDriftCorr", and "useForMemCorr" (not included in the 
+raw Picarro output).}
 }
 \value{
-A list. The list elements are named like the input list "datasets". 
-        Each element of the list is a dataframe with data that
-        has been calibrated and drift corrected.
+A data.frame.
 }
 \description{
-Apply calibration and drift correction to the input datasets. Uses
+Apply calibration and drift correction to the input dataset. Uses
 linear drift correction and linear calibration. The calibration uses
 only the standards in block 1.
 }

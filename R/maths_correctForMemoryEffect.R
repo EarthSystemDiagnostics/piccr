@@ -1,23 +1,15 @@
 library(tidyverse)
 
-#' correctForMemoryEffect
+#' Correct for memory effect
 #' 
-#' Take a list of dataframes with isotope measurement data and apply memory correction
-#' to each dataset in the list.
+#' Take a data.frame with isotope measurement data and apply memory correction to it.
 #'
-#' @param datasets A named list of data frames. Each dataframe is one Picarro
-#'                 isotope file. Each dataframe should contain the additional column
-#'                 "block" (not included in the raw Picarro output).
+#' @param dataset A data.frame.
 #'
-#' @return A list. The list elements are named like the input list "datasets". 
-#'         Each element of the list is a list with the two named elements
+#' @return A list. It contains the two named elements
 #'         "datasetMemoryCorrected" and "memoryCoefficients".
-correctForMemoryEffect <- function(datasets){
-  
-  map(datasets, correctSingleDatasetForMemoryEffect)
-}
-
-correctSingleDatasetForMemoryEffect <- function(dataset){
+#'
+correctForMemoryEffect <- function(dataset){
   
   memoryCoefficients <- calculateMemoryCoefficients(dataset)
   datasetMemoryCorrected <- applyMemoryCorrection(dataset, memoryCoefficients)

@@ -1,42 +1,5 @@
 library(tidyverse)
 
-#' Process data for output
-#'
-#' Calculate the injection average of the samples and obtain the quality control
-#' information based on the true standard values.
-#' 
-#' Uses the config parameter 'average_over_last_n_inj'. If it is
-#' -1 or 'all', all injections are used to calculate the sample averages.
-#'
-#' @param datasets A named list of data.frames
-#' @param config A named list. Needs to contain the component
-#'               'average_over_last_n_inj'.
-#'
-#' @return A named list of data.frames. The list elements are named like the
-#'   input list "datasets". Each list element is a list with the collected
-#'   output of \code{accumulateMeasurementsForSingleDataset()} and
-#'   \code{getQualityControlInfo().}
-#'
-processDataForOutput <- function(datasets, config) {
-
-  map(datasets, processSingleDatasetForOutput, config = config)
-}
-
-processSingleDatasetForOutput <- function(dataset, config) {
-
-  accumulatedData <- accumulateMeasurementsForSingleDataset(dataset, config)
-
-  qualityControlData <- getQualityControlInfo(dataset, accumulatedData)
-
-  return(
-    list(
-      accumulatedData = accumulatedData,
-      deviationsFromTrue = qualityControlData$deviationsFromTrue,
-      rmsdDeviationsFromTrue = qualityControlData$rmsdDeviationsFromTrue,
-      deviationOfControlStandard = qualityControlData$deviationOfControlStandard)
-  )
-}
-
 #' Obtain quality control information
 #'
 #' Obtain the quality control information for a data set based on the deviations
@@ -90,54 +53,63 @@ getQualityControlInfo <- function(dataset, accumulatedDataset) {
     as.list()
 
   return(list(
-    deviationsFromTrue = select(deviationDataOfStandards,
-                                -Line, -useAsControlStandard),
+    deviationsFromTrue = select(deviationDataOfStandards, -Line, -useAsControlStandard),
+    pooledSD = calculatePoooledSD(dataset),
     rmsdDeviationsFromTrue = rmsdDeviationDataOfStandards,
     deviationOfControlStandard = deviationOfControlStandard
   ))
 
 }
 
-#' accumulateMeasurementsForSingleDataset
+#' accumulate measurements
 #'
 #' Average the delta.O18, delta.H2 and d.Excess values for each 
 #' sample from a dataset and calculate their standard deviation.
 #' 
-#' Uses the config parameter 'average_over_last_n_inj'. If it is
+#' Uses the config parameter 'average_over_inj'. If it is
 #' -1 or 'all', all injections are used to calculate the averages
 #' and standard deviations.
 #'
 #' @param datasets A data frame with the data set.
 #' @param config A named list. Needs to contain the component
-#'               'average_over_last_n_inj'.
+#'               'average_over_inj'.
 #'
 #' @return A data frame.
 #'
-accumulateMeasurementsForSingleDataset <- function(dataset, config){
+accumulateMeasurements <- function(dataset, config){
 
   accumulatedData <- dataset %>%
-    getLastNInjectionsForEachSample(config) %>%
+    filterInjections(config) %>%
     doAccumulate() %>% 
     rearrange()
 
   return(accumulatedData)
 }
 
-getLastNInjectionsForEachSample <- function(dataset, config){
+filterInjections <- function(dataset, config){
   
-  n <- config$average_over_last_n_inj
+  n <- config$average_over_inj
   
   # exit early if all injections should be kept
   if (n %in% c(-1, "all")) return(dataset)
   
-  # don't fail if n is a string containing a number
-  n <- as.numeric(n)
+  # Convert n to number or vector of numbers
+  n <- eval(parse(text = n))
   
-  dataset %>%
-    group_by(`Identifier 1`, block) %>% 
-    slice((n() - n + 1):n()) %>%
-    ungroup() %>%
-    arrange(Line)
+  if (length(n) == 1)
+    # use last n injections
+    dataset %>%
+      group_by(`Identifier 1`, block) %>% 
+      slice((n() - n + 1):n()) %>%
+      ungroup() %>%
+      arrange(Line)
+  else
+    # n gives range of injections to use
+    dataset %>%
+      group_by(`Identifier 1`, block) %>% 
+      slice(n) %>%
+      ungroup() %>%
+      arrange(Line)
 }
 
 doAccumulate <- function(dataset){

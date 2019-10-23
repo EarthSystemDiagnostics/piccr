@@ -82,31 +82,13 @@ expected3 <- tribble(
 
 test_that("test linearDriftCorrection", {
   
-  actual <- linearDriftCorrection(list(df1 = dataset1, df2 = dataset2, df3 = dataset3))
+  actual1 <- linearDriftCorrection(dataset1)
+  actual2 <- linearDriftCorrection(dataset2)
+  actual3 <- linearDriftCorrection(dataset3)
   
-  expect_length(actual, 3)
-  
-  # avoid test failure due to floating point inaccuracies
-  actualRounded <- map(actual, ~ mutate(., `d(18_16)Mean` = round(`d(18_16)Mean`, 10),
-                                        `d(D_H)Mean` = round(`d(D_H)Mean`, 10)))
-  
-  expect_equal(actualRounded$df1, dataset1)
-  expect_equal(actualRounded$df2, expected2)
-  expect_equal(actualRounded$df3, expected3)
-})
-
-test_that("test calibrateUsingSimpleDriftCorrection", {
-  
-  # mock linearCalibration to return the dataframes that should be drift corrected
-  testthat::local_mock(linearCalibration = function(dfs, config, block){
-    force(config)  # make sure that the argument "config" is passed to linearCalibration
-    force(block)  # make sure that the argument "block" is passed to linearCalibration
-    list(df1 = dataset1, df2 = dataset2, df3 = dataset3)
-  }, .env = environment(linearCalibration)) 
-  
-  actual <- calibrateUsingSimpleDriftCorrection(list(), config = list())
-  
-  expect_length(actual, 3)
+  expect_equal(mutate_if(actual1, is.numeric, round), dataset1)
+  expect_equal(mutate_if(actual2, is.numeric, round), expected2)
+  expect_equal(mutate_if(actual3, is.numeric, round), expected3)
 })
 
 test_that("test calculate drift slope alpha (dataset1)", {

@@ -22,10 +22,8 @@ test_that("test calculatePooledStdDev", {
     "C",             2,      4,               -4
   )
   
-  actual <- calculatePoooledStdDev(list(df1 = dataset1))
+  actual <- calculatePoooledSD(dataset1)
   
-  expect_length(actual, 1)
-  
-  expect_equal(actual$df1$d18O, 1.207615, tolerance = 1e-6)
-  expect_equal(actual$df1$dD, 2.919047,  tolerance = 1e-6)
+  expect_equal(actual$d18O, 1.207615, tolerance = 1e-6)
+  expect_equal(actual$dD, 2.919047,  tolerance = 1e-6)
 })

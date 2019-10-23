@@ -4,11 +4,11 @@
 \alias{linearCalibration}
 \title{linearCalibration}
 \usage{
-linearCalibration(datasets, config, block = 1)
+linearCalibration(dataset, config, block = 1)
 }
 \arguments{
-\item{datasets}{A named list of dataframes with isotope measurement data.
-Each dataframe should contain the additional columns "block" and 
+\item{dataset}{A data.frame with isotope measurement data. It dataframe should 
+contain the additional columns "block" and 
 "useForMemCorr" (not included in the raw Picarro output).}
 
 \item{config}{A named list. Need to contain the boolean elements "use_memory_correction"
@@ -17,12 +17,11 @@ and "use_three_point_calibration".}
 \item{block}{A number. Use the standards in this block for calibration. Default: 1.}
 }
 \value{
-A list. The list elements are named like the input list "datasets". 
-        Each element of the list is a list is a dataframe with calibrated data.
+A data.frame.
 }
 \description{
-Take a list of dataframes with isotope measurement data and 
-calibrate each dataframe. Does not include drift correction.
+Take a data.frame with isotope measurement data and 
+calibrate it. Does not include drift correction.
 Note: 
  - If config$use_memory_correction is TRUE all injections are used for 
    calibration, else only the last three injections are used.

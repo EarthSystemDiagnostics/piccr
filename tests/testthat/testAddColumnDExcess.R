@@ -42,9 +42,9 @@ test_that("test addColumnDExcess", {
     -20,       0,             10,        160
   )
   
-  actual <- addColumnDExcess(list(df1 = dataset1, df2 = dataset2))
+  actual1 <- addColumnDExcess(dataset1)
+  actual2 <- addColumnDExcess(dataset2)
   
-  expect_length(actual, 2)
-  expect_equal(actual$df1, expected1)
-  expect_equal(actual$df2, expected2)
+  expect_equal(actual1, expected1)
+  expect_equal(actual2, expected2)
 })

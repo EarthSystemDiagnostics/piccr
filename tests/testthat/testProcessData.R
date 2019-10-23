@@ -44,7 +44,7 @@ test_that("check general output structure", {
   expect_true(is.data.frame(actual[[1]]$calibrated))
   expect_true(is.data.frame(actual[[1]]$calibratedAndDriftCorrected))
 
-  expect_true(is.data.frame(actual[[1]]$processed))
+  expect_is(actual[[1]]$processed, "data.frame")
 
   expect_true(is.list(actual[[1]]$pooledSD))
   expect_length(actual[[1]]$pooledSD, 2)

@@ -15,9 +15,9 @@ test_that("test for dataframe with single row (contains standard)", {
     val = 3,
     block = 1
   )
-  dfWithGroupedStandardsActual <- groupStandardsInBlocks(list(df), config)
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
   
-  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual[[1]])
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
 })
 
 test_that("test for dataframe with single row (does not contain standard)", {
@@ -30,9 +30,9 @@ test_that("test for dataframe with single row (does not contain standard)", {
     val = 3,
     block = NA
   )
-  dfWithGroupedStandardsActual <- groupStandardsInBlocks(list(df), config)
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
   
-  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual[[1]])
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
 })
 
 test_that("test for dataframe with mulitple rows (first standard, then probe)", {
@@ -45,9 +45,9 @@ test_that("test for dataframe with mulitple rows (first standard, then probe)", 
     val = c(3, 7),
     block = c(1, NA)
   )
-  dfWithGroupedStandardsActual <- groupStandardsInBlocks(list(df), config)
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
   
-  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual[[1]])
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
 })
 
 test_that("test for dataframe with mulitple rows (probe, standard, probe)", {
@@ -60,9 +60,9 @@ test_that("test for dataframe with mulitple rows (probe, standard, probe)", {
     val = c(1, 3, 7),
     block = c(NA, 1, NA)
   )
-  dfWithGroupedStandardsActual <- groupStandardsInBlocks(list(df), config)
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
   
-  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual[[1]])
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
 })
 
 test_that("test for dataframe with mulitple rows (standard, probe, standard)", {
@@ -75,12 +75,12 @@ test_that("test for dataframe with mulitple rows (standard, probe, standard)", {
     val = c(1, 3, 7),
     block = c(1, NA, 2)
   )
-  dfWithGroupedStandardsActual <- groupStandardsInBlocks(list(df), config)
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
   
-  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual[[1]])
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
 })
 
-test_that("test for list of dataframes with mulitple rows (standard, probe, standard, probe, standard)", {
+test_that("test for mulitple rows (standard, probe, standard, probe, standard)", {
   df <- tibble(
     `Identifier 1` = c("STD_A", "Probe", "Probe", "STD_B", "STD_A", "Probe", "STD_A"),
     val = 1:7
@@ -90,34 +90,7 @@ test_that("test for list of dataframes with mulitple rows (standard, probe, stan
     val = 1:7,
     block = c(1, NA, NA, 2, 2, NA, 3)
   )
-  dfWithGroupedStandardsActual <- groupStandardsInBlocks(list(df), config)
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
   
-  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual[[1]])
-})
-
-test_that("test for list of dataframes", {
-  df_1<- tibble(
-    `Identifier 1` = c("STD_A", "Probe", "Probe", "STD_B", "STD_A", "Probe", "STD_A"),
-    val = 1:7
-  )
-  dfWithGroupedStandardsExpected_1 <- tibble(
-    `Identifier 1` = c("STD_A", "Probe", "Probe", "STD_B", "STD_A", "Probe", "STD_A"),
-    val = 1:7,
-    block = c(1, NA, NA, 2, 2, NA, 3)
-  )
-  df_2 <- tibble(
-    `Identifier 1` = c("STD_A", "Probe", "STD_B"),
-    val = c(1, 3, 7)
-  )
-  dfWithGroupedStandardsExpected_2 <- tibble(
-    `Identifier 1` = c("STD_A", "Probe", "STD_B"),
-    val = c(1, 3, 7),
-    block = c(1, NA, 2)
-  )
-  
-  dfsWithGroupedStandardsActual <- groupStandardsInBlocks(list(df_1, df_2), config)
-  
-  expect_equal(dfWithGroupedStandardsExpected_1, dfsWithGroupedStandardsActual[[1]])
-  expect_equal(dfWithGroupedStandardsExpected_2, dfsWithGroupedStandardsActual[[2]])
-  expect_length(dfsWithGroupedStandardsActual, 2)
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
 })

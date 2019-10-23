@@ -1,16 +1,15 @@
 library(tidyverse)
 
-#' addColumnDExcess
+#' Add column dExcess
 #'
-#' Add the column "dExcess" to every dataframe in datasets. dExcess is 
+#' Add the column "dExcess" to the dataset. dExcess is 
 #' calculated as dExcess = dD - 8 * d18O.
 #' 
-#' @param datasets A named list of dataframes.
+#' @param dataset A data.frame.
 #'
-#' @return A list. The list elements are named like the input list "datasets". 
-#'         Each element of the list is a dataframe that includes the column
-#'         "dExcess".
-addColumnDExcess <- function(datasets){
+#' @return A data.frame.
+#' 
+addColumnDExcess <- function(dataset){
   
-  map(datasets, ~ mutate(., dExcess = `d(D_H)Mean` - `d(18_16)Mean` * 8))
+  mutate(dataset, dExcess = `d(D_H)Mean` - `d(18_16)Mean` * 8)
 }

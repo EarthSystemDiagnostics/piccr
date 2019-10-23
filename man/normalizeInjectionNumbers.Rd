@@ -4,16 +4,15 @@
 \alias{normalizeInjectionNumbers}
 \title{Re-calculate injection numbers}
 \usage{
-normalizeInjectionNumbers(datasets)
+normalizeInjectionNumbers(dataset)
 }
 \arguments{
-\item{datasets}{A named list of data frames; each data frame is a read-in
-data set.}
+\item{datasets}{A data.frame.}
 }
 \value{
-The same named list of data frames where for each data set the
-        column of injection numbers has been re-calculated accounting for
-        possible consecutive vials of the same probe.
+A data.frame. The column of injection numbers has been 
+        re-calculated accounting for possible consecutive vials 
+        of the same probe.
 }
 \description{
 Re-calculate injection numbers to account for probes being measured
