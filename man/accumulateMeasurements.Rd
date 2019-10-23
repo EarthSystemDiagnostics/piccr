@@ -8,7 +8,7 @@ accumulateMeasurements(dataset, config)
 }
 \arguments{
 \item{config}{A named list. Needs to contain the component
-'average_over_last_n_inj'.}
+'average_over_inj'.}
 
 \item{datasets}{A data frame with the data set.}
 }
@@ -20,7 +20,7 @@ Average the delta.O18, delta.H2 and d.Excess values for each
 sample from a dataset and calculate their standard deviation.
 }
 \details{
-Uses the config parameter 'average_over_last_n_inj'. If it is
+Uses the config parameter 'average_over_inj'. If it is
 -1 or 'all', all injections are used to calculate the averages
 and standard deviations.
 }

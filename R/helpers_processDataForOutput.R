@@ -66,41 +66,50 @@ getQualityControlInfo <- function(dataset, accumulatedDataset) {
 #' Average the delta.O18, delta.H2 and d.Excess values for each 
 #' sample from a dataset and calculate their standard deviation.
 #' 
-#' Uses the config parameter 'average_over_last_n_inj'. If it is
+#' Uses the config parameter 'average_over_inj'. If it is
 #' -1 or 'all', all injections are used to calculate the averages
 #' and standard deviations.
 #'
 #' @param datasets A data frame with the data set.
 #' @param config A named list. Needs to contain the component
-#'               'average_over_last_n_inj'.
+#'               'average_over_inj'.
 #'
 #' @return A data frame.
 #'
 accumulateMeasurements <- function(dataset, config){
 
   accumulatedData <- dataset %>%
-    getLastNInjectionsForEachSample(config) %>%
+    filterInjections(config) %>%
     doAccumulate() %>% 
     rearrange()
 
   return(accumulatedData)
 }
 
-getLastNInjectionsForEachSample <- function(dataset, config){
+filterInjections <- function(dataset, config){
   
-  n <- config$average_over_last_n_inj
+  n <- config$average_over_inj
   
   # exit early if all injections should be kept
   if (n %in% c(-1, "all")) return(dataset)
   
-  # don't fail if n is a string containing a number
-  n <- as.numeric(n)
+  # Convert n to number or vector of numbers
+  n <- eval(parse(text = n))
   
-  dataset %>%
-    group_by(`Identifier 1`, block) %>% 
-    slice((n() - n + 1):n()) %>%
-    ungroup() %>%
-    arrange(Line)
+  if (length(n) == 1)
+    # use last n injections
+    dataset %>%
+      group_by(`Identifier 1`, block) %>% 
+      slice((n() - n + 1):n()) %>%
+      ungroup() %>%
+      arrange(Line)
+  else
+    # n gives range of injections to use
+    dataset %>%
+      group_by(`Identifier 1`, block) %>% 
+      slice(n) %>%
+      ungroup() %>%
+      arrange(Line)
 }
 
 doAccumulate <- function(dataset){

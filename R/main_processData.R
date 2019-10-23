@@ -11,7 +11,7 @@
 #' @param datasets A named list of data.frames. The isotope measurement data
 #'                 as output by the Picarro device.
 #' @param config A named list. Required fiels: 
-#'                   $average_over_last_n_inj (a number or "all")
+#'                   $average_over_inj (a number or "all")
 #'                   $use_three_point_calibration (logical)
 #'                   $calibration_method (1, 2, or 3)
 #'                   $use_memory_correction (logical)

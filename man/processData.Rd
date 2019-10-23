@@ -11,7 +11,7 @@ processData(datasets, config)
 as output by the Picarro device.}
 
 \item{config}{A named list. Required fiels: 
-$average_over_last_n_inj (a number or "all")
+average_over_inj (a number or "all")
 $use_three_point_calibration (logical)
 $calibration_method (1, 2, or 3)
 $use_memory_correction (logical)
