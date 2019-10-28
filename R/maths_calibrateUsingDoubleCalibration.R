@@ -11,39 +11,41 @@ library(tidyverse)
 #' @return A data.frame.
 #' 
 calibrateUsingDoubleCalibration <- function(dataset, config){
-  
+
+  finalBlock <- max(dataset$block, na.rm = TRUE)
+
   calibParamsBlock1 <- getCalibInterceptAndSlope(dataset, config, useBlock = 1)
-  calibParamsBlock3 <- getCalibInterceptAndSlope(dataset, config, useBlock = 3)
-  calibTimes <- getCalibTimes(dataset)
+  calibParamsBlockN <- getCalibInterceptAndSlope(dataset, config, useBlock = finalBlock)
+  calibTimes <- getCalibTimes(dataset, useBlocks = c(1, finalBlock))
   
-  calibSlopes <- getCalibrationSlopes(calibParamsBlock1, calibParamsBlock3, calibTimes)
+  calibSlopes <- getCalibrationSlopes(calibParamsBlock1, calibParamsBlockN, calibTimes)
   
   applyDoubleCalibration(dataset, calibParamsBlock1, calibSlopes)
 }
 
-getCalibTimes <- function(dataset){
+getCalibTimes <- function(dataset, useBlocks){
   
   addColumnSecondsSinceStart(dataset) %>%
-    filter(block %in% c(1,3)) %>%
+    filter(block %in% useBlocks) %>%
     group_by(block) %>%
     summarise(time = mean(SecondsSinceStart)) %>%
     arrange(block) %>%
     .$time
 }
 
-getCalibrationSlopes <- function(paramsBlock1, paramsBlock3, calibTimes){
+getCalibrationSlopes <- function(paramsBlock1, paramsBlockN, calibTimes){
   
   timeDiffBetweenBlocks <- calibTimes[[2]] - calibTimes[[1]]
   
   # TODO: clean this
   list(
     d18O = list(
-      alpha = (paramsBlock3$d18O$intercept - paramsBlock1$d18O$intercept) / timeDiffBetweenBlocks,
-      beta = (paramsBlock3$d18O$slope - paramsBlock1$d18O$slope) / timeDiffBetweenBlocks
+      alpha = (paramsBlockN$d18O$intercept - paramsBlock1$d18O$intercept) / timeDiffBetweenBlocks,
+      beta = (paramsBlockN$d18O$slope - paramsBlock1$d18O$slope) / timeDiffBetweenBlocks
     ),
     dD = list(
-      alpha = (paramsBlock3$dD$intercept - paramsBlock1$dD$intercept) / timeDiffBetweenBlocks,
-      beta = (paramsBlock3$dD$slope - paramsBlock1$dD$slope) / timeDiffBetweenBlocks
+      alpha = (paramsBlockN$dD$intercept - paramsBlock1$dD$intercept) / timeDiffBetweenBlocks,
+      beta = (paramsBlockN$dD$slope - paramsBlock1$dD$slope) / timeDiffBetweenBlocks
     )
   )
 }
