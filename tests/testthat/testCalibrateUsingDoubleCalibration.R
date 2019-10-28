@@ -17,11 +17,14 @@ test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and
     "Std_A",         2,      "2019/11/2505:30:03",    0,               0,             1,         2,        TRUE,
     "Std_B",         2,      "2019/11/2505:37:09",    0,               0,             1,         2,        TRUE,
     "Probe_C",       NA,     "2019/11/2505:50:40",    1,               2,             1,         2,        TRUE,
-    "Std_A",         3,      "2019/11/2506:00:00",    1,               2,             1,         2,        TRUE,
-    "Std_A",         3,      "2019/11/2506:07:11",    1,               2,             1,         2,        TRUE,
-    "Std_B",         3,      "2019/11/2506:13:28",    2,               3,             2,         3,        TRUE,
-    "Std_B",         3,      "2019/11/2506:20:59",    2,               3,             2,         3,        TRUE
-  )
+    "Std_A",         3,      "2019/11/2506:00:00",    1,               2,             1,         2,        FALSE,
+    "Std_B",         3,      "2019/11/2506:07:11",    1,               2,             1,         2,        FALSE,
+    "Probe_D",       NA,     "2019/11/2506:13:28",    1,               2,             1,         2,        TRUE,
+    "Std_A",         4,      "2019/11/2506:20:59",    1,               2,             1,         2,        TRUE,
+    "Std_A",         4,      "2019/11/2506:29:18",    1,               2,             1,         2,        TRUE,
+    "Std_B",         4,      "2019/11/2506:36:59",    2,               3,             2,         3,        TRUE,
+    "Std_B",         4,      "2019/11/2506:45:31",    2,               3,             2,         3,        TRUE
+    )
   
   config <- list(use_memory_correction = TRUE, use_three_point_calibration = TRUE)
   
