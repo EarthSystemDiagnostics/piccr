@@ -255,7 +255,7 @@ test_that("test injection range of mean memory coefficients", {
 
 test_that("different numbers of injections for the block 1 standards does not cause error", {
   
-  dataset <- tribble(
+  dataset4 <- tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`,
     # -- / -------------- / -------- / -------------- / ----- / -------------
     1,    "A",           1,         0.5,             1,      -5,
@@ -270,7 +270,54 @@ test_that("different numbers of injections for the block 1 standards does not ca
     10,   "B",           3,         3,               1,      0.0391
   )
   
-  actual <- correctForMemoryEffect(dataset)
+  actual <- correctForMemoryEffect(dataset4)
   
   expect_is(actual, "list")
 })
+
+# in this dataset:
+# d18O: m.tilde = 0.082085
+# dD: m.tilde = 0.2231302
+dataset5 <- tribble(
+  ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`,
+  #--- / -------------- / -------- / -------------- / ----- / -------------
+  1,     "WU",            1,         -9.179,           1,    -62.145,
+  2,     "WU",            2,         -9.933,           1,    -76.017,
+  3,     "WU",            3,         -9.994,           1,    -79.111,
+  4,     "WU",            4,         -9.999,           1,    -79.802,
+  5,     "WU",            5,         -10,              1,    -79.956,
+  6,     "WU",            6,         -10,              1,    -79.990,
+  7,     "WU",            7,         -10,              1,    -79.998,
+  8,     "WU",            8,         -10,              1,    -79.999,
+  9,     "WU",            9,         -10,              1,    -80,
+  10,    "WU",            10,        -10,              1,    -80,
+  11,    "Std1",          1,         -28.358,          1,    -204.299,
+  12,    "Std1",          2,         -29.865,          1,    -232.034,
+  13,    "Std1",          3,         -29.989,          1,    -238.223,
+  14,    "Std1",          4,         -29.999,          1,    -239.603,
+  15,    "Std1",          5,         -30,              1,    -239.912,
+  16,    "Std1",          6,         -30,              1,    -239.980,
+  17,    "Std2",          1,         -39.179,          1,    -302.150,
+  18,    "Std2",          2,         -39.933,          1,    -316.017,
+  19,    "Std2",          3,         -39.994,          1,    -319.111,
+  20,    "Std2",          4,         -39.999,          1,    -319.802,
+  21,    "Std2",          5,         -40,              1,    -319.956,
+  22,    "Std2",          6,         -40,              1,    -319.990,
+  23,    "A",             1,         -35.410,          NA,   -288.923,
+  24,    "A",             2,         -35.034,          NA,   -281.992,
+  25,    "A",             3,         -35.003,          NA,   -280.444,
+  26,    "A",             4,         -35.,             NA,   -280.099,
+  27,    "A",             5,         -35.,             NA,   -280.022,
+  28,    "A",             6,         -35.,             NA,   -280.005,
+  29,    "A",             7,         -35.,             NA,   -280.001
+)
+
+test_that("test that no NA mean memory coefficients are produced", {
+
+  actual <- calculateMemoryCoefficients(dataset5)
+
+  expect_equal(nrow(actual), 6)
+  expect_equal(sum(is.na(c(actual$memoryCoeffD18O, actual$memoryCoeffDD))), 0)
+
+})
+  
