@@ -46,6 +46,10 @@ calculateMemoryCoefficients <- function(dataset) {
   # join the mean mem coeff and the mem coeff for each standard into one dataframe
   tablesToJoin <- append(memoryCoeffForEachStandard, list(meanMemoryCoefficients))
   memCoeffOutput <- reduce(tablesToJoin, full_join, by = "Inj Nr")
+
+  # remove all trailing rows from output dataframe which only contain NA values
+  memCoeffOutput <- memCoeffOutput %>%
+    filter(cumall(!is.na(memoryCoeffD18O)))
   
   return(memCoeffOutput)
 }
