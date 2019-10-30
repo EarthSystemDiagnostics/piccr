@@ -50,6 +50,26 @@ calculateMemoryCoefficients <- function(dataset) {
   # remove all trailing rows from output dataframe which only contain NA values
   memCoeffOutput <- memCoeffOutput %>%
     filter(cumall(!is.na(memoryCoeffD18O)))
+
+  # pad mean memory coefficients with 1's if last coefficient refers to an
+  # injection number less than the maximum inj. number of the samples/standards
+  # in the other blocks
+
+  # bypass if only block 1 is passed as dataset
+  if (nrow(dataset) > nrow(filter(dataset, block == 1))) {
+
+    maxInjMeasurement <- max(
+      filter(dataset, is.na(dataset$block) | dataset$block != 1)$`Inj Nr`)
+    maxInjCoeff <- max(memCoeffOutput$`Inj Nr`)
+
+    if (maxInjMeasurement > maxInjCoeff) {
+
+      memCoeffOutput <- memCoeffOutput %>%
+        add_row(`Inj Nr` = (maxInjCoeff + 1) : maxInjMeasurement,
+                memoryCoeffD18O = rep(1, maxInjMeasurement - maxInjCoeff),
+                memoryCoeffDD = rep(1, maxInjMeasurement - maxInjCoeff))
+    }
+  }
   
   return(memCoeffOutput)
 }
