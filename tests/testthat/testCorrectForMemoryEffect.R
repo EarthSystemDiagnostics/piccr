@@ -308,11 +308,10 @@ dataset5 <- tribble(
   25,    "A",             3,         -35.003,          NA,   -280.444,
   26,    "A",             4,         -35.,             NA,   -280.099,
   27,    "A",             5,         -35.,             NA,   -280.022,
-  28,    "A",             6,         -35.,             NA,   -280.005,
-  29,    "A",             7,         -35.,             NA,   -280.001
+  28,    "A",             6,         -35.,             NA,   -280.005
 )
 
-test_that("test that no NA mean memory coefficients are produced", {
+test_that("test that no NA mean memory coefficients are kept", {
 
   actual <- calculateMemoryCoefficients(dataset5)
 
@@ -320,4 +319,22 @@ test_that("test that no NA mean memory coefficients are produced", {
   expect_equal(sum(is.na(c(actual$memoryCoeffD18O, actual$memoryCoeffDD))), 0)
 
 })
+
+test_that("test that number of memory coefficients fits sample data", {
+
+  dataset6 <- add_row(dataset5,
+                      Line = 29, `Identifier 1` = "A", `Inj Nr` = 7,
+                      `d(18_16)Mean` = -35., `d(D_H)Mean` = -280.001,
+                      block = NA)
+
+  actualCoeff <- calculateMemoryCoefficients(dataset6)
+  sampleData  <- filter(dataset6, is.na(dataset6$block))
+
+  expect_equal(max(sampleData$`Inj Nr`), max(actualCoeff$`Inj Nr`))
+
+  actual <- correctForMemoryEffect(dataset6)$datasetMemoryCorrected
+  actual <- filter(actual, `Identifier 1` == "A")
+
+  expect_equal(sum(is.na(c(actual$`d(18_16)Mean`, actual$`d(D_H)Mean`))), 0)
   
+})
