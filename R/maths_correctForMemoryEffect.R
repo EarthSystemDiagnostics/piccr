@@ -49,7 +49,9 @@ calculateMemoryCoefficients <- function(dataset) {
 
   # remove all trailing rows from output dataframe which only contain NA values
   memCoeffOutput <- memCoeffOutput %>%
-    filter(cumall(!is.na(memoryCoeffD18O)))
+    arrange(desc(`Inj Nr`)) %>%
+    filter(cumany(!is.na(memoryCoeffD18O))) %>%
+    arrange(`Inj Nr`)
 
   # pad mean memory coefficients with 1's if last coefficient refers to an
   # injection number less than the maximum inj. number of the samples/standards
