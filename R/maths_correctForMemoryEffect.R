@@ -52,26 +52,6 @@ calculateMemoryCoefficients <- function(dataset) {
     arrange(desc(`Inj Nr`)) %>%
     filter(cumany(!is.na(memoryCoeffD18O))) %>%
     arrange(`Inj Nr`)
-
-  # pad mean memory coefficients with 1's if last coefficient refers to an
-  # injection number less than the maximum inj. number of the samples/standards
-  # in the other blocks
-
-  # bypass if only block 1 is passed as dataset
-  if (nrow(dataset) > nrow(filter(dataset, block == 1))) {
-
-    maxInjMeasurement <- max(
-      filter(dataset, is.na(dataset$block) | dataset$block != 1)$`Inj Nr`)
-    maxInjCoeff <- max(memCoeffOutput$`Inj Nr`)
-
-    if (maxInjMeasurement > maxInjCoeff) {
-
-      memCoeffOutput <- memCoeffOutput %>%
-        add_row(`Inj Nr` = (maxInjCoeff + 1) : maxInjMeasurement,
-                memoryCoeffD18O = rep(1, maxInjMeasurement - maxInjCoeff),
-                memoryCoeffDD = rep(1, maxInjMeasurement - maxInjCoeff))
-    }
-  }
   
   return(memCoeffOutput)
 }
@@ -96,7 +76,14 @@ applyMemoryCorrection <- function(dataset, memoryCoefficients){
   for (i in 2:length(samples)){
     
     sampleData <- samples[[i]]
-    joinedData <- inner_join(sampleData, memoryCoefficients, by = c("Inj Nr"))
+
+    # join sample and mem. coeffs., ensure to keep all sample rows (injections)
+    joinedData <- left_join(sampleData, memoryCoefficients, by = c("Inj Nr"))
+
+    # set memory coefficients to 1 for all rows that have an injection number
+    # greater than the maximum injection number of the memory coefficients
+    joinedData[joinedData$`Inj Nr` > max(memoryCoefficients$`Inj Nr`),
+               c("memoryCoeffD18O", "memoryCoeffDD")] <- 1
     
     # calculate memory corrected values for the current sample
     o18MemoryCorrected <- formulaCorrectMem(
