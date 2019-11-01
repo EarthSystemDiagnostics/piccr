@@ -353,16 +353,15 @@ test_that("test that no NA mean memory coefficients are kept", {
 
 })
 
-test_that("test that number of memory coefficients fits sample data", {
+test_that("test that no sample data is lost in memory correction", {
 
-  actualCoeff <- calculateMemoryCoefficients(dataset6)
-  sampleData  <- filter(dataset6, is.na(dataset6$block))
+  expect_error(actual <- correctForMemoryEffect(dataset6), NA)
 
-  expect_equal(max(sampleData$`Inj Nr`), max(actualCoeff$`Inj Nr`))
+  skip_if_not(exists("actual"), "previous test")
 
-  actual <- correctForMemoryEffect(dataset6)$datasetMemoryCorrected
-  actual <- filter(actual, `Identifier 1` == "A")
+  actual <- actual$datasetMemoryCorrected %>%
+    filter(`Identifier 1` == "A")
 
   expect_equal(sum(is.na(c(actual$`d(18_16)Mean`, actual$`d(D_H)Mean`))), 0)
-  
+
 })
