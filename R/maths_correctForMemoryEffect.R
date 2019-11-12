@@ -46,6 +46,12 @@ calculateMemoryCoefficients <- function(dataset) {
   # join the mean mem coeff and the mem coeff for each standard into one dataframe
   tablesToJoin <- append(memoryCoeffForEachStandard, list(meanMemoryCoefficients))
   memCoeffOutput <- reduce(tablesToJoin, full_join, by = "Inj Nr")
+
+  # remove all trailing rows from output dataframe which only contain NA values
+  memCoeffOutput <- memCoeffOutput %>%
+    arrange(desc(`Inj Nr`)) %>%
+    filter(cumany(!is.na(memoryCoeffD18O))) %>%
+    arrange(`Inj Nr`)
   
   return(memCoeffOutput)
 }
@@ -70,7 +76,14 @@ applyMemoryCorrection <- function(dataset, memoryCoefficients){
   for (i in 2:length(samples)){
     
     sampleData <- samples[[i]]
-    joinedData <- inner_join(sampleData, memoryCoefficients, by = c("Inj Nr"))
+
+    # join sample and mem. coeffs., ensure to keep all sample rows (injections)
+    joinedData <- left_join(sampleData, memoryCoefficients, by = c("Inj Nr"))
+
+    # set memory coefficients to 1 for all rows that have an injection number
+    # greater than the maximum injection number of the memory coefficients
+    joinedData[joinedData$`Inj Nr` > max(memoryCoefficients$`Inj Nr`),
+               c("memoryCoeffD18O", "memoryCoeffDD")] <- 1
     
     # calculate memory corrected values for the current sample
     o18MemoryCorrected <- formulaCorrectMem(
