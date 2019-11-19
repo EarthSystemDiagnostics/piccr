@@ -211,3 +211,43 @@ buildOutputList <- function(name, config, dataset, memoryCorrected, memoryCoeffi
     driftParams = NA
   )
 }
+
+#' Assign vial groups
+#'
+#' This function adds the additional column \code{vial_group} to the input
+#' data.frame counting the occurrence of groups of consecutive vials of the
+#' same standard or probe across the measurement.
+#' @param dataset a data.frame; needs to contain at least the columns
+#' \code{Line} and \code{Identifier 1}.
+#' @return the input data.frame appended by the column \code{vial_group}.
+#'
+assignVialsToGroups <- function(dataset) {
+
+  groupVials <- function(sampleData) {
+
+    counter_vial_group <- 1
+    differenceInLineNumbers <- c(1, diff(sampleData$`Line`))
+
+    for (row in 1 : nrow(sampleData)) {
+
+      if (differenceInLineNumbers[row] > 1) {
+        counter_vial_group <- counter_vial_group + 1
+      }
+
+      sampleData[row, "vial_group"] <- counter_vial_group
+
+    }
+
+    return(sampleData)
+  }
+
+  dataset <- dataset %>%
+    add_column(vial_group = 1) %>%
+    group_split(`Identifier 1`) %>%
+    map(groupVials) %>%
+    bind_rows() %>%
+    arrange(Line)
+
+  return(dataset)
+
+}
