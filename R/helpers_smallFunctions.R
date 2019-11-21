@@ -62,7 +62,7 @@ readFiles <- function(config) {
 normalizeInjectionNumbers <- function(dataset) {
   
   dataset %>% 
-    group_by(`Identifier 1`, block) %>% 
+    group_by(`Identifier 1`, block, `vial_group`) %>%
     mutate(`Inj Nr` = row_number()) %>%
     ungroup() %>%
     arrange(Line)
