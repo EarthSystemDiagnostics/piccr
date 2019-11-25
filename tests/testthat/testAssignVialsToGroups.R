@@ -139,3 +139,75 @@ test_that("test that vial grouping yields proper injection numbers", {
   expect_equal(actual, expected)
 
 })
+
+test_that("test vial grouping on true delta and true previous delta", {
+
+  dataset1 <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~vial_group,
+    # -- / -------------- / -------- / -------------- / -------------/ ------------
+    1,     "STD_A",         1,         1,               10,            1,
+    2,     "STD_A",         2,         2,               20,            1,
+    3,     "STD_A",         3,         3,               30,            1,
+    4,     "STD_B",         1,         2,               20,            1,
+    5,     "STD_B",         2,         3,               30,            1,
+    6,     "STD_B",         3,         4,               40,            1,
+    7,     "STD_C",         1,         3,               30,            1,
+    8,     "STD_C",         2,         4,               40,            1,
+    9,     "STD_C",         3,         5,               50,            1
+  )
+
+  expected1 <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~vial_group, ~deltaTrueD18O, ~deltaTrueDD, ~deltaTruePrevD18O, ~deltaTruePrevDD,
+    # -- / -------------- / -------- / -------------- / -------------/ -----------/ --------------/ ------------/ ------------------/ -----------------
+    1,     "STD_A",         1,         1,               10,            1,           2,              20,           NA,                 NA,
+    2,     "STD_A",         2,         2,               20,            1,           2,              20,           NA,                 NA,
+    3,     "STD_A",         3,         3,               30,            1,           2,              20,           NA,                 NA,
+    4,     "STD_B",         1,         2,               20,            1,           3,              30,           2,                  20,
+    5,     "STD_B",         2,         3,               30,            1,           3,              30,           2,                  20,
+    6,     "STD_B",         3,         4,               40,            1,           3,              30,           2,                  20,
+    7,     "STD_C",         1,         3,               30,            1,           4,              40,           3,                  30,
+    8,     "STD_C",         2,         4,               40,            1,           4,              40,           3,                  30,
+    9,     "STD_C",         3,         5,               50,            1,           4,              40,           3,                  30
+  )
+
+  dataset2 <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~vial_group,
+    # -- / -------------- / -------- / -------------- / -------------/ ------------
+    1,     "STD_A",         1,         1,               10,            1,
+    2,     "STD_A",         2,         2,               20,            1,
+    3,     "STD_A",         3,         3,               30,            1,
+    4,     "STD_B",         1,         2,               20,            1,
+    5,     "STD_B",         2,         3,               30,            1,
+    6,     "STD_B",         3,         4,               40,            1,
+    7,     "STD_A",         1,         1,               10,            2,
+    8,     "STD_A",         2,         2,               20,            2,
+    9,     "STD_A",         3,         3,               30,            2,
+    10,    "STD_C",         1,         3,               30,            1,
+    11,    "STD_C",         2,         4,               40,            1,
+    12,    "STD_C",         3,         5,               50,            1
+  )
+
+  expected2 <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~vial_group, ~deltaTrueD18O, ~deltaTrueDD, ~deltaTruePrevD18O, ~deltaTruePrevDD,
+    # -- / -------------- / -------- / -------------- / -------------/ -----------/ --------------/ ------------/ ------------------/ -----------------
+    1,     "STD_A",         1,         1,               10,            1,           2,              20,           NA,                 NA,
+    2,     "STD_A",         2,         2,               20,            1,           2,              20,           NA,                 NA,
+    3,     "STD_A",         3,         3,               30,            1,           2,              20,           NA,                 NA,
+    4,     "STD_B",         1,         2,               20,            1,           3,              30,           2,                  20,
+    5,     "STD_B",         2,         3,               30,            1,           3,              30,           2,                  20,
+    6,     "STD_B",         3,         4,               40,            1,           3,              30,           2,                  20,
+    7,     "STD_A",         1,         1,               10,            2,           2,              20,           3,                  30,
+    8,     "STD_A",         2,         2,               20,            2,           2,              20,           3,                  30,
+    9,     "STD_A",         3,         3,               30,            2,           2,              20,           3,                  30,
+    10,    "STD_C",         1,         3,               30,            1,           4,              40,           2,                  20,
+    11,    "STD_C",         2,         4,               40,            1,           4,              40,           2,                  20,
+    12,    "STD_C",         3,         5,               50,            1,           4,              40,           2,                  20
+  )
+
+  actual1 <- getDeltaTrueAndDeltaTruePrevForEachSample(dataset1, `Identifier 1`, `vial_group`)
+  actual2 <- getDeltaTrueAndDeltaTruePrevForEachSample(dataset2, `Identifier 1`, `vial_group`)
+
+  expect_equal(actual1, expected1)
+  expect_equal(actual2, expected2)
+
+})
