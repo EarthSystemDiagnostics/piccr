@@ -34,13 +34,21 @@ calculateMemoryCoefficients <- function(dataset) {
               memoryCoeffDD = mean(memoryCoeffDD, na.rm = T))
   
   # extract the mem coeff for each standard as a list of dataframes
-  memoryCoeffForEachStandard <- memoryCoefficients %>% 
-    select(`Inj Nr`, `Identifier 1`, memoryCoeffD18O, memoryCoeffDD) %>% 
-    split(.$`Identifier 1`) 
+  memoryCoeffForEachStandard <- memoryCoefficients %>%
+    select(`Inj Nr`, `Identifier 1`, vial_group, memoryCoeffD18O, memoryCoeffDD)
+
+  groupNames <- memoryCoeffForEachStandard %>%
+    group_keys(`Identifier 1`, `vial_group`) %>%
+    apply(1, function(x) {paste(x, collapse = "_vial")})
+
+  memoryCoeffForEachStandard <- memoryCoeffForEachStandard %>%
+    group_split(`Identifier 1`, `vial_group`) %>%
+    setNames(groupNames)
+
   memoryCoeffForEachStandard <- map(names(memoryCoeffForEachStandard), ~ {
     data <- select(memoryCoeffForEachStandard[[.]], `Inj Nr`, memoryCoeffD18O, memoryCoeffDD)
     data <- select(memoryCoeffForEachStandard[[.]], `Inj Nr`, memoryCoeffD18O, memoryCoeffDD)
-    setNames(data, c("Inj Nr", str_c(., "D18O"), str_c(., "DD")))
+    setNames(data, c("Inj Nr", str_c(., "_d18O"), str_c(., "_dD")))
   })
   
   # join the mean mem coeff and the mem coeff for each standard into one dataframe

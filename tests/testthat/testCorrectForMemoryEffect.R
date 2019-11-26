@@ -127,6 +127,29 @@ dataset3 <- tribble(
    11,   "B",             1,         2.875,           1,      -1.4,          1,
    12,   "B",             2,         3,               1,      -1,            1
 )
+# in this dataset:
+# d18O: m1 = 0.5, m2 = 0.75, m3 = 0.875, m4 = 1
+# dD: m1 = 0.4, m2 = 0.6, m3 = 0.8, m4 = 1
+dataset4 <- tribble(
+  ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~`vial_group`,
+  # -- / -------------- / -------- / -------------- / ----- / ------------ / --------------
+  1,     "A",             1,         1,               1,      -5,            1,
+  2,     "A",             2,         1,               1,      -5,            1,
+  3,     "A",             3,         1,               1,      -5,            1,
+  4,     "A",             4,         1,               1,      -5,            1,
+  5,     "C",             1,         1.5,             1,      -4.2,          1,
+  6,     "C",             2,         1.75,            1,      -3.8,          1,
+  7,     "C",             3,         1.875,           1,      -3.4,          1,
+  8,     "C",             4,         2.0,             1,      -3.0,          1,
+  9,     "A",             1,         1.5,             1,      -3.8,          2,
+  10,    "A",             2,         1.25,            1,      -4.2,          2,
+  11,    "A",             3,         1.125,           1,      -4.6,          2,
+  12,    "A",             4,         1,               1,      -5,            2,
+  13,    "B",             1,         2,               1,      -3.4,          1,
+  14,    "B",             2,         2.5,             1,      -2.6,          1,
+  15,    "B",             3,         2.75,            1,      -1.8,          1,
+  16,    "B",             4,         3,               1,      -1,            1
+)
 
 # -------------- tests ------------------------------
 
@@ -149,21 +172,21 @@ test_that("test memory corrected datasets", {
 test_that("test memory coefficients", {
 
   memCoeffExpected1 <- tribble(
-    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD, ~AD18O,   ~ADD,       ~BD18O, ~BDD,  ~CD18O, ~CDD,
-    # ------ / --------------- / -------------| -------- | --------- | ----- | ---- | ------ | ----
-    1,         0.75,             0.76,          NA_real_,  NA_real_,  0.75,   0.71,   0.75,  0.81,
-    2,         1.0,              1.05,          NA_real_,  NA_real_,  1,      1.06,   1,     1.04,
-    3,         1.25,             1.18,          NA_real_,  NA_real_,  1.25,   1.22,   1.25,  1.15,
+    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD, ~A_vial1_d18O, ~A_vial1_dD, ~B_vial1_d18O, ~B_vial1_dD, ~C_vial1_d18O, ~C_vial1_dD,
+    # ------ / --------------- / ------------- / ------------ / ---------- / ------------ / ---------- / ------------ / -----------
+    1,         0.75,             0.76,           NA_real_,      NA_real_,    0.75,          0.71,        0.75,          0.81,
+    2,         1.0,              1.05,           NA_real_,      NA_real_,    1,             1.06,        1,             1.04,
+    3,         1.25,             1.18,           NA_real_,      NA_real_,    1.25,          1.22,        1.25,          1.15,
   )
 
   memCoeffExpected2 <- tribble(
-    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD, ~AD18O,   ~ADD,      ~BD18O, ~BDD,  ~CD18O,  ~CDD,
-    # ------ / --------------- / ------------- | -------- | ------- | ----- | ----- | ----- | ----
-    1,         0.985,             0.992,         NA_real_, NA_real_,  0.984,  0.992,  0.985,  0.992,
-    2,         0.990,             0.986,         NA_real_, NA_real_,  0.990,  0.986,  0.990,  0.986,
-    3,         0.995,             0.992,         NA_real_, NA_real_,  0.995,  0.992,  0.995,  0.992,
-    4,         1.0,               1.002,         NA_real_, NA_real_,  1.000,  1.002,  1.000,  1.002,
-    5,         1.005,             1.007,         NA_real_, NA_real_,  1.005,  1.007,  1.005,  1.007
+    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD, ~A_vial1_d18O, ~A_vial1_dD, ~B_vial1_d18O, ~B_vial1_dD, ~C_vial1_d18O, ~C_vial1_dD,
+    # ------ / --------------- / ------------- / ------------ / ---------- / ------------ / ---------- / ------------ / -----------
+    1,         0.985,            0.992,          NA_real_,      NA_real_,    0.984,        0.992,        0.985,         0.992,
+    2,         0.990,            0.986,          NA_real_,      NA_real_,    0.990,        0.986,        0.990,         0.986,
+    3,         0.995,            0.992,          NA_real_,      NA_real_,    0.995,        0.992,        0.995,         0.992,
+    4,         1.0,              1.002,          NA_real_,      NA_real_,    1.000,        1.002,        1.000,         1.002,
+    5,         1.005,            1.007,          NA_real_,      NA_real_,    1.005,        1.007,        1.005,         1.007
   )
 
   actual1 <- correctForMemoryEffect(dataset1)
@@ -363,5 +386,19 @@ test_that("test that no sample data is lost in memory correction", {
     filter(`Identifier 1` == "A")
 
   expect_equal(sum(is.na(c(actual$`d(18_16)Mean`, actual$`d(D_H)Mean`))), 0)
+
+})
+
+test_that("test that vial grouping gives correct memory coefficients output", {
+
+  actual <- calculateMemoryCoefficients(dataset4)
+
+  expect_equal(dim(actual), c(4, 11))
+  expect_equal(colnames(actual),
+               c("Inj Nr", "A_vial1_d18O", "A_vial1_dD",
+                 "A_vial2_d18O", "A_vial2_dD",
+                 "B_vial1_d18O", "B_vial1_dD",
+                 "C_vial1_d18O", "C_vial1_dD",
+                 "memoryCoeffD18O", "memoryCoeffDD"))
 
 })
