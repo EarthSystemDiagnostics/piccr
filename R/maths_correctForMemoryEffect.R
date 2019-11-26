@@ -21,7 +21,7 @@ correctForMemoryEffect <- function(dataset){
 calculateMemoryCoefficients <- function(dataset) {
   
   block1 <- filter(dataset, block == 1)
-  deltaTrueAndDeltaTruePrev <- getDeltaTrueAndDeltaTruePrevForEachSample(block1, `Identifier 1`)
+  deltaTrueAndDeltaTruePrev <- getDeltaTrueAndDeltaTruePrevForEachSample(block1, `Identifier 1`, `vial_group`)
   
   memoryCoefficients <- deltaTrueAndDeltaTruePrev %>%
     mutate(memoryCoeffD18O = formulaMemCoeff(.$`d(18_16)Mean`, .$deltaTrueD18O, .$deltaTruePrevD18O),
