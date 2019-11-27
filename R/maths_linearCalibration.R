@@ -73,7 +73,7 @@ getTrainingData <- function(dataset, config, useBlock) {
 
 selectGroupsForTwoPointCalib <- function(groups){
 
-  orderedByIsotopeVal <- order(map_dbl(groups, ~ mean(.$`d(18_16)Mean`)))
+  orderedByIsotopeVal <- order(map_dbl(groups, ~ mean(.$`d(18_16)Mean`, na.rm = TRUE)))
   highestAndLowestIsotopeVal <- groups[c(orderedByIsotopeVal[1], tail(orderedByIsotopeVal, 1))]
   return(highestAndLowestIsotopeVal)
 }
