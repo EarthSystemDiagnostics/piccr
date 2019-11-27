@@ -67,7 +67,7 @@ calculateMemoryCoefficients <- function(dataset) {
 applyMemoryCorrection <- function(dataset, memoryCoefficients){
   
   # get list with one dataframe per sample
-  samples     <- group_split(dataset, `Identifier 1`, block)
+  samples     <- group_split(dataset, `Identifier 1`, block, `vial_group`)
   sampleOrder <- order(map_dbl(samples, ~ first(.$Line)))
   samples     <- samples[sampleOrder]
   
