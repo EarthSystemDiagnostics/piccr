@@ -177,3 +177,140 @@ test_that("test two point calibration", {
   expect_equal(actual$dD$intercept, 0)
   expect_equal(actual$dD$slope, 1)
 })
+
+test_that("test training data for grouped vials", {
+
+  config <- list(use_memory_correction = FALSE,
+                 use_three_point_calibration = TRUE)
+
+  dataset5 <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~useForCalibration, ~vial_group,
+    # -- / -------------- / -------- / -------------- / ----- / ------------ / ----------------- / -----------
+    1,     "A",             1,         1,               1,      10,            TRUE,               1,
+    2,     "A",             2,         1,               1,      10,            TRUE,               1,
+    3,     "A",             3,         1,               1,      10,            TRUE,               1,
+    4,     "A",             4,         1,               1,      10,            TRUE,               1,
+    5,     "B",             1,         2,               1,      20,            TRUE,               1,
+    6,     "B",             2,         2,               1,      20,            TRUE,               1,
+    7,     "B",             3,         2,               1,      20,            TRUE,               1,
+    8,     "B",             4,         2,               1,      20,            TRUE,               1,
+    9,     "C",             4,         3,               1,      30,            TRUE,               1,
+    10,    "C",             1,         3,               1,      30,            TRUE,               1,
+    11,    "C",             2,         3,               1,      30,            TRUE,               1,
+    12,    "C",             3,         3,               1,      30,            TRUE,               1,
+    13,    "A",             1,         1,               1,      10,            TRUE,               2,
+    14,    "A",             2,         1,               1,      10,            TRUE,               2,
+    15,    "A",             3,         1,               1,      10,            TRUE,               2,
+    16,    "A",             4,         1,               1,      10,            TRUE,               2
+  )
+  expected <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~useForCalibration, ~vial_group,
+    # -- / -------------- / -------- / -------------- / ----- / ------------ / ----------------- / -----------
+    2,     "A",             2,         1,               1,      10,            TRUE,               1,
+    3,     "A",             3,         1,               1,      10,            TRUE,               1,
+    4,     "A",             4,         1,               1,      10,            TRUE,               1,
+    6,     "B",             2,         2,               1,      20,            TRUE,               1,
+    7,     "B",             3,         2,               1,      20,            TRUE,               1,
+    8,     "B",             4,         2,               1,      20,            TRUE,               1,
+    10,    "C",             1,         3,               1,      30,            TRUE,               1,
+    11,    "C",             2,         3,               1,      30,            TRUE,               1,
+    12,    "C",             3,         3,               1,      30,            TRUE,               1,
+    14,    "A",             2,         1,               1,      10,            TRUE,               2,
+    15,    "A",             3,         1,               1,      10,            TRUE,               2,
+    16,    "A",             4,         1,               1,      10,            TRUE,               2
+  )
+
+  actual5 <- getTrainingData(dataset5, config, useBlock = 1)
+
+  expect_equal(actual5, expected)
+
+  config <- list(use_memory_correction = TRUE,
+                 use_three_point_calibration = FALSE)
+
+  dataset6 <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~useForCalibration, ~vial_group,
+    # -- / -------------- / -------- / -------------- / ----- / ------------ / ----------------- / -----------
+    1,     "A",             1,         NA,               1,     NA,            TRUE,               1,
+    2,     "A",             2,         NA,               1,     NA,            TRUE,               1,
+    3,     "A",             3,         NA,               1,     NA,            TRUE,               1,
+    4,     "A",             4,         NA,               1,     NA,            TRUE,               1,
+    5,     "B",             1,         2,               1,      20,            TRUE,               1,
+    6,     "B",             2,         2,               1,      20,            TRUE,               1,
+    7,     "B",             3,         2,               1,      20,            TRUE,               1,
+    8,     "B",             4,         2,               1,      20,            TRUE,               1,
+    9,     "C",             4,         3,               1,      30,            TRUE,               1,
+    10,    "C",             1,         3,               1,      30,            TRUE,               1,
+    11,    "C",             2,         3,               1,      30,            TRUE,               1,
+    12,    "C",             3,         3,               1,      30,            TRUE,               1,
+    13,    "A",             1,         1,               1,      10,            TRUE,               2,
+    14,    "A",             2,         1,               1,      10,            TRUE,               2,
+    15,    "A",             3,         1,               1,      10,            TRUE,               2,
+    16,    "A",             4,         1,               1,      10,            TRUE,               2
+  )
+  expected <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~useForCalibration, ~vial_group,
+    # -- / -------------- / -------- / -------------- / ----- / ------------ / ----------------- / -----------
+    1,     "A",             1,         NA,               1,     NA,            TRUE,               1,
+    2,     "A",             2,         NA,               1,     NA,            TRUE,               1,
+    3,     "A",             3,         NA,               1,     NA,            TRUE,               1,
+    4,     "A",             4,         NA,               1,     NA,            TRUE,               1,
+    9,     "C",             4,         3,               1,      30,            TRUE,               1,
+    10,    "C",             1,         3,               1,      30,            TRUE,               1,
+    11,    "C",             2,         3,               1,      30,            TRUE,               1,
+    12,    "C",             3,         3,               1,      30,            TRUE,               1,
+    13,    "A",             1,         1,               1,      10,            TRUE,               2,
+    14,    "A",             2,         1,               1,      10,            TRUE,               2,
+    15,    "A",             3,         1,               1,      10,            TRUE,               2,
+    16,    "A",             4,         1,               1,      10,            TRUE,               2
+  )
+
+  actual6 <- getTrainingData(dataset6, config, useBlock = 1)
+
+  expect_equal(actual6, expected)
+
+  config <- list(use_memory_correction = FALSE,
+                 use_three_point_calibration = FALSE)
+
+  dataset7 <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~useForCalibration, ~vial_group,
+    # -- / -------------- / -------- / -------------- / ----- / ------------ / ----------------- / -----------
+    1,     "A",             1,         1,               1,      10,            FALSE,              1,
+    2,     "A",             2,         1,               1,      10,            FALSE,              1,
+    3,     "A",             3,         1,               1,      10,            FALSE,              1,
+    4,     "A",             4,         1,               1,      10,            FALSE,              1,
+    5,     "B",             1,         2,               1,      20,            TRUE,               1,
+    6,     "B",             2,         2,               1,      20,            TRUE,               1,
+    7,     "B",             3,         2,               1,      20,            TRUE,               1,
+    8,     "B",             4,         2,               1,      20,            TRUE,               1,
+    9,     "C",             4,         3,               1,      30,            TRUE,               1,
+    10,    "C",             1,         3,               1,      30,            TRUE,               1,
+    11,    "C",             2,         3,               1,      30,            TRUE,               1,
+    12,    "C",             3,         3,               1,      30,            TRUE,               1,
+    13,    "B",             1,         2,               1,      20,            TRUE,               2,
+    14,    "B",             2,         2,               1,      20,            TRUE,               2,
+    15,    "B",             3,         2,               1,      20,            TRUE,               2,
+    16,    "B",             4,         2,               1,      20,            TRUE,               2,
+    17,    "D",             1,         4,               1,      40,            TRUE,               1,
+    18,    "D",             2,         4,               1,      40,            TRUE,               1,
+    19,    "D",             3,         4,               1,      40,            TRUE,               1,
+    20,    "D",             4,         4,               1,      40,            TRUE,               1
+    )
+  expected <- tribble(
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~useForCalibration, ~vial_group,
+    # -- / -------------- / -------- / -------------- / ----- / ------------ / ----------------- / -----------
+    6,     "B",             2,         2,               1,      20,            TRUE,               1,
+    7,     "B",             3,         2,               1,      20,            TRUE,               1,
+    8,     "B",             4,         2,               1,      20,            TRUE,               1,
+    14,    "B",             2,         2,               1,      20,            TRUE,               2,
+    15,    "B",             3,         2,               1,      20,            TRUE,               2,
+    16,    "B",             4,         2,               1,      20,            TRUE,               2,
+    18,    "D",             2,         4,               1,      40,            TRUE,               1,
+    19,    "D",             3,         4,               1,      40,            TRUE,               1,
+    20,    "D",             4,         4,               1,      40,            TRUE,               1
+  )
+
+  actual7 <- getTrainingData(dataset7, config, useBlock = 1)
+
+  expect_equal(actual7, expected)
+
+})
