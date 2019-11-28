@@ -55,7 +55,7 @@ getTrainingData <- function(dataset, config, useBlock) {
   # if no memory correction is applied, use only the last three injections for calibration
   if (config$use_memory_correction == FALSE) {
     trainingData <- trainingData %>% 
-      group_by(`Identifier 1`) %>% 
+      group_by(`Identifier 1`, `vial_group`) %>%
       slice((n()-2):n()) %>% 
       ungroup()
   }

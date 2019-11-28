@@ -121,20 +121,20 @@ test_that("test calibrateWithoutDriftCorrection", {
 test_that("test use only last three injections if memory correction is not used", {
   
   dataset3 <- tribble(
-    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
-    # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
-    1,    "A",             1,         100,              1,      100,           2,        -5,        TRUE,
-    2,    "A",             2,         2,                1,      -5,            2,        -5,        TRUE,
-    3,    "A",             3,         2,                1,      -5,            2,        -5,        TRUE,
-    3,    "A",             4,         2,                1,      -5,            2,        -5,        TRUE,
-    4,    "C",             1,         100,              1,      100,           5,         4,        TRUE,
-    5,    "C",             2,         100,              1,      100,           5,         4,        TRUE,
-    6,    "C",             3,         5,                1,      4,             5,         4,        TRUE,
-    6,    "C",             4,         5,                1,      4,             5,         4,        TRUE,
-    6,    "C",             5,         5,                1,      4,             5,         4,        TRUE,
-    7,    "B",             1,         -2,               1,      7,             -2,        7,        TRUE,
-    8,    "B",             2,         -2,               1,      7,             -2,        7,        TRUE,
-    9,    "B",             3,         -2,               1,      7,             -2,        7,        TRUE
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration, ~vial_group,
+    # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ----------------- / -----------
+    1,    "A",             1,         100,              1,      100,           2,        -5,        TRUE,               1,
+    2,    "A",             2,         2,                1,      -5,            2,        -5,        TRUE,               1,
+    3,    "A",             3,         2,                1,      -5,            2,        -5,        TRUE,               1,
+    3,    "A",             4,         2,                1,      -5,            2,        -5,        TRUE,               1,
+    4,    "C",             1,         100,              1,      100,           5,         4,        TRUE,               1,
+    5,    "C",             2,         100,              1,      100,           5,         4,        TRUE,               1,
+    6,    "C",             3,         5,                1,      4,             5,         4,        TRUE,               1,
+    6,    "C",             4,         5,                1,      4,             5,         4,        TRUE,               1,
+    6,    "C",             5,         5,                1,      4,             5,         4,        TRUE,               1,
+    7,    "B",             1,         -2,               1,      7,             -2,        7,        TRUE,               1,
+    8,    "B",             2,         -2,               1,      7,             -2,        7,        TRUE,               1,
+    9,    "B",             3,         -2,               1,      7,             -2,        7,        TRUE,               1,
   )
   
   config <- list(use_memory_correction = FALSE, use_three_point_calibration = TRUE)
@@ -151,20 +151,20 @@ test_that("test use only last three injections if memory correction is not used"
 test_that("test two point calibration", {
   
   dataset4 <- tribble(
-    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
-    # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
-    1,    "C",             1,         0,                1,      100,           5,         4,        TRUE,
-    2,    "C",             2,         0,                1,      100,           5,         4,        TRUE,
-    3,    "C",             3,         0,                1,      4,             5,         4,        TRUE,
-    4,    "C",             4,         0,                1,      4,             5,         4,        TRUE,
-    5,    "C",             5,         0,                1,      4,             5,         4,        TRUE,
-    6,    "A",             1,         100,              1,      100,           2,        -5,        TRUE,
-    7,    "A",             2,         2,                1,      -5,            2,        -5,        TRUE,
-    8,    "A",             3,         2,                1,      -5,            2,        -5,        TRUE,
-    9,    "A",             4,         2,                1,      -5,            2,        -5,        TRUE,
-    10,   "B",             1,         -2,               1,      7,             -2,        7,        TRUE,
-    11,   "B",             2,         -2,               1,      7,             -2,        7,        TRUE,
-    12,   "B",             3,         -2,               1,      7,             -2,        7,        TRUE
+    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration, ~vial_group,
+    # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ----------------- / -----------
+    1,    "C",             1,         0,                1,      100,           5,         4,        TRUE,               1,
+    2,    "C",             2,         0,                1,      100,           5,         4,        TRUE,               1,
+    3,    "C",             3,         0,                1,      4,             5,         4,        TRUE,               1,
+    4,    "C",             4,         0,                1,      4,             5,         4,        TRUE,               1,
+    5,    "C",             5,         0,                1,      4,             5,         4,        TRUE,               1,
+    6,    "A",             1,         100,              1,      100,           2,        -5,        TRUE,               1,
+    7,    "A",             2,         2,                1,      -5,            2,        -5,        TRUE,               1,
+    8,    "A",             3,         2,                1,      -5,            2,        -5,        TRUE,               1,
+    9,    "A",             4,         2,                1,      -5,            2,        -5,        TRUE,               1,
+    10,   "B",             1,         -2,               1,      7,             -2,        7,        TRUE,               1,
+    11,   "B",             2,         -2,               1,      7,             -2,        7,        TRUE,               1,
+    12,   "B",             3,         -2,               1,      7,             -2,        7,        TRUE,               1
   )
   
   config <- list(use_memory_correction = FALSE, use_three_point_calibration = FALSE)
