@@ -80,11 +80,46 @@ expected3 <- tribble(
   "Std_B",         3,      "2019/11/2510:40:00",    1200,             1200,          TRUE
 )
 
+# as dataset2, but with more standard injections
+dataset4 <- tribble(
+  ~`Identifier 1`, ~block, ~`Time Code`,         ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~useForDriftCorr, ~vial_group,
+  # ------------ / ----- / ------------------- / -------------- / ------------ / --------------- / -----------
+  "Std_A",         1,      "2019/11/2510:00:00", 0,               -3,            TRUE,             1,
+  "Std_A",         1,      "2019/11/2510:05:00", 300,             -153,          TRUE,             1,
+  "Std_A",         1,      "2019/11/2510:10:00", 600,             -303,          TRUE,             1,
+  "Std_A",         1,      "2019/11/2510:15:00", 900,             -453,          TRUE,             1,
+  "Std_B",         1,      "2019/11/2510:20:00", 100,             -145,          TRUE,             1,
+  "Std_B",         1,      "2019/11/2510:25:00", 400,             -295,          TRUE,             1,
+  "Std_B",         1,      "2019/11/2510:30:00", 700,             -445,          TRUE,             1,
+  "Std_B",         1,      "2019/11/2510:35:00", 1000,            -595,          TRUE,             1,
+  "Probe_A",       NA,     "2019/11/2510:40:00", 10,              0,             NA,               1,
+  "Probe_B",       NA,     "2019/11/2510:45:00", 10,              0,             NA,               1,
+  "Std_A",         2,      "2019/11/2510:50:00", 3000,            -1503,         TRUE,             1,
+  "Std_A",         2,      "2019/11/2510:55:00", 3300,            -1653,         TRUE,             1,
+  "Std_A",         2,      "2019/11/2511:00:00", 3600,            -1803,         TRUE,             1,
+  "Std_A",         2,      "2019/11/2511:05:00", 3900,            -1953,         TRUE,             1,
+  "Std_B",         2,      "2019/11/2511:10:00", 3100,            -1645,         TRUE,             1,
+  "Std_B",         2,      "2019/11/2511:15:00", 3400,            -1795,         TRUE,             1,
+  "Std_B",         2,      "2019/11/2511:20:00", 3700,            -1945,         TRUE,             1,
+  "Std_B",         2,      "2019/11/2511:25:00", 4000,            -2095,         TRUE,             1,
+  "Probe_C",       NA,     "2019/11/2511:30:00", 10,              0,             NA,               1,
+  "Std_A",         3,      "2019/11/2511:35:00", 5700,            -2853,         TRUE,             1,
+  "Std_A",         3,      "2019/11/2511:40:00", 6000,            -3003,         TRUE,             1,
+  "Std_A",         3,      "2019/11/2511:45:00", 6300,            -3153,         TRUE,             1,
+  "Std_A",         3,      "2019/11/2511:50:00", 6600,            -3303,         TRUE,             1,
+  "Std_B",         3,      "2019/11/2511:55:00", 5800,            -2995,         TRUE,             1,
+  "Std_B",         3,      "2019/11/2512:00:00", 6100,            -3145,         TRUE,             1,
+  "Std_B",         3,      "2019/11/2512:05:00", 6400,            -3295,         TRUE,             1,
+  "Std_B",         3,      "2019/11/2512:10:00", 6700,            -3445,         TRUE,             1
+)
+
+config <- list(use_memory_correction = TRUE)
+
 test_that("test linearDriftCorrection", {
   
-  actual1 <- linearDriftCorrection(dataset1)
-  actual2 <- linearDriftCorrection(dataset2)
-  actual3 <- linearDriftCorrection(dataset3)
+  actual1 <- linearDriftCorrection(dataset1, config)
+  actual2 <- linearDriftCorrection(dataset2, config)
+  actual3 <- linearDriftCorrection(dataset3, config)
   
   expect_equal(mutate_if(actual1, is.numeric, round), dataset1)
   expect_equal(mutate_if(actual2, is.numeric, round), expected2)
@@ -94,7 +129,7 @@ test_that("test linearDriftCorrection", {
 test_that("test calculate drift slope alpha (dataset1)", {
   
   dataset1 <- addColumnSecondsSinceStart(dataset1)
-  actual <- calculateDriftSlope(dataset1)
+  actual <- calculateDriftSlope(dataset1, config)
   
   expect_equal(actual$d18O, 0)
   expect_equal(actual$dD, 0)
@@ -103,7 +138,7 @@ test_that("test calculate drift slope alpha (dataset1)", {
 test_that("test calculate drift slope alpha (dataset2)", {
   
   dataset2 <- addColumnSecondsSinceStart(dataset2)
-  actual <- calculateDriftSlope(dataset2)
+  actual <- calculateDriftSlope(dataset2, config)
   
   expect_equal(actual$d18O, 1)
   expect_equal(actual$dD, -0.5)
@@ -112,7 +147,7 @@ test_that("test calculate drift slope alpha (dataset2)", {
 test_that("test calculate drift slope alpha (dataset3)", {
   
   dataset3 <- addColumnSecondsSinceStart(dataset3)
-  actual <- calculateDriftSlope(dataset3)
+  actual <- calculateDriftSlope(dataset3, config)
   
   expect_equal(actual$d18O, 1.5)
   expect_equal(actual$dD, 0)
@@ -138,9 +173,20 @@ test_that("test use only standards specified in config", {
   )
   
   dataset3 <- addColumnSecondsSinceStart(dataset3)
-  actual <- calculateDriftSlope(dataset3)
+  actual <- calculateDriftSlope(dataset3, config)
   
   expect_equal(actual$d18O, 1)
   expect_equal(actual$dD, -0.5)
   
+})
+
+test_that("test correct drift slopes when memory correction is off", {
+
+  config <- list(use_memory_correction = FALSE)
+
+  dataset4 <- addColumnSecondsSinceStart(dataset4)
+  actual <- calculateDriftSlope(dataset4, config)
+
+  expect_equal(actual$d18O, 1)
+  expect_equal(actual$dD, -0.5)
 })
