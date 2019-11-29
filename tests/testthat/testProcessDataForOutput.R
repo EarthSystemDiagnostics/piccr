@@ -26,13 +26,13 @@ test_that("test quality control output structure", {
     16,    "C",             "x",             3,      2,         2.45,            22.7,           2,        2,         20,      FALSE,                 7,       2
   )
   expected1 <- tribble(
-    ~`Identifier 1`, ~block, ~d18OMeasured, ~d18OTrue, ~d18ODeviation, ~dDMeasured, ~dDTrue, ~dDDeviation,
-    # -------------/ ------/ -------------/ ---------/ --------------/ -----------/ -------/ ------------
-    "WU",            1,      1,             1,         0,              9.4,         10,      0.6,
-    "C",             1,      2,             2,         0,              20.6,        20,      -0.6,
-    "QC",            2,      10.1,          10,        -0.1,           98.75,       100,     1.25,
-    "B",             3,      3,             3,         0,              29.75,       30,      0.25,
-    "C",             3,      2.375,         2,         -0.375,         20.9,        20,      -0.9
+    ~Sample, ~`Identifier 1`, ~block, ~d18OMeasured, ~d18OTrue, ~d18ODeviation, ~dDMeasured, ~dDTrue, ~dDDeviation,
+    # -----/ ---------------/ ------/ -------------/ ---------/ --------------/ -----------/ -------/ ------------
+    1,       "WU",            1,      1,             1,         0,              9.4,         10,      0.6,
+    2,       "C",             1,      2,             2,         0,              20.6,        20,      -0.6,
+    4,       "QC",            2,      10.1,          10,        -0.1,           98.75,       100,     1.25,
+    6,       "B",             3,      3,             3,         0,              29.75,       30,      0.25,
+    7,       "C",             3,      2.375,         2,         -0.375,         20.9,        20,      -0.9
     )
   expected2 <- list(d18O = -0.1, dD = 1.25)
   expected3 <- list(d18O = 0.194, dD = 0.836)
@@ -42,7 +42,7 @@ test_that("test quality control output structure", {
   actual2 <- getQualityControlInfo(dataset1, actual1)
   
   expect_is(actual1, "data.frame")
-  
+
   expect_length(actual2, 4)
   expect_equal(mutate_if(actual2$deviationsFromTrue, is.numeric, round, digits = 5), expected1)
   expect_equal(actual2$deviationOfControlStandard, expected2)
