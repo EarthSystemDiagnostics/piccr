@@ -36,6 +36,7 @@ test_that("test quality control output structure", {
     )
   expected2 <- list(d18O = -0.1, dD = 1.25)
   expected3 <- list(d18O = 0.194, dD = 0.836)
+  expected4 <- list(d18O = 0.382, dD = 3.427)
   
   actual1 <- accumulateMeasurements(dataset1, list(average_over_inj = "all"))
   actual2 <- getQualityControlInfo(dataset1, actual1)
@@ -46,4 +47,5 @@ test_that("test quality control output structure", {
   expect_equal(mutate_if(actual2$deviationsFromTrue, is.numeric, round, digits = 5), expected1)
   expect_equal(actual2$deviationOfControlStandard, expected2)
   expect_equal(lapply(actual2$rmsdDeviationsFromTrue, round, 3), expected3)
+  expect_equal(lapply(actual2$pooledSD, round, 3), expected4)
 })
