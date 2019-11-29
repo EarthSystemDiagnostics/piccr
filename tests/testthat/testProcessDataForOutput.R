@@ -6,24 +6,24 @@ context("test processing data for output")
 test_that("test quality control output structure", {
 
   dataset1 <- tribble(
-    ~Line, ~`Identifier 1`, ~`Identifier 2`, ~block, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~dExcess, ~o18_True, ~H2_True, ~useAsControlStandard, ~Sample,
-    # -- / -------------- / -------------- / ----- / -------- / -------------- / ------------ / --------/ ---------/ --------/ ---------------------/ -------
-    1,     "WU",            "w",             1,      1,         0.9,             8.5,           15,       1,         10,       FALSE,                 1,
-    2,     "WU",            "w",             1,      2,         1,               9,             20,       1,         10,       FALSE,                 1,
-    3,     "WU",            "w",             1,      3,         1.1,             10.7,          25,       1,         10,       FALSE,                 1,
-    4,     "C",             "x",             1,      1,         1.9,             19,            15,       2,         20,       FALSE,                 2,
-    5,     "C",             "x",             1,      2,         2.1,             20.7,          20,       2,         20,       FALSE,                 2,
-    6,     "C",             "x",             1,      3,         2,               22.1,          25,       2,         20,       FALSE,                 2,
-    7,     "probe1",        "p",             NA,     1,         4,               49,            4,        NA,        NA,       FALSE,                 3,
-    8,     "probe1",        "p",             NA,     2,         5,               49,            5,        NA,        NA,       FALSE,                 3,
-    9,     "QC",            "qq",            2,      1,         10.4,            95,            11,       10,        100,      TRUE,                  4,
-    10,    "QC",            "qq",            2,      2,         9.8,             102.5,         9,        10,        100,      TRUE,                  4,
-    11,    "probe2",        "pp",            NA,     1,         6,               60,            4,        NA,        NA,       FALSE,                 5,
-    12,    "probe2",        "pp",            NA,     2,         7,               71,            5,        NA,        NA,       FALSE,                 5,
-    13,    "B",             "z",             3,      1,         2.8,             28.5,          11,       3,         30,       FALSE,                 6,
-    14,    "B",             "z",             3,      2,         3.2,             31,            9,        3,         30,       FALSE,                 6,
-    15,    "C",             "x",             3,      1,         2.3,             19.1,           -2,       2,         20,      FALSE,                 7,
-    16,    "C",             "x",             3,      2,         2.45,            22.7,           2,        2,         20,      FALSE,                 7
+    ~Line, ~`Identifier 1`, ~`Identifier 2`, ~block, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~dExcess, ~o18_True, ~H2_True, ~useAsControlStandard, ~Sample, ~vial_group,
+    # -- / -------------- / -------------- / ----- / -------- / -------------- / ------------ / --------/ ---------/ --------/ ---------------------/ -------/ -----------
+    1,     "WU",            "w",             1,      1,         0.9,             8.5,           15,       1,         10,       FALSE,                 1,       1,
+    2,     "WU",            "w",             1,      2,         1,               9,             20,       1,         10,       FALSE,                 1,       1,
+    3,     "WU",            "w",             1,      3,         1.1,             10.7,          25,       1,         10,       FALSE,                 1,       1,
+    4,     "C",             "x",             1,      1,         1.9,             19,            15,       2,         20,       FALSE,                 2,       1,
+    5,     "C",             "x",             1,      2,         2.1,             20.7,          20,       2,         20,       FALSE,                 2,       1,
+    6,     "C",             "x",             1,      3,         2,               22.1,          25,       2,         20,       FALSE,                 2,       1,
+    7,     "probe1",        "p",             NA,     1,         4,               49,            4,        NA,        NA,       FALSE,                 3,       1,
+    8,     "probe1",        "p",             NA,     2,         5,               49,            5,        NA,        NA,       FALSE,                 3,       1,
+    9,     "QC",            "qq",            2,      1,         10.4,            95,            11,       10,        100,      TRUE,                  4,       1,
+    10,    "QC",            "qq",            2,      2,         9.8,             102.5,         9,        10,        100,      TRUE,                  4,       1,
+    11,    "probe2",        "pp",            NA,     1,         6,               60,            4,        NA,        NA,       FALSE,                 5,       1,
+    12,    "probe2",        "pp",            NA,     2,         7,               71,            5,        NA,        NA,       FALSE,                 5,       1,
+    13,    "B",             "z",             3,      1,         2.8,             28.5,          11,       3,         30,       FALSE,                 6,       1,
+    14,    "B",             "z",             3,      2,         3.2,             31,            9,        3,         30,       FALSE,                 6,       1,
+    15,    "C",             "x",             3,      1,         2.3,             19.1,           -2,       2,         20,      FALSE,                 7,       2,
+    16,    "C",             "x",             3,      2,         2.45,            22.7,           2,        2,         20,      FALSE,                 7,       2
   )
   expected1 <- tribble(
     ~`Identifier 1`, ~block, ~d18OMeasured, ~d18OTrue, ~d18ODeviation, ~dDMeasured, ~dDTrue, ~dDDeviation,
