@@ -49,3 +49,52 @@ test_that("test quality control output structure", {
   expect_equal(lapply(actual2$rmsdDeviationsFromTrue, round, 3), expected3)
   expect_equal(lapply(actual2$pooledSD, round, 3), expected4)
 })
+
+test_that("test correct vial count of very first standard in file", {
+
+  dataset1 <- tribble(
+    ~Line, ~`Identifier 1`, ~`Identifier 2`, ~`Inj Nr`, ~Sample, ~vial_group,
+    # ---/ ---------------/ ---------------/ ---------/ -------/ -----------/
+    1,     "A",             "x",             1,         1,       1,
+    2,     "A",             "x",             2,         1,       1,
+    3,     "A",             "x",             3,         1,       1,
+    4,     "B",             "y",             1,         2,       1,
+    5,     "B",             "y",             2,         2,       1,
+    6,     "B",             "y",             3,         2,       1,
+    7,     "C",             "z",             1,         3,       1,
+    8,     "C",             "z",             2,         3,       1,
+    9,     "C",             "z",             3,         3,       1
+  )
+  dataset2 <- tribble(
+    ~Line, ~`Identifier 1`, ~`Identifier 2`, ~`Inj Nr`, ~Sample, ~vial_group,
+    # ---/ ---------------/ ---------------/ ---------/ -------/ -----------/
+    1,     "A",             "x",             1,         1,       1,
+    2,     "A",             "x",             2,         1,       1,
+    3,     "A",             "x",             3,         1,       1,
+    4,     "A",             "x",             1,         2,       1,
+    5,     "A",             "x",             2,         2,       1,
+    6,     "A",             "x",             3,         2,       1,
+    7,     "B",             "z",             1,         3,       1,
+    8,     "B",             "z",             2,         3,       1,
+    9,     "B",             "z",             3,         3,       1,
+    10,    "A",             "x",             1,         4,       2,
+    11,    "A",             "x",             2,         4,       2,
+    12,    "A",             "x",             3,         4,       2,
+    13,    "C",             "z",             1,         5,       1,
+    14,    "C",             "z",             2,         5,       1,
+    15,    "C",             "z",             3,         5,       1,
+    16,    "C",             "z",             1,         6,       2,
+    17,    "C",             "z",             2,         6,       2,
+    18,    "C",             "z",             3,         6,       2,
+    19,    "D",             "f",             1,         7,       1,
+    20,    "D",             "f",             2,         7,       1,
+    21,    "D",             "f",             3,         7,       1
+  )
+
+  actual1 <- getVialCountOfFirstStd(dataset1)
+  actual2 <- getVialCountOfFirstStd(dataset2)
+
+  expect_equal(actual1, 1)
+  expect_equal(actual2, 2)
+
+})

@@ -42,8 +42,10 @@ getQualityControlInfo <- function(dataset, accumulatedDataset) {
     select(d18O = d18ODeviation, dD = dDDeviation) %>%
     as.list()
 
+  vialCountOfFirstStd <- getVialCountOfFirstStd(dataset)
+
   rmsdDeviationDataOfStandards <- deviationDataOfStandards %>%
-    filter(Sample > 1) %>%  # do not use very first standard for rmsd calculation
+    filter(Sample > vialCountOfFirstStd) %>% # discard very first standard here
     summarise(d18O = calculateRMSD(d18OMeasured, d18OTrue),
               dD = calculateRMSD(dDMeasured, dDTrue)) %>%
     as.list()
@@ -119,4 +121,12 @@ doAccumulate <- function(dataset){
               d.Excess = mean(dExcess, na.rm = T),
               sd.d.Excess =
                 sqrt((sd(`d(D_H)Mean`, na.rm = T))^2 + 64 * (sd(`d(18_16)Mean`, na.rm = T)^2)))
+}
+
+getVialCountOfFirstStd <- function(dataset) {
+
+  dataset %>%
+    filter(`Identifier 1` == `Identifier 1`[[1]], vial_group == 1) %>%
+    select(Sample) %>%
+    max()
 }
