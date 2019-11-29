@@ -22,7 +22,7 @@ library(tidyverse)
 getQualityControlInfo <- function(dataset, accumulatedDataset) {
 
   infoDataOnStd <- dataset %>%
-    group_by(`Identifier 1`, block) %>%
+    group_by(`Identifier 1`, block, Sample) %>%
     summarise(Line = min(Line),
               d18OTrue = `o18_True`[[1]],
               dDTrue = `H2_True`[[1]],
@@ -99,14 +99,14 @@ filterInjections <- function(dataset, config){
   if (length(n) == 1)
     # use last n injections
     dataset %>%
-      group_by(`Identifier 1`, block) %>% 
+      group_by(`Identifier 1`, block, Sample) %>%
       slice((n() - n + 1):n()) %>%
       ungroup() %>%
       arrange(Line)
   else
     # n gives range of injections to use
     dataset %>%
-      group_by(`Identifier 1`, block) %>% 
+      group_by(`Identifier 1`, block, Sample) %>%
       slice(n) %>%
       ungroup() %>%
       arrange(Line)
@@ -115,7 +115,7 @@ filterInjections <- function(dataset, config){
 doAccumulate <- function(dataset){
   
   dataset %>%
-    group_by(`Identifier 1`, block) %>%
+    group_by(`Identifier 1`, block, Sample) %>%
     summarise(`Identifier 2` = `Identifier 2`[[1]],
               delta.O18 = mean(`d(18_16)Mean`, na.rm = T),
               delta.H2 = mean(`d(D_H)Mean`, na.rm = T),
