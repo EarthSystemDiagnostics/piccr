@@ -39,7 +39,6 @@ calculateMemoryCoefficients <- function(dataset) {
     split(.$`Identifier 1`) 
   memoryCoeffForEachStandard <- map(names(memoryCoeffForEachStandard), ~ {
     data <- select(memoryCoeffForEachStandard[[.]], `Inj Nr`, memoryCoeffD18O, memoryCoeffDD)
-    data <- select(memoryCoeffForEachStandard[[.]], `Inj Nr`, memoryCoeffD18O, memoryCoeffDD)
     setNames(data, c("Inj Nr", str_c(., "D18O"), str_c(., "DD")))
   })
   
