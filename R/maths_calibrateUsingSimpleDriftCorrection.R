@@ -18,25 +18,33 @@ library(tidyverse)
 calibrateUsingSimpleDriftCorrection <- function(dataset, config){
   
   dataset %>%
-    linearDriftCorrection() %>%
+    linearDriftCorrection(config) %>%
     linearCalibration(config, block = 1)
 }
 
-linearDriftCorrection <- function(dataset){
+linearDriftCorrection <- function(dataset, config){
   
   dataset <- addColumnSecondsSinceStart(dataset)
-  alphaValues <- calculateDriftSlope(dataset)
+  alphaValues <- calculateDriftSlope(dataset, config)
   driftCorrectedData <- applyDriftCorrection(dataset, alphaValues)
   
   return(driftCorrectedData)
 }
 
-calculateDriftSlope <- function(dataset){
+calculateDriftSlope <- function(dataset, config){
   
   trainingData <- dataset %>%
     filter(useForDriftCorr == TRUE) %>%
     drop_na(block)
-  
+
+  # if no memory correction is applied, use only the last three injections
+  if (config$use_memory_correction == FALSE) {
+    trainingData <- trainingData %>%
+      group_by(`Identifier 1`, `vial_group`) %>%
+      slice((n()-2):n()) %>%
+      ungroup()
+  }
+
   dataForEachStandard <- split(trainingData, trainingData$`Identifier 1`)
   
   # TODO: clean this code

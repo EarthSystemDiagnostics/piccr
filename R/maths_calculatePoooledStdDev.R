@@ -16,10 +16,10 @@ library(tidyverse)
 calculatePoooledSD <- function(dataset){
  
    stdDevForEachSample <- dataset %>% 
-     group_by(`Identifier 1`, block) %>% 
+     group_by(`Identifier 1`, block, vial_group) %>%
      summarise(n = n(), 
-               sd.d18O = sd(`d(18_16)Mean`),
-               sd.dD = sd(`d(D_H)Mean`)) %>% 
+               sd.d18O = sd(`d(18_16)Mean`, na.rm = TRUE),
+               sd.dD = sd(`d(D_H)Mean`), na.rm = TRUE) %>%
      ungroup()
 
    pooledStdDev <- stdDevForEachSample %>%

@@ -48,6 +48,7 @@ processSingleDataset <- function(name, datasets, config){
   # pre-process the input dataset
   preProcessed <- dataset %>%
     groupStandardsInBlocks(config) %>%
+    assignVialsToGroups() %>%
     normalizeInjectionNumbers() %>%
     associateStandardsWithConfigInfo(config)
   

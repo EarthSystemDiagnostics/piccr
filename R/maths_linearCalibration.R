@@ -55,7 +55,7 @@ getTrainingData <- function(dataset, config, useBlock) {
   # if no memory correction is applied, use only the last three injections for calibration
   if (config$use_memory_correction == FALSE) {
     trainingData <- trainingData %>% 
-      group_by(`Identifier 1`) %>% 
+      group_by(`Identifier 1`, `vial_group`) %>%
       slice((n()-2):n()) %>% 
       ungroup()
   }
@@ -73,7 +73,7 @@ getTrainingData <- function(dataset, config, useBlock) {
 
 selectGroupsForTwoPointCalib <- function(groups){
 
-  orderedByIsotopeVal <- order(map_dbl(groups, ~ mean(.$`d(18_16)Mean`)))
+  orderedByIsotopeVal <- order(map_dbl(groups, ~ mean(.$`d(18_16)Mean`, na.rm = TRUE)))
   highestAndLowestIsotopeVal <- groups[c(orderedByIsotopeVal[1], tail(orderedByIsotopeVal, 1))]
   return(highestAndLowestIsotopeVal)
 }

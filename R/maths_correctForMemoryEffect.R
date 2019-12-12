@@ -21,7 +21,7 @@ correctForMemoryEffect <- function(dataset){
 calculateMemoryCoefficients <- function(dataset) {
   
   block1 <- filter(dataset, block == 1)
-  deltaTrueAndDeltaTruePrev <- getDeltaTrueAndDeltaTruePrevForEachSample(block1, `Identifier 1`)
+  deltaTrueAndDeltaTruePrev <- getDeltaTrueAndDeltaTruePrevForEachSample(block1, `Identifier 1`, `vial_group`)
   
   memoryCoefficients <- deltaTrueAndDeltaTruePrev %>%
     mutate(memoryCoeffD18O = formulaMemCoeff(.$`d(18_16)Mean`, .$deltaTrueD18O, .$deltaTruePrevD18O),
@@ -34,12 +34,20 @@ calculateMemoryCoefficients <- function(dataset) {
               memoryCoeffDD = mean(memoryCoeffDD, na.rm = T))
   
   # extract the mem coeff for each standard as a list of dataframes
-  memoryCoeffForEachStandard <- memoryCoefficients %>% 
-    select(`Inj Nr`, `Identifier 1`, memoryCoeffD18O, memoryCoeffDD) %>% 
-    split(.$`Identifier 1`) 
+  memoryCoeffForEachStandard <- memoryCoefficients %>%
+    select(`Inj Nr`, `Identifier 1`, vial_group, memoryCoeffD18O, memoryCoeffDD)
+
+  groupNames <- memoryCoeffForEachStandard %>%
+    group_keys(`Identifier 1`, `vial_group`) %>%
+    apply(1, function(x) {paste(x, collapse = "_vial")})
+
+  memoryCoeffForEachStandard <- memoryCoeffForEachStandard %>%
+    group_split(`Identifier 1`, `vial_group`) %>%
+    setNames(groupNames)
+
   memoryCoeffForEachStandard <- map(names(memoryCoeffForEachStandard), ~ {
     data <- select(memoryCoeffForEachStandard[[.]], `Inj Nr`, memoryCoeffD18O, memoryCoeffDD)
-    setNames(data, c("Inj Nr", str_c(., "D18O"), str_c(., "DD")))
+    setNames(data, c("Inj Nr", str_c(., "_d18O"), str_c(., "_dD")))
   })
   
   # join the mean mem coeff and the mem coeff for each standard into one dataframe
@@ -58,7 +66,7 @@ calculateMemoryCoefficients <- function(dataset) {
 applyMemoryCorrection <- function(dataset, memoryCoefficients){
   
   # get list with one dataframe per sample
-  samples     <- group_split(dataset, `Identifier 1`, block)
+  samples     <- group_split(dataset, `Identifier 1`, block, `vial_group`)
   sampleOrder <- order(map_dbl(samples, ~ first(.$Line)))
   samples     <- samples[sampleOrder]
   

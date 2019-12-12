@@ -22,18 +22,16 @@ library(tidyverse)
 getQualityControlInfo <- function(dataset, accumulatedDataset) {
 
   infoDataOnStd <- dataset %>%
-    group_by(`Identifier 1`, block) %>%
-    summarise(Line = min(Line),
-              d18OTrue = `o18_True`[[1]],
+    group_by(Sample) %>%
+    summarise(d18OTrue = `o18_True`[[1]],
               dDTrue = `H2_True`[[1]],
-              useAsControlStandard = useAsControlStandard[[1]]) %>%
-    rearrange()
+              useAsControlStandard = useAsControlStandard[[1]])
 
   deviationDataOfStandards <- accumulatedDataset %>%
-    inner_join(infoDataOnStd) %>%
+    inner_join(infoDataOnStd, by = "Sample") %>%
     mutate(d18ODeviation = d18OTrue - delta.O18,
            dDDeviation = dDTrue - delta.H2) %>%
-    select(Line, block,
+    select(Sample, `Identifier 1`, block,
            d18OMeasured = delta.O18, d18OTrue, d18ODeviation,
            dDMeasured = delta.H2, dDTrue, dDDeviation,
            useAsControlStandard) %>%
@@ -41,19 +39,19 @@ getQualityControlInfo <- function(dataset, accumulatedDataset) {
 
   deviationOfControlStandard <- deviationDataOfStandards %>%
     filter(useAsControlStandard == TRUE) %>%
-    ungroup() %>%  # to remove grouping attributes
     select(d18O = d18ODeviation, dD = dDDeviation) %>%
     as.list()
 
+  vialCountOfFirstStd <- getVialCountOfFirstStd(dataset)
+
   rmsdDeviationDataOfStandards <- deviationDataOfStandards %>%
-    filter(Line > 1) %>%  # do not use very first standard for rmsd calculation
-    ungroup() %>%
+    filter(Sample > vialCountOfFirstStd) %>% # discard very first standard here
     summarise(d18O = calculateRMSD(d18OMeasured, d18OTrue),
               dD = calculateRMSD(dDMeasured, dDTrue)) %>%
     as.list()
 
   return(list(
-    deviationsFromTrue = select(deviationDataOfStandards, -Line, -useAsControlStandard),
+    deviationsFromTrue = select(deviationDataOfStandards, -useAsControlStandard),
     pooledSD = calculatePoooledSD(dataset),
     rmsdDeviationsFromTrue = rmsdDeviationDataOfStandards,
     deviationOfControlStandard = deviationOfControlStandard
@@ -80,8 +78,7 @@ accumulateMeasurements <- function(dataset, config){
 
   accumulatedData <- dataset %>%
     filterInjections(config) %>%
-    doAccumulate() %>% 
-    rearrange()
+    doAccumulate()
 
   return(accumulatedData)
 }
@@ -99,38 +96,37 @@ filterInjections <- function(dataset, config){
   if (length(n) == 1)
     # use last n injections
     dataset %>%
-      group_by(`Identifier 1`, block) %>% 
+      group_by(Sample) %>%
       slice((n() - n + 1):n()) %>%
-      ungroup() %>%
-      arrange(Line)
+      ungroup()
   else
     # n gives range of injections to use
     dataset %>%
-      group_by(`Identifier 1`, block) %>% 
+      group_by(Sample) %>%
       slice(n) %>%
-      ungroup() %>%
-      arrange(Line)
+      ungroup()
 }
 
 doAccumulate <- function(dataset){
   
   dataset %>%
-    group_by(`Identifier 1`, block) %>%
-    summarise(`Identifier 2` = `Identifier 2`[[1]],
+    group_by(Sample) %>%
+    summarise(`Identifier 1` = `Identifier 1`[[1]],
+              `Identifier 2` = `Identifier 2`[[1]],
+              block = block[[1]],
               delta.O18 = mean(`d(18_16)Mean`, na.rm = T),
               delta.H2 = mean(`d(D_H)Mean`, na.rm = T),
               sd.O18 = sd(`d(18_16)Mean`, na.rm = T),
               sd.H2 = sd(`d(D_H)Mean`, na.rm = T),
               d.Excess = mean(dExcess, na.rm = T),
               sd.d.Excess =
-                  sqrt((sd(`d(D_H)Mean`, na.rm = T))^2 + 64 * (sd(`d(18_16)Mean`, na.rm = T)^2)),
-              Line = min(Line))
+                sqrt((sd(`d(D_H)Mean`, na.rm = T))^2 + 64 * (sd(`d(18_16)Mean`, na.rm = T)^2)))
 }
 
-rearrange <- function(dataset){
-  
+getVialCountOfFirstStd <- function(dataset) {
+
   dataset %>%
-    arrange(Line) %>%  # preserve original order of samples
-    select(-Line) %>%
-    rowid_to_column("Line")  # use continous row numbers
+    filter(`Identifier 1` == `Identifier 1`[[1]], vial_group == 1) %>%
+    select(Sample) %>%
+    max()
 }
