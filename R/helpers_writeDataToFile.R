@@ -1,5 +1,3 @@
-library(tidyverse)
-
 #' writeDataToFile
 #'
 #' Save processed datasets to disc. Note that the component 
@@ -14,6 +12,7 @@ library(tidyverse)
 #'                 Contains the component $processed.
 #' @param config A named list. Needs to contain at least the components
 #'               'output_directory' and 'include_standards_in_output'.
+#' @import dplyr
 #'
 #' @return No relevant return value
 #'
@@ -29,18 +28,19 @@ createOutputDirectory <- function(folder){
 }
 
 writeDatasets <- function(folder, datasets, config){
-  walk(datasets, writeSingleDataset, folder = folder, config = config)
+  purrr::walk(datasets, writeSingleDataset, folder = folder, config = config)
 }
 
+#' @import dplyr
 writeSingleDataset <- function(dataset, folder, config){
   dataset$processed %>%
     removeStandardsFromDataIfRequested(config) %>%
-    write_csv(path = file.path(folder, dataset$name), na = "")
+    readr::write_csv(path = file.path(folder, dataset$name), na = "")
 }
 
 removeStandardsFromDataIfRequested <- function(dataset, config){
   if(!config$include_standards_in_output){
-    return(filter(dataset, !isStandard(`Identifier 1`, config)))
+    return(dplyr::filter(dataset, !isStandard(`Identifier 1`, config)))
   }
   return(dataset)
 }

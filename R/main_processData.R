@@ -38,9 +38,10 @@
 #'
 processData <- function(datasets, config){
   
-  map(names(datasets), processSingleDataset, config = config, datasets = datasets)
+  purrr::map(names(datasets), processSingleDataset, config = config, datasets = datasets)
 }
 
+#' @import dplyr
 processSingleDataset <- function(name, datasets, config){
   
   dataset <- datasets[[name]]

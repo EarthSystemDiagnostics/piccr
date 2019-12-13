@@ -1,5 +1,3 @@
-library(tidyverse)
-
 #' Add column dExcess
 #'
 #' Add the column "dExcess" to the dataset. dExcess is 
@@ -11,5 +9,5 @@ library(tidyverse)
 #' 
 addColumnDExcess <- function(dataset){
   
-  mutate(dataset, dExcess = `d(D_H)Mean` - `d(18_16)Mean` * 8)
+  dplyr::mutate(dataset, dExcess = `d(D_H)Mean` - `d(18_16)Mean` * 8)
 }

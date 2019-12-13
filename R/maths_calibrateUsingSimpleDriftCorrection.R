@@ -1,5 +1,3 @@
-library(tidyverse)
-
 #' Calibrate using simple drift correction
 #' 
 #' Apply calibration and drift correction to the input dataset. Uses
@@ -12,6 +10,7 @@ library(tidyverse)
 #'                 raw Picarro output).
 #' @param config A named list of config arguments. The required config arguments 
 #'               are the same as for the function "linearDriftCorrection".
+#' @import dplyr
 #'
 #' @return A data.frame.
 #' 
@@ -31,11 +30,12 @@ linearDriftCorrection <- function(dataset, config){
   return(driftCorrectedData)
 }
 
+#' @import dplyr
 calculateDriftSlope <- function(dataset, config){
   
   trainingData <- dataset %>%
     filter(useForDriftCorr == TRUE) %>%
-    drop_na(block)
+    tidyr::drop_na(block)
 
   # if no memory correction is applied, use only the last three injections
   if (config$use_memory_correction == FALSE) {
@@ -49,18 +49,19 @@ calculateDriftSlope <- function(dataset, config){
   
   # TODO: clean this code
   slopeD18O <- dataForEachStandard %>%
-    map(function(x) lm(`d(18_16)Mean` ~ SecondsSinceStart, data = x)) %>%
-    map_dbl(~ coef(.)[[2]]) %>%
+    purrr::map(function(x) lm(`d(18_16)Mean` ~ SecondsSinceStart, data = x)) %>%
+    purrr::map_dbl(~ coef(.)[[2]]) %>%
     mean()
   
   slopeDD <- dataForEachStandard %>%
-    map(function(x) lm(`d(D_H)Mean` ~ SecondsSinceStart, data = x)) %>%
-    map_dbl(~ coef(.)[[2]]) %>%
+    purrr::map(function(x) lm(`d(D_H)Mean` ~ SecondsSinceStart, data = x)) %>%
+    purrr::map_dbl(~ coef(.)[[2]]) %>%
     mean()
   
   list(d18O = slopeD18O, dD = slopeDD)
 }
 
+#' @import dplyr
 applyDriftCorrection <- function(dataset, alpha){
   
   dataset %>%

@@ -1,5 +1,3 @@
-library(tidyverse)
-
 #' calculate poooled standard deviation
 #' 
 #' Calculate the pooled standard deviation for d18O and dD. The pooled standard
@@ -10,7 +8,7 @@ library(tidyverse)
 #'     sdPooled = sqrt( x / y )
 #'
 #' @param datasets A data.frame with isotope measurement data.
-#'
+#' @import dplyr
 #' @return A list with the two named elements
 #'         "d18O" and "dD" (the pooled standard deviation for d18O and dD).
 calculatePoooledSD <- function(dataset){

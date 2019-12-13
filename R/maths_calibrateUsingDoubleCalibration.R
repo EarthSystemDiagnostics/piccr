@@ -1,5 +1,3 @@
-library(tidyverse)
-
 #' Calibrate the given dataset using double calibration
 #'
 #' @param dataset A data.frame with isotope measurement data.
@@ -23,6 +21,7 @@ calibrateUsingDoubleCalibration <- function(dataset, config){
   applyDoubleCalibration(dataset, calibParamsBlock1, calibSlopes)
 }
 
+#' @import dplyr
 getCalibTimes <- function(dataset, useBlocks){
   
   addColumnSecondsSinceStart(dataset) %>%
@@ -50,6 +49,7 @@ getCalibrationSlopes <- function(paramsBlock1, paramsBlockN, calibTimes){
   )
 }
 
+#' @import dplyr
 applyDoubleCalibration <- function(dataset, calibParamsBlock1, calibSlopes){
   
   d18OCalibSlope     <- calibParamsBlock1$d18O$slope

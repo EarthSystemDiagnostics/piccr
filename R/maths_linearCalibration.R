@@ -1,5 +1,3 @@
-library(tidyverse)
-
 #' linearCalibration
 #'
 #' Take a data.frame with isotope measurement data and 
@@ -48,6 +46,7 @@ getCalibInterceptAndSlope <- function(dataset, config, useBlock){
   )
 }
 
+#' @import dplyr
 getTrainingData <- function(dataset, config, useBlock) {
   
   trainingData <- filter(dataset, block == useBlock, useForCalibration == TRUE)
@@ -73,11 +72,12 @@ getTrainingData <- function(dataset, config, useBlock) {
 
 selectGroupsForTwoPointCalib <- function(groups){
 
-  orderedByIsotopeVal <- order(map_dbl(groups, ~ mean(.$`d(18_16)Mean`, na.rm = TRUE)))
+  orderedByIsotopeVal <- order(purrr::map_dbl(groups, ~ mean(.$`d(18_16)Mean`, na.rm = TRUE)))
   highestAndLowestIsotopeVal <- groups[c(orderedByIsotopeVal[1], tail(orderedByIsotopeVal, 1))]
   return(highestAndLowestIsotopeVal)
 }
 
+#' @import dplyr
 applyCalibration <- function(dataset, calibrationParams){
   
   d18OIntercept <- calibrationParams$d18O$intercept

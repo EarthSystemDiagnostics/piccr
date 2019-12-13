@@ -1,5 +1,3 @@
-library(magrittr)
-
 #' processFiles
 #' 
 #' Main interface for the stand-alone use of piccr. Input the path to
@@ -9,6 +7,7 @@ library(magrittr)
 #' Relies on processData(..) to do the actual processing.
 #' 
 #' @param configFile A character string naming the config file.
+#' @import dplyr
 #'
 #' @return A list. See the documentation for processData(..) for details.
 #' 

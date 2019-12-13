@@ -1,7 +1,3 @@
-library(tidyverse)
-library(lubridate)
-library(yaml)
-
 #' Read the specified YAML configuration file for piccr processing.
 #' 
 #' @param configFile A character string naming the config file.
@@ -37,12 +33,12 @@ parseConfig <- function(configFile){
 readFiles <- function(config) {
   
   folder <- config$input_directory
-  file_pattern <- str_c("*", config$file_extension)
+  file_pattern <- stringr::str_c("*", config$file_extension)
   
   filenames <- list.files(path = folder, pattern = file_pattern)
   pathsToFiles <- file.path(folder, filenames)
   
-  datasets <- map(pathsToFiles, read_csv)
+  datasets <- purrr::map(pathsToFiles, readr::read_csv)
   names(datasets) <- filenames
   
   return(datasets)
@@ -54,6 +50,7 @@ readFiles <- function(config) {
 #' from two or more consectuive vials.
 #' 
 #' @param datasets A data.frame.
+#' @import dplyr
 #'                 
 #' @return A data.frame. The column of injection numbers has been 
 #'         re-calculated accounting for possible consecutive vials 
@@ -83,6 +80,7 @@ normalizeInjectionNumbers <- function(dataset) {
 #'               'standards'; a named list with the components
 #'               'name', 'o18_True', 'H2_True', 'use_for_drift_correction',
 #'               'use_for_calibration', and 'use_as_control_standard'.
+#' @import dplyr
 #'
 #' @return A data.frame.
 #'
@@ -115,7 +113,7 @@ associateStandardsWithConfigInfo <- function(dataset, config){
 #'
 groupStandardsInBlocks <- function(dataset, config){
     
-  dataset <- add_column(dataset, block = NA)
+  dataset <- tibble::add_column(dataset, block = NA)
   currBlock <- 0
   inBlock <- FALSE
   
@@ -143,6 +141,7 @@ groupStandardsInBlocks <- function(dataset, config){
 #'                'Time Code'. The elements of 'Time Code' should
 #'                be character vectors of the format 'yyyy/mm/ddhh:mm:ss'
 #'                (e.g. '2019/11/2510:00:00').
+#' @import dplyr
 #'
 #' @return A data.frame that includes the column 'SecondsSinceStart'.
 #' 
@@ -164,7 +163,7 @@ addColumnSecondsSinceStart <- function(dataset){
 #' @return A logical. 
 #' 
 isStandard <- function(id1, config){
-  id1 %in% map(config$standards, ~ .$name)
+  id1 %in% purrr::map(config$standards, ~ .$name)
 }
 
 #' Build output list
@@ -219,6 +218,7 @@ buildOutputList <- function(name, config, dataset, memoryCorrected, memoryCoeffi
 #' same standard or probe across the measurement.
 #' @param dataset a data.frame; needs to contain at least the columns
 #' \code{Line} and \code{Identifier 1}.
+#' @import dplyr
 #' @return the input data.frame appended by the column \code{vial_group}.
 #'
 assignVialsToGroups <- function(dataset) {
@@ -242,9 +242,9 @@ assignVialsToGroups <- function(dataset) {
   }
 
   dataset <- dataset %>%
-    add_column(vial_group = 1) %>%
+    tibble::add_column(vial_group = 1) %>%
     group_split(`Identifier 1`) %>%
-    map(groupVials) %>%
+    purrr::map(groupVials) %>%
     bind_rows() %>%
     arrange(Line)
 

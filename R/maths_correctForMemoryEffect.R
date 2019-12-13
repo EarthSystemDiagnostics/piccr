@@ -1,5 +1,3 @@
-library(tidyverse)
-
 #' Correct for memory effect
 #' 
 #' Take a data.frame with isotope measurement data and apply memory correction to it.
@@ -18,6 +16,7 @@ correctForMemoryEffect <- function(dataset){
               memoryCoefficients = memoryCoefficients))
 }
 
+#' @import dplyr
 calculateMemoryCoefficients <- function(dataset) {
   
   block1 <- filter(dataset, block == 1)
@@ -45,14 +44,14 @@ calculateMemoryCoefficients <- function(dataset) {
     group_split(`Identifier 1`, `vial_group`) %>%
     setNames(groupNames)
 
-  memoryCoeffForEachStandard <- map(names(memoryCoeffForEachStandard), ~ {
+  memoryCoeffForEachStandard <- purrr::map(names(memoryCoeffForEachStandard), ~ {
     data <- select(memoryCoeffForEachStandard[[.]], `Inj Nr`, memoryCoeffD18O, memoryCoeffDD)
-    setNames(data, c("Inj Nr", str_c(., "_d18O"), str_c(., "_dD")))
+    setNames(data, c("Inj Nr", stringr::str_c(., "_d18O"), stringr::str_c(., "_dD")))
   })
   
   # join the mean mem coeff and the mem coeff for each standard into one dataframe
   tablesToJoin <- append(memoryCoeffForEachStandard, list(meanMemoryCoefficients))
-  memCoeffOutput <- reduce(tablesToJoin, full_join, by = "Inj Nr")
+  memCoeffOutput <- purrr::reduce(tablesToJoin, full_join, by = "Inj Nr")
 
   # remove all trailing rows from output dataframe which only contain NA values
   memCoeffOutput <- memCoeffOutput %>%
@@ -63,11 +62,12 @@ calculateMemoryCoefficients <- function(dataset) {
   return(memCoeffOutput)
 }
 
+#' @import dplyr
 applyMemoryCorrection <- function(dataset, memoryCoefficients){
   
   # get list with one dataframe per sample
   samples     <- group_split(dataset, `Identifier 1`, block, `vial_group`)
-  sampleOrder <- order(map_dbl(samples, ~ first(.$Line)))
+  sampleOrder <- order(purrr::map_dbl(samples, ~ first(.$Line)))
   samples     <- samples[sampleOrder]
   
   # accumulate result in these vars
@@ -115,6 +115,7 @@ applyMemoryCorrection <- function(dataset, memoryCoefficients){
   return(dataset)
 }
 
+#' @import dplyr
 getDeltaTrueAndDeltaTruePrevForEachSample <- function(dataset, ...){
   
   lastThreeInj <- dataset %>%
@@ -134,8 +135,8 @@ getDeltaTrueAndDeltaTruePrevForEachSample <- function(dataset, ...){
   deltaTruePrevDD <- lag(deltaTrueInCorrectOrder$deltaTrueDD)
   
   deltaTrueAndDeltaTruePrev <- deltaTrueInCorrectOrder %>% 
-    add_column(deltaTruePrevD18O = deltaTruePrevD18O, 
-               deltaTruePrevDD = deltaTruePrevDD)
+    tibble::add_column(deltaTruePrevD18O = deltaTruePrevD18O,
+                       deltaTruePrevDD = deltaTruePrevDD)
   
   deltasForAllRows <- inner_join(dataset, deltaTrueAndDeltaTruePrev)
   

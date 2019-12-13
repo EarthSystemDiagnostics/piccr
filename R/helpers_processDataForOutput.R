@@ -1,5 +1,3 @@
-library(tidyverse)
-
 #' Obtain quality control information
 #'
 #' Obtain the quality control information for a data set based on the deviations
@@ -9,6 +7,7 @@ library(tidyverse)
 #' of a specific data set.
 #' @param accumulatedDataset a data frame with the accumulated
 #' (i.e. injection-averaged) measurement data for this data set.
+#' @import dplyr
 #' 
 #' @return A list with three elements:
 #'   $deviationsFromTrue (data frame with the deviations from the true value for
@@ -35,7 +34,7 @@ getQualityControlInfo <- function(dataset, accumulatedDataset) {
            d18OMeasured = delta.O18, d18OTrue, d18ODeviation,
            dDMeasured = delta.H2, dDTrue, dDDeviation,
            useAsControlStandard) %>%
-    drop_na()
+    tidyr::drop_na()
 
   deviationOfControlStandard <- deviationDataOfStandards %>%
     filter(useAsControlStandard == TRUE) %>%
@@ -71,6 +70,7 @@ getQualityControlInfo <- function(dataset, accumulatedDataset) {
 #' @param datasets A data frame with the data set.
 #' @param config A named list. Needs to contain the component
 #'               'average_over_inj'.
+#' @import dplyr
 #'
 #' @return A data frame.
 #'
@@ -83,6 +83,13 @@ accumulateMeasurements <- function(dataset, config){
   return(accumulatedData)
 }
 
+#' title
+#'
+#' description
+#' @param dataset
+#' @param config
+#' @import dplyr
+#' @return
 filterInjections <- function(dataset, config){
   
   n <- config$average_over_inj
@@ -107,6 +114,12 @@ filterInjections <- function(dataset, config){
       ungroup()
 }
 
+#' title
+#'
+#' description
+#' @param dataset
+#' @import dplyr
+#' @return
 doAccumulate <- function(dataset){
   
   dataset %>%
@@ -123,6 +136,12 @@ doAccumulate <- function(dataset){
                 sqrt((sd(`d(D_H)Mean`, na.rm = T))^2 + 64 * (sd(`d(18_16)Mean`, na.rm = T)^2)))
 }
 
+#' title
+#'
+#' description
+#' @param dataset
+#' @import dplyr
+#' @return
 getVialCountOfFirstStd <- function(dataset) {
 
   dataset %>%
