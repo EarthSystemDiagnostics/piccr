@@ -1,5 +1,4 @@
-library(testthat)
-library(tidyverse)
+library(tibble)
 
 context("Test assigning vials into groups")
 
@@ -9,7 +8,7 @@ config <- list(standards = list(list(name = "STD_A"),
 
 test_that("test that grouping works as expected", {
 
-  dataset1 <- tribble(
+  dataset1 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`,
     # -- / -------------- / -------- / -------------- / -------------
     1,     "STD_A",         1,         1,               1,
@@ -23,7 +22,7 @@ test_that("test that grouping works as expected", {
     9,     "PROBE_C",       1,         30,              30
   )
 
-  expected1 <- tribble(
+  expected1 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~vial_group,
     # -- / -------------- / -------- / -------------- / -------------/ ------------
     1,     "STD_A",         1,         1,               1,              1,
@@ -37,7 +36,7 @@ test_that("test that grouping works as expected", {
     9,     "PROBE_C",       1,         30,              30,             1
   )
 
-  dataset2 <- tribble(
+  dataset2 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`,
     # -- / -------------- / -------- / -------------- / -------------
     1,     "STD_A",         1,         1,               1,
@@ -55,7 +54,7 @@ test_that("test that grouping works as expected", {
     13,    "STD_C",         2,         3,               3,
   )
 
-  expected2 <- tribble(
+  expected2 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~vial_group,
     # -- / -------------- / -------- / -------------- / -------------/ ------------
     1,     "STD_A",         1,         1,               1,             1,
@@ -85,7 +84,7 @@ test_that("test that grouping works as expected", {
 
 test_that("test that vial grouping yields proper injection numbers", {
 
-  dataset <- tribble(
+  dataset <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`,
     # -- / -------------- / -------- / -------------- / -------------
     1,     "STD_A",         1,         1,               1,
@@ -107,7 +106,7 @@ test_that("test that vial grouping yields proper injection numbers", {
     17,    "STD_A",         2,         1,               1
   )
 
-  expected <- tribble(
+  expected <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~block, ~vial_group,
     # -- / -------------- / -------- / -------------- / -------------/ ------/ ------------
     1,     "STD_A",         1,         1,               1,             1,      1,
@@ -142,7 +141,7 @@ test_that("test that vial grouping yields proper injection numbers", {
 
 test_that("test vial grouping on true delta and true previous delta", {
 
-  dataset1 <- tribble(
+  dataset1 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~vial_group,
     # -- / -------------- / -------- / -------------- / -------------/ ------------
     1,     "STD_A",         1,         1,               10,            1,
@@ -156,7 +155,7 @@ test_that("test vial grouping on true delta and true previous delta", {
     9,     "STD_C",         3,         5,               50,            1
   )
 
-  expected1 <- tribble(
+  expected1 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~vial_group, ~deltaTrueD18O, ~deltaTrueDD, ~deltaTruePrevD18O, ~deltaTruePrevDD,
     # -- / -------------- / -------- / -------------- / -------------/ -----------/ --------------/ ------------/ ------------------/ -----------------
     1,     "STD_A",         1,         1,               10,            1,           2,              20,           NA,                 NA,
@@ -170,7 +169,7 @@ test_that("test vial grouping on true delta and true previous delta", {
     9,     "STD_C",         3,         5,               50,            1,           4,              40,           3,                  30
   )
 
-  dataset2 <- tribble(
+  dataset2 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~vial_group,
     # -- / -------------- / -------- / -------------- / -------------/ ------------
     1,     "STD_A",         1,         1,               10,            1,
@@ -187,7 +186,7 @@ test_that("test vial grouping on true delta and true previous delta", {
     12,    "STD_C",         3,         5,               50,            1
   )
 
-  expected2 <- tribble(
+  expected2 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~vial_group, ~deltaTrueD18O, ~deltaTrueDD, ~deltaTruePrevD18O, ~deltaTruePrevDD,
     # -- / -------------- / -------- / -------------- / -------------/ -----------/ --------------/ ------------/ ------------------/ -----------------
     1,     "STD_A",         1,         1,               10,            1,           2,              20,           NA,                 NA,

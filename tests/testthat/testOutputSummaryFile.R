@@ -1,5 +1,6 @@
-library(testthat)
-library(tidyverse)
+library(tibble)
+library(readr)
+library(stringr)
 
 context("test creating and writing a summary file with quality control information")
 
@@ -7,7 +8,7 @@ test_that("test", {
   
   # ------------ INITIALIZE INPUTS -------------
   
-  df1 <- tribble(
+  df1 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Identifier 2`, ~block, ~delta.O18, ~delta.H2,
     # -- / -------------- / -------------- / ----- / --------- / -------- 
     1,     "C",             "x",             1,      4,          10,
@@ -15,7 +16,7 @@ test_that("test", {
     3,     "B",             "z",             2,      1,         -8,
     4,     "C",             "x",             3,      -6,         1
   )
-  df2 <- tribble(
+  df2 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Identifier 2`, ~block, ~delta.O18, ~delta.H2,
     # -- / -------------- / -------------- / ----- / --------- / -------- 
     1,     "C",             "x",             1,      2,          20,
@@ -46,8 +47,8 @@ test_that("test", {
   
   # ----------- MAKE EXPECTATIONS --------------
   
-  actual <- read_file(file)
-  expected <- str_c(
+  actual <- readr::read_file(file)
+  expected <- stringr::str_c(
     "### AVERAGE OVER ALL FILES: ###\n\n",
     "pooled standard deviation delta O18: 1.50\n",
     "pooled standard deviation delta H2: -7.65\n\n",

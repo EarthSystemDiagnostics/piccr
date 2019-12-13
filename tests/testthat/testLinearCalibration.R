@@ -1,11 +1,11 @@
-library(testthat)
-library(tidyverse)
+library(tibble)
+library(dplyr)
 
 context("Test simple calibration without drift correction")
 
 # In this data set, o18_True is calculated from d(18_16)Mean applying
 # a slope = 0.9 and an intercept = -2.
-dataset1 <- tribble(
+dataset1 <- tibble::tribble(
   ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
   # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
    1,    "A",             1,         1,               1,      -5,            -1.1,      -5,       TRUE,
@@ -18,7 +18,7 @@ dataset1 <- tribble(
    8,    "B",             2,         3,               1,      7,             0.7,       7,        TRUE,
    9,    "B",             3,         3,               1,      7,             0.7,       7,        TRUE
 )
-expected1 <- tribble(
+expected1 <- tibble::tribble(
   ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
   # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
   1,    "A",             1,         -1.1,             1,      -5,            -1.1,      -5,       TRUE,
@@ -53,7 +53,7 @@ test_that("test getCalibInterceptAndSlope", {
 test_that("test getCalibInterceptAndSlope for dataset with rows that should be excluded", {
   
   # In this dataset only the first two rows should be used to determine calibration intercept and slope.
-  dataset2 <- tribble(
+  dataset2 <- tibble::tribble(
     ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~block, ~o18_True, ~H2_True, ~useForCalibration,
     # ------------ / ----------- / ----- / -------- / ------- / ---------------
     1,             2,            1,      1,         2,        TRUE,
@@ -79,7 +79,7 @@ test_that("test applyCalibration", {
     d18O = list(intercept = 5, slope = 0.9),
     dD = list(intercept = -2, slope = 1.3)
   )
-  data <- tribble(
+  data <- tibble::tribble(
     ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~otherCol,
     # ------------ / ------------ / ----------
     15,              7,             "w",
@@ -87,7 +87,7 @@ test_that("test applyCalibration", {
     -2,              0,             "y",
     0,               -30,           "z"
   )
-  expected <- tribble(
+  expected <- tibble::tribble(
     ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~otherCol,
     # ------------ / ------------ / ----------
     18.5,            7.1,            "w",
@@ -97,7 +97,7 @@ test_that("test applyCalibration", {
   )
   
   actual <- applyCalibration(data, calibrationParams)
-  actual <- mutate(actual, `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
+  actual <- dplyr::mutate(actual, `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
   
   expect_equal(actual, expected)
 })
@@ -105,7 +105,7 @@ test_that("test applyCalibration", {
 test_that("test calibrateNoDriftSingleDataset", {
   
   actual <- linearCalibration(dataset1, config = config, block = 1)
-  actual <- mutate(actual, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
+  actual <- dplyr::mutate(actual, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
   
   expect_equal(actual, expected1)
 })
@@ -113,14 +113,14 @@ test_that("test calibrateNoDriftSingleDataset", {
 test_that("test calibrateWithoutDriftCorrection", {
   
   actual <- linearCalibration(dataset1, config = config)
-  actual <- mutate(actual, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
+  actual <- dplyr::mutate(actual, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
   
   expect_equal(actual, expected1)
 })
 
 test_that("test use only last three injections if memory correction is not used", {
   
-  dataset3 <- tribble(
+  dataset3 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration, ~vial_group,
     # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ----------------- / -----------
     1,    "A",             1,         100,              1,      100,           2,        -5,        TRUE,               1,
@@ -150,7 +150,7 @@ test_that("test use only last three injections if memory correction is not used"
 
 test_that("test two point calibration", {
   
-  dataset4 <- tribble(
+  dataset4 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration, ~vial_group,
     # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ----------------- / -----------
     1,    "C",             1,         0,                1,      100,           5,         4,        TRUE,               1,
@@ -183,7 +183,7 @@ test_that("test training data for grouped vials", {
   config <- list(use_memory_correction = FALSE,
                  use_three_point_calibration = TRUE)
 
-  dataset5 <- tribble(
+  dataset5 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~useForCalibration, ~vial_group,
     # -- / -------------- / -------- / -------------- / ----- / ------------ / ----------------- / -----------
     1,     "A",             1,         1,               1,      10,            TRUE,               1,
@@ -203,7 +203,7 @@ test_that("test training data for grouped vials", {
     15,    "A",             3,         1,               1,      10,            TRUE,               2,
     16,    "A",             4,         1,               1,      10,            TRUE,               2
   )
-  expected <- tribble(
+  expected <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~useForCalibration, ~vial_group,
     # -- / -------------- / -------- / -------------- / ----- / ------------ / ----------------- / -----------
     2,     "A",             2,         1,               1,      10,            TRUE,               1,
@@ -227,7 +227,7 @@ test_that("test training data for grouped vials", {
   config <- list(use_memory_correction = TRUE,
                  use_three_point_calibration = FALSE)
 
-  dataset6 <- tribble(
+  dataset6 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~useForCalibration, ~vial_group,
     # -- / -------------- / -------- / -------------- / ----- / ------------ / ----------------- / -----------
     1,     "A",             1,         NA,               1,     NA,            TRUE,               1,
@@ -247,7 +247,7 @@ test_that("test training data for grouped vials", {
     15,    "A",             3,         1,               1,      10,            TRUE,               2,
     16,    "A",             4,         1,               1,      10,            TRUE,               2
   )
-  expected <- tribble(
+  expected <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~useForCalibration, ~vial_group,
     # -- / -------------- / -------- / -------------- / ----- / ------------ / ----------------- / -----------
     1,     "A",             1,         NA,               1,     NA,            TRUE,               1,
@@ -271,7 +271,7 @@ test_that("test training data for grouped vials", {
   config <- list(use_memory_correction = FALSE,
                  use_three_point_calibration = FALSE)
 
-  dataset7 <- tribble(
+  dataset7 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~useForCalibration, ~vial_group,
     # -- / -------------- / -------- / -------------- / ----- / ------------ / ----------------- / -----------
     1,     "A",             1,         1,               1,      10,            FALSE,              1,
@@ -295,7 +295,7 @@ test_that("test training data for grouped vials", {
     19,    "D",             3,         4,               1,      40,            TRUE,               1,
     20,    "D",             4,         4,               1,      40,            TRUE,               1
     )
-  expected <- tribble(
+  expected <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~useForCalibration, ~vial_group,
     # -- / -------------- / -------- / -------------- / ----- / ------------ / ----------------- / -----------
     6,     "B",             2,         2,               1,      20,            TRUE,               1,

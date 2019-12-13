@@ -1,5 +1,5 @@
-library(testthat)
-library(tidyverse)
+library(tibble)
+library(dplyr)
 
 context("Test the memory correction logic")
 
@@ -8,7 +8,7 @@ context("Test the memory correction logic")
 # in this dataset:
 # d18O: m1 = 0.5, m2 = 0.75, m3 = 1
 # dD: m1 = 0.7, m2 = 0.9, m3 = 0.99
-dataset1 <- tribble(
+dataset1 <- tibble::tribble(
   ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~vial_group,
   # -- / -------------- / -------- / -------------- / ----- / ------------ / -----------
    1,    "A",             1,         0.5,             1,      -5,            1,
@@ -21,7 +21,7 @@ dataset1 <- tribble(
    8,    "B",             2,         2.75,            1,      0.391,         1,
    9,    "B",             3,         3,               1,      0.0391,        1
 )
-expected1 <- tribble(
+expected1 <- tibble::tribble(
   ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~vial_group,
   # -- / -------------- / -------- / -------------- / ----- / ------------ / -----------
    1,    "A",           1,         NA,               1,      NA,             1,
@@ -38,7 +38,7 @@ expected1 <- tribble(
 # in this dataset:
 # d18O: m1 = 0.98, m2 = 0.985, m3 = 0.99, m4 = 0.995, m5 = 0.9999
 # dD: ḿ1 = 0.98, m2 = 0.975, m3 = 0.98, m4 = 0.99, m5 = 0.995
-dataset2 <- tribble(
+dataset2 <- tibble::tribble(
   ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~vial_group,
   #--- / -------------- / -------- / -------------- / ----- / ------------ / -----------
   1,     "Probe1",        1,         10,              NA,     -15,           1,
@@ -73,7 +73,7 @@ dataset2 <- tribble(
   30,    "Probe3",        2,         19.72984,        NA,     4.583644,      1,
   31,    "Probe3",        3,         19.81989,        NA,     4.666915,      1
 )
-expected2 <- tribble(
+expected2 <- tibble::tribble(
   ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~vial_group,
   #--- / -------------- / -------- / -------------- / ----- / ------------ / -----------
   1,     "Probe1",        1,         NA,              NA,     NA,            1,
@@ -111,7 +111,7 @@ expected2 <- tribble(
 # in this dataset: 
 # d18O: m1 = 0.5, m2 = 0.75, m3 = 0.875, m4 = 1
 # dD: m1 = 0.4, m2 = 0.6, m3 = 0.8, m4 = 1
-dataset3 <- tribble(
+dataset3 <- tibble::tribble(
   ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~`vial_group`,
   # -- / -------------- / -------- / -------------- / ----- / ------------ / --------------
    1,    "A",             1,         1,               1,      -5,            1,
@@ -130,7 +130,7 @@ dataset3 <- tribble(
 # in this dataset:
 # d18O: m1 = 0.5, m2 = 0.75, m3 = 0.875, m4 = 1
 # dD: m1 = 0.4, m2 = 0.6, m3 = 0.8, m4 = 1
-dataset4 <- tribble(
+dataset4 <- tibble::tribble(
   ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~`vial_group`,
   # -- / -------------- / -------- / -------------- / ----- / ------------ / --------------
   1,     "A",             1,         1,               1,      -5,            1,
@@ -158,20 +158,20 @@ test_that("test memory corrected datasets", {
   actual1 <- correctForMemoryEffect(dataset1)
   actual2 <- correctForMemoryEffect(dataset2)
 
-  df1Rounded <- mutate(actual1$datasetMemoryCorrected,
-                       `d(D_H)Mean` = round(`d(D_H)Mean`, 2),
-                       `d(18_16)Mean` = round(`d(18_16)Mean`, 2))
+  df1Rounded <- dplyr::mutate(actual1$datasetMemoryCorrected,
+                              `d(D_H)Mean` = round(`d(D_H)Mean`, 2),
+                              `d(18_16)Mean` = round(`d(18_16)Mean`, 2))
   expect_equal(df1Rounded, expected1)
 
-  df2Rounded <- mutate(actual2$datasetMemoryCorrected,
-                       `d(D_H)Mean` = round(`d(D_H)Mean`, 2),
-                       `d(18_16)Mean` = round(`d(18_16)Mean`, 2))
+  df2Rounded <- dplyr::mutate(actual2$datasetMemoryCorrected,
+                              `d(D_H)Mean` = round(`d(D_H)Mean`, 2),
+                              `d(18_16)Mean` = round(`d(18_16)Mean`, 2))
   expect_equal(df2Rounded, expected2)
 })
 
 test_that("test memory coefficients", {
 
-  memCoeffExpected1 <- tribble(
+  memCoeffExpected1 <- tibble::tribble(
     ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD, ~A_vial1_d18O, ~A_vial1_dD, ~B_vial1_d18O, ~B_vial1_dD, ~C_vial1_d18O, ~C_vial1_dD,
     # ------ / --------------- / ------------- / ------------ / ---------- / ------------ / ---------- / ------------ / -----------
     1,         0.75,             0.76,           NA_real_,      NA_real_,    0.75,          0.71,        0.75,          0.81,
@@ -179,7 +179,7 @@ test_that("test memory coefficients", {
     3,         1.25,             1.18,           NA_real_,      NA_real_,    1.25,          1.22,        1.25,          1.15,
   )
 
-  memCoeffExpected2 <- tribble(
+  memCoeffExpected2 <- tibble::tribble(
     ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD, ~A_vial1_d18O, ~A_vial1_dD, ~B_vial1_d18O, ~B_vial1_dD, ~C_vial1_d18O, ~C_vial1_dD,
     # ------ / --------------- / ------------- / ------------ / ---------- / ------------ / ---------- / ------------ / -----------
     1,         0.985,            0.992,          NA_real_,      NA_real_,    0.984,        0.992,        0.985,         0.992,
@@ -204,7 +204,7 @@ test_that("test memory coefficients", {
 
 test_that("test that NA values don't spread in applyCalibration", {
   
-  dataset1 <- tribble(
+  dataset1 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~vial_group,
     # -- / -------------- / -------- / -------------- / ----- / ------------ / -----------
     1,    "A",              1,         0.5,                1,      5,          1,
@@ -220,7 +220,7 @@ test_that("test that NA values don't spread in applyCalibration", {
     11,   "B",              2,         2.75,               2,       NA,        1,
     12,   "B",              3,         3,                  2,       NA,        1
   )
-  dataset2 <- tribble(
+  dataset2 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~vial_group,
     #--- / -------------- / -------- / -------------- / ----- / ------------ / -----------
     4,     "A",             1,         1.18,            1,      6.56,          1,
@@ -278,7 +278,7 @@ test_that("test injection range of mean memory coefficients", {
 
 test_that("different numbers of injections for the block 1 standards does not cause error", {
   
-  dataset4 <- tribble(
+  dataset4 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~vial_group,
     # -- / -------------- / -------- / -------------- / ----- / ------------ / -----------
     1,    "A",              1,         0.5,             1,      -5,            1,
@@ -301,7 +301,7 @@ test_that("different numbers of injections for the block 1 standards does not ca
 # in these datasets:
 # d18O: m.tilde = 0.082085
 # dD: m.tilde = 0.2231302
-dataset5 <- tribble(
+dataset5 <- tibble::tribble(
   ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~vial_group,
   #--- / -------------- / -------- / -------------- / ----- / ------------ / -----------
   1,     "WU",            1,         -9.179,           1,    -62.145,        1,
@@ -333,7 +333,7 @@ dataset5 <- tribble(
   27,    "A",             5,         -35.,             NA,   -280.022,       1,
   28,    "A",             6,         -35.,             NA,   -280.005,       1
 )
-dataset6 <- tribble(
+dataset6 <- tibble::tribble(
   ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~vial_group,
   #--- / -------------- / -------- / -------------- / ----- / ------------ / -----------
   1,     "WU",            1,         -9.179,           1,    -62.145,        1,
@@ -383,7 +383,7 @@ test_that("test that no sample data is lost in memory correction", {
   skip_if_not(exists("actual"), "previous test")
 
   actual <- actual$datasetMemoryCorrected %>%
-    filter(`Identifier 1` == "A")
+    dplyr::filter(`Identifier 1` == "A")
 
   expect_equal(sum(is.na(c(actual$`d(18_16)Mean`, actual$`d(D_H)Mean`))), 0)
 
@@ -408,7 +408,7 @@ test_that("test memory correction for identical non-consecutive samples", {
   # in this dataset:
   # d18O: m1 = 0.5, m2 = 0.75, m3 = 0.875, m4 = 1
   # dD: m1 = 0.4, m2 = 0.6, m3 = 0.8, m4 = 1
-  dataset7 <- tribble(
+  dataset7 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~`vial_group`,
     # -- / -------------- / -------- / -------------- / ----- / ------------ / --------------
     1,     "A",             1,         1,               1,      -5,            1,
@@ -442,7 +442,7 @@ test_that("test memory correction for identical non-consecutive samples", {
     29,    "A",             2,         1,               2,      1,             2,
     30,    "A",             3,         1,               2,      -2,            2
   )
-  expected <- tribble(
+  expected <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~`vial_group`,
     # -- / -------------- / -------- / -------------- / ----- / ------------ / --------------
     1,     "A",             1,         NA,              1,      NA,            1,
@@ -478,9 +478,9 @@ test_that("test memory correction for identical non-consecutive samples", {
   )
 
   actual <- correctForMemoryEffect(dataset7)
-  actualRounded <- mutate(actual$datasetMemoryCorrected,
-                          `d(D_H)Mean` = round(`d(D_H)Mean`, 1),
-                          `d(18_16)Mean` = round(`d(18_16)Mean`, 1))
+  actualRounded <- dplyr::mutate(actual$datasetMemoryCorrected,
+                                 `d(D_H)Mean` = round(`d(D_H)Mean`, 1),
+                                 `d(18_16)Mean` = round(`d(18_16)Mean`, 1))
 
   expect_equal(actualRounded, expected)
 

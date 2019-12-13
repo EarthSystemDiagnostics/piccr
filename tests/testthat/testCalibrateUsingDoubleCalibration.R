@@ -1,11 +1,12 @@
-library(testthat)
+library(tibble)
+library(dplyr)
 
 context("test calibrateUsingDoubleCalibration")
 
 
 test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and intercept 0)", {
   
-  dataset <- tribble(
+  dataset <- tibble::tribble(
     ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
     # ------------ / ----- / ---------------------- / -------------- / ------------ / -------- / ------- / ------------------
     "Std_A",         1,      "2019/11/2504:47:06",    1,               2,             1,         2,        TRUE,
@@ -29,8 +30,8 @@ test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and
   config <- list(use_memory_correction = TRUE, use_three_point_calibration = TRUE)
   
   actual <- calibrateUsingDoubleCalibration(dataset, config)
-  actual <- mutate(actual, `d(18_16)Mean` = round(actual$`d(18_16)Mean`, 10), 
-                                   `d(D_H)Mean` = round(actual$`d(D_H)Mean`, 10))
+  actual <- dplyr::mutate(actual, `d(18_16)Mean` = round(actual$`d(18_16)Mean`, 10), 
+                          `d(D_H)Mean` = round(actual$`d(D_H)Mean`, 10))
   
   expect_equal(actual, dataset)
 })
@@ -79,7 +80,7 @@ test_that("test getCalibrationSlopes (case slopes are not zero)", {
 
 test_that("test applyDoubleCalibration", {
   
-  dataset <- tribble(
+  dataset <- tibble::tribble(
     ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`,
     # ------------ / ----- / ---------------------- / -------------- / ------------
     "Std_A",         1,      "2019/11/2504:47:06",    1,               2,
@@ -105,7 +106,7 @@ test_that("test applyDoubleCalibration", {
     dD = list(alpha = -0.5, beta = 0)
   )
   
-  expected <- tribble(
+  expected <- tibble::tribble(
     ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`,
     # ------------ / ----- / ---------------------- / -------------- / ------------
     "Std_A",         1,      "2019/11/2504:47:06",    -2,              8,
@@ -124,7 +125,7 @@ test_that("test applyDoubleCalibration", {
   )
   
   actual <- applyDoubleCalibration(dataset, params1, calibSlopes)
-  actual <- mutate(actual, `d(18_16)Mean` = round(actual$`d(18_16)Mean`), `d(D_H)Mean` = round(actual$`d(D_H)Mean`))
+  actual <- dplyr::mutate(actual, `d(18_16)Mean` = round(actual$`d(18_16)Mean`), `d(D_H)Mean` = round(actual$`d(D_H)Mean`))
   
   expect_equal(actual, expected)
 })

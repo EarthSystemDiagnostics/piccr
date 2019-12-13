@@ -1,5 +1,4 @@
-library(testthat)
-library(tidyverse)
+library(tibble)
 
 context("Test associating standards with their true values")
 
@@ -16,11 +15,11 @@ test_that("associating standards for single row (standard, including usage in ph
                                        use_for_drift_correction = TRUE,
                                        use_for_calibration = TRUE,
                                        use_as_control_standard = TRUE)))
-  df_1 <- tibble(
+  df_1 <- tibble::tibble(
     `Identifier 1` = c("STD_A", "STD_B", "Probe", "STD_A"),
     val = 1:4
   )
-  dfExpected_1 <- tibble(
+  dfExpected_1 <- tibble::tibble(
     `Identifier 1` = c("STD_A", "STD_B", "Probe", "STD_A"),
     val = 1:4,
     o18_True = c(-2, 1.8, NA, -2),
@@ -29,11 +28,11 @@ test_that("associating standards for single row (standard, including usage in ph
     useForCalibration = c(T, T, NA, T),
     useAsControlStandard = c(F, T, NA, F)
   )
-  df_2 <- tibble(
+  df_2 <- tibble::tibble(
     `Identifier 1` = c("xyz", "STD_B", "Probe", "STD_A"),
     val = 1:4
   )
-  dfExpected_2 <- tibble(
+  dfExpected_2 <- tibble::tibble(
     `Identifier 1` = c("xyz", "STD_B", "Probe", "STD_A"),
     val = 1:4,
     o18_True = c(NA, 1.8, NA, -2),

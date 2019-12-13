@@ -1,11 +1,10 @@
-library(testthat)
-library(tidyverse)
+library(tibble)
 
 context("test calculatePooledStdDev")
 
 test_that("test calculatePooledStdDev", {
   
-  dataset1 <- tribble(
+  dataset1 <- tibble::tribble(
     ~`Identifier 1`, ~block, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~vial_group,
     # ------------ / ----- / -------------- / ------------ / -----------
     "C",             1,      1,               1,             1,
