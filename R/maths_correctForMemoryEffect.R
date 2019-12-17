@@ -226,7 +226,8 @@ getDeltaTrueAndDeltaTruePrevForEachSample <- function(dataset, ...){
     tibble::add_column(deltaTruePrevD18O = deltaTruePrevD18O,
                        deltaTruePrevDD = deltaTruePrevDD)
   
-  deltasForAllRows <- inner_join(dataset, deltaTrueAndDeltaTruePrev)
+  deltasForAllRows <- inner_join(dataset, deltaTrueAndDeltaTruePrev,
+                                 by = c("Identifier 1", "vial_group"))
   
   return(deltasForAllRows)
 }

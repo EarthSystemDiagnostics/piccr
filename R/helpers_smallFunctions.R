@@ -107,7 +107,7 @@ associateStandardsWithConfigInfo <- function(dataset, config){
               useForCalibration = as.logical(use_for_calibration),
               useAsControlStandard = as.logical(use_as_control_standard))
   
-  left_join(x = dataset, y = configAsTable)
+  left_join(x = dataset, y = configAsTable, by = "Identifier 1")
 }
 
 #' Group standards in blocks
