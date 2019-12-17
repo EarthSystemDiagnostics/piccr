@@ -1,8 +1,12 @@
-#' Read the specified YAML configuration file for piccr processing.
+#' Read the YAML configuration file
 #' 
-#' @param configFile A character string naming the config file.
+#' Read in the specified YAML configuration file for the \code{piccr}
+#' processing.
+#'
+#' @param configFile a character string with the file path of the configuration
+#' file.
 #' 
-#' @return A list.
+#' @return A list of the parameters read from the configuration file.
 #' 
 parseConfig <- function(configFile){
   
@@ -14,22 +18,20 @@ parseConfig <- function(configFile){
   })
 }
 
-#' Read files
+#' Read in measurement files
 #' 
-#' Read all files from a given input directory that have a 
-#' given file extension. Only works for csv files.
+#' Read all files from a given input directory that match a given file
+#' extension. Note that only csv files are supported.
+#'
+#' @param config A named list which needs to contain at least the
+#'   components \code{input_directory} (the directory which contains the files
+#'   to be read in) and \code{file_extension} (the file name extension to look
+#'   for).
+#'
+#' @return A named list of data frames where the names of the list elements
+#'   correspond to the file names in the input directory and where each data
+#'   frame contains the data read in from the file.
 #' 
-#' The input directory and the file extension are given in
-#' the config args 'input_directory' and 'file_extension'
-#' respectively.
-#'
-#' @param config A named list. Needs to contain at least the#
-#'               components 'input_directory' and 'file_extension'.
-#'
-#' @return A named list of dataframes. The names of the 
-#'         list elements correspond to the file names in the
-#'         input directory.
-#'
 readFiles <- function(config) {
   
   folder <- config$input_directory
@@ -46,16 +48,15 @@ readFiles <- function(config) {
 
 #' Re-calculate injection numbers
 #'
-#' Re-calculate injection numbers to account for probes being measured
-#' from two or more consectuive vials.
+#' Re-calculate the injection numbers to account for probes being measured
+#' from two or more consecutive vials.
 #' 
-#' @param datasets A data.frame.
+#' @param dataset a data frame with measurement data of a specific data set.
 #' @import dplyr
 #'                 
-#' @return A data.frame. The column of injection numbers has been 
-#'         re-calculated accounting for possible consecutive vials 
-#'         of the same probe.
-#'         
+#' @return The input \code{dataset} with the column of injection numbers
+#'   re-calculated accounting for possible consecutive vials of the same probe.
+#' 
 normalizeInjectionNumbers <- function(dataset) {
   
   dataset %>% 
@@ -65,25 +66,36 @@ normalizeInjectionNumbers <- function(dataset) {
     arrange(Line)
 }
 
-#' Associate standards with config info
+#' Associate standards with configuration information
 #' 
-#' Associate each standard in the given dataset with the 
-#' config info for that standard (true values for 018 
-#' and H2, use for drift correction, use for calibration).
+#' Associate each standard in the given dataset with the configuration
+#' information for this standard, i.e. expected values for d18O and dH and the
+#' flag parameters whether the standard shall be used for drift correction and
+#' calibration or as a control standard. For normal samples, these values are
+#' set to \code{NA}.
 #' 
-#' The output dataset will contain the columns o18_True, H2_True,
-#' useForDriftCorrection, and useForCalibration. The values will
-#' be NA for probes.
-#' 
-#' @param dataset A data.frame.
-#' @param config A named list. Needs to contain the component
-#'               'standards'; a named list with the components
-#'               'name', 'o18_True', 'H2_True', 'use_for_drift_correction',
-#'               'use_for_calibration', and 'use_as_control_standard'.
+#' @param dataset a data frame with measurement data of a specific data set.
+#' @param config A named list which needs to contain at least the component
+#'   \code{standards} which is expected to be a named list of the following
+#'   components:
+#'   \describe{
+#'   \item{\code{name}:}{character; the name of the standard as specified by the
+#'     \code{Identifier 1} value in the data set.}
+#'   \item{\code{o18_True}:}{numeric; the expected d18O value of the standard.}
+#'   \item{\code{H2_True}:}{numeric; the expected dD value of the standard.}
+#'   \item{\code{use_for_drift_correction}:}{logical; shall the standard be
+#'     used to calculate the drift correction?}
+#'   \item{\code{use_for_calibration}:}{logical; shall the standard be
+#'     used for calibration?}
+#'   \item{\code{use_as_control_standard}:}{logical: shall the standard be
+#'     used as a quality control standard?}
+#' }
 #' @import dplyr
 #'
-#' @return A data.frame.
-#'
+#' @return The input \code{dataset} supplemented by the columns \code{o18_True},
+#'   \code{H2_True}, \code{useForDriftCorrection}, \code{useForCalibration}, and
+#'   \code{useAsControlStandard}.
+#' 
 associateStandardsWithConfigInfo <- function(dataset, config){
     
   configAsTable <- do.call(rbind, config$standards) %>%
@@ -100,17 +112,18 @@ associateStandardsWithConfigInfo <- function(dataset, config){
 
 #' Group standards in blocks
 #'
-#' For each standard injection, determine which standard block
-#' it belongs to. The results are stored in the column 'block'.
-#' For probes the value is NA.
+#' Determine for each standard injection which standard block it belongs to.
 #'
-#' @param dataset A data.frame.
-#' @param config A named list. Needs to contain the component
-#'               $standards; a list of lists where each innermost
-#'               list needs to contain the component $name.
+#' @param dataset a data frame with measurement data of a specific data set.
+#' @param config A named list which needs to contain at least the component
+#'   \code{standards} which is expected to be a list containing at least the
+#'   component \code{name} giving the name for each used standard as specified
+#'   by the \code{Identifier 1} column of the data set.
 #'
-#' @return A data.frame.
-#'
+#' @return The input \code{dataset} supplemented by the column \code{block}
+#'   which counts the number of standard blocks across the measurement. For
+#'   normal samples, this value is set to \code{NA}.
+#' 
 groupStandardsInBlocks <- function(dataset, config){
     
   dataset <- tibble::add_column(dataset, block = NA)
@@ -135,15 +148,20 @@ groupStandardsInBlocks <- function(dataset, config){
   return(dataset)
 }
 
-#' Add the column 'SecondsSinceStart' to the given dataset.
+#' Calculate seconds since start
+#'
+#' Calculate the seconds elapsed since the start of the measurement.
+#'
+#' The input data frame is expected to contain the column
+#' \code{Time Code} with values as character vectors of the format
+#' 'yyyy/mm/ddhh:mm:ss' (e.g. '2019/11/2510:00:00').
 #' 
-#' @param dataset A data.frame. Needs to contain the column
-#'                'Time Code'. The elements of 'Time Code' should
-#'                be character vectors of the format 'yyyy/mm/ddhh:mm:ss'
-#'                (e.g. '2019/11/2510:00:00').
+#' @param dataset a data frame with measurement data of a specific data set.
 #' @import dplyr
 #'
-#' @return A data.frame that includes the column 'SecondsSinceStart'.
+#' @return The input \code{dataset} supplemented by the column
+#' \code{SecondsSinceStart} which gives the seconds elapsed since the start of
+#' the measurement.
 #' 
 addColumnSecondsSinceStart <- function(dataset){
   
@@ -153,14 +171,18 @@ addColumnSecondsSinceStart <- function(dataset){
     mutate(SecondsSinceStart = cumsum(.$SecondsSinceStart))
 }
 
-#' Determine if a given ID belongs to a standard.
+#' Determine if a given probe is a standard.
 #'
-#' @param id1 A character vector. The id to test for.
-#' @param config A named list. Needs to contain the component 'standards'.
-#'               'standards' is a list, each element needs to contain the
-#'               component 'name'.
+#' Determine if a given probe is a standard based on its ID value.
 #'
-#' @return A logical. 
+#' @param id1 character vector; the ID to test for.
+#' @param config A named list which needs to contain at least the component
+#'   \code{standards} which is expected to be a list containing at least the
+#'   component \code{name} giving the name for each used standard as specified
+#'   by the \code{Identifier 1} column of the data set.
+#'
+#' @return logical; \code{TRUE} if the requested ID is found in the
+#'   \code{config} data base of standards, else \code{FALSE}.
 #' 
 isStandard <- function(id1, config){
   id1 %in% purrr::map(config$standards, ~ .$name)
@@ -168,25 +190,39 @@ isStandard <- function(id1, config){
 
 #' Build output list
 #' 
-#' This is the final processing step for each dataset. After all the processing is done, input
-#' all relevant information and construct the output for a single dataset for the function
-#' processData(..).
+#' This function performs the final processing step for a specific dataset after
+#' all corrections are done by collecting the relevant data and information and
+#' returning them in a single output structure.
 #' 
-#' Note: If you change the output of this function, don't forget to update
-#' the roxygen docstring (section return value) of the function processData(..).
+#' @note
+#' If you change the output of this function, remember to update
+#' the roxygen docstring (section return value) in `piccr_output.R`.
 #'
-#' @param config A list. Needs to contain the component $use_memory_correction, a logical.
-#' @param dataset A data.frame.
-#' @param memoryCorrected  A data.frame.
-#' @param memoryCoefficients A data.frame.
-#' @param calibrated A data.frame.
-#' @param calibratedAndDriftCorrected A data.frame.
-#' @param processedData A named list. Has the components $accumulatedData (a data.frame), 
-#'                      $deviationsFromTrue (a data.frame), $rmsdDeviationsFromTrue
-#'                      (a list), $pooledSD (a list), and $deviationOfControlStandard (a list).
-#'
-#' @return A nested list structure
-#'
+#' @param name the file name of the data set.
+#' @param config a named list containing the logical component
+#'   \code{use_memory_correction} which specifies if memory correction was used
+#'   in the processing.
+#' @param dataset a data frame with the raw measurement data.
+#' @param memoryCorrected a data frame with the memory-corrected measurement
+#'   data.
+#' @param memoryCoefficients a data frame of estimated memory coefficients.
+#' @param calibrated a data frame with the (memory-corrected and) calibrated
+#'   measurement data.
+#' @param calibratedAndDriftCorrected a data frame with the (memory-corrected),
+#'   calibrated and drift-corrected measurement data.
+#' @param accumulated a data frame with the corrected and calibrated data
+#'   averaged over a specified number of injections.
+#' @param qualityControlInfo the output of \code{\link{getQualityControlInfo}}.
+#' @inherit piccr_output return
+#' @seealso \code{\link{processData}},
+#'   \code{\link{calculateMemoryCoefficients}},
+#'   \code{\link{correctForMemoryEffect}},
+#'   \code{\link{linearCalibration}},
+#'   \code{\link{calibrateUsingSimpleDriftCorrection}},
+#'   \code{\link{calibrateUsingDoubleCalibration}},
+#'   \code{\link{accumulateMeasurements}},
+#'   \code{\link{getQualityControlInfo}}.
+#' 
 buildOutputList <- function(name, config, dataset, memoryCorrected, memoryCoefficients, 
                             calibrated, calibratedAndDriftCorrected, accumulated, qualityControlInfo){
   
@@ -214,13 +250,15 @@ buildOutputList <- function(name, config, dataset, memoryCorrected, memoryCoeffi
 #' Assign vial groups
 #'
 #' This function adds the additional column \code{vial_group} to the input
-#' data.frame counting the occurrence of groups of consecutive vials of the
-#' same standard or probe across the measurement.
-#' @param dataset a data.frame; needs to contain at least the columns
-#' \code{Line} and \code{Identifier 1}.
+#' data frame counting the occurrence of groups of consecutive vials of the
+#' same standard or sample across the measurement.
+#' 
+#' @param dataset a data frame with measurement data of a specific data set;
+#'   needs to contain at least the columns \code{Line} and \code{Identifier 1}.
 #' @import dplyr
-#' @return the input data.frame appended by the column \code{vial_group}.
-#'
+#' 
+#' @return The input \code{dataset} appended by the column \code{vial_group}.
+#' 
 assignVialsToGroups <- function(dataset) {
 
   groupVials <- function(sampleData) {

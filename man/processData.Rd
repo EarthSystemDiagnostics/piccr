@@ -2,47 +2,65 @@
 % Please edit documentation in R/main_processData.R
 \name{processData}
 \alias{processData}
-\title{processData}
+\title{Process Picarro CRDS stable isotope data}
 \usage{
 processData(datasets, config)
 }
 \arguments{
-\item{datasets}{A named list of data.frames. The isotope measurement data
-as output by the Picarro device.}
+\item{datasets}{a named list of data frames with the raw isotope measurement
+data as output by the Picarro device.}
 
-\item{config}{A named list. Required fiels: 
-average_over_inj (a number or "all")
-$use_three_point_calibration (logical)
-$calibration_method (1, 2, or 3)
-$use_memory_correction (logical)
-$standards (named list of $name (character), $o18_True (numerical), 
-            $H2_True (numerical), $use_for_drift_correction (logical), 
-            $use_for_calibration (logical)), $use_as_control_standard(logical)}
+\item{config}{a named list of the following required components:
+\describe{
+\item{\code{use_memory_correction}.}{logical; shall a memory correction be
+  applied?}
+\item{\code{calibration_method}:}{integer; which calibration method shall be
+  used? Set to \code{0} for simple calibration without drift correction; set
+  to \code{1} for simple calibration including linear drift correction; set
+  to \code{2} for a double calibration performed at the beginning and the end
+  of the measurement sequence including an inherent drift correction.}
+\item{\code{use_three_point_calibration}:}{logical; shall three or more
+  standards be used in the calibration (\code{TRUE}) or only two
+  (\code{FALSE})?}
+\item{\code{average_over_inj}:}{the number or range of injections to average
+  over in the final processing step. Set to \code{-1} or "all" to use all
+  available injections; set to a single integer `n` to use the last `n`
+  injections; set to a range `n1:n2` to use the injection range `n1:n2`.}
+\item{\code{standards}:}{a list the same length as the number of standards
+  used in the measurement data sets; each list is a list with the following
+  elements:
+  \itemize{
+  \item \code{name}: character; the name of the standard as specified by the
+    \code{Identifier 1} value in the data set.
+  \item \code{o18_True}: numeric; the expected d18O value of the standard.
+  \item \code{H2_True}: numeric; the expected dD value of the standard.
+  \item \code{use_for_calibration}: logical; shall the standard be used for
+    calibration? 
+  \item \code{use_for_drift_correction}: logical; shall the standard be used
+    to calculate the drift correction? 
+  \item \code{use_as_control_standard}: logical; shall the standard be used
+    as a quality control standard?
+}}
+}}
 }
 \value{
-A list of the same length as \code{datasets}. Each list element is
-  again a list of 13 elements with the following structure:
-            $name (character vector with the name of the data set (file name))
-            $raw (data frame with the raw input isotope data)
-            $memoryCorrected (data frame of memory-corrected data)
-            $calibrated (data frame of data calibrated without drift correction)
-            $calibratedAndDriftCorrected (data frame of calibrated and drift-corrected data)
-            $processed (data frame of final processed data)
-            $deviationsFromTrue (data frame with the deviations from the true values for all measured standards)
-            $rmsdDeviationsFromTrue (named list (elements \code{d18O} and \code{dD}) with the rmsd of deviationsFromTrue)
-            $deviationOfControlStandard (named list (elements \code{d18O} and \code{dD}) with the deviation from the true value for the quality control standard)
-            $pooledSD (named list (elements \code{d18O} and \code{dD}) of pooled standard deviations for the data set)
-            $memoryCoefficients (data frame of memory coefficients)
-            $calibrationParams (data frame of calibration regression parameters)
-            $driftParams (data frame of drift regression parameters)
+A named list the same length as the input \code{datasets}; each list
+  element contains the output of \code{\link{processSingleDataset}}.
 }
 \description{
-The main interface for using piccr as a part of other programs.
+This is the main interface for using \code{piccr} as a part of other
+programmes to correct and calibrate ("process") a number of similar Picarro
+measurement data sets at once. It is is a wrapper for the function
+\code{\link{processSingleDataset}} which works on a single data set to do the
+actual processing.
 }
 \details{
-Implements the processing of water isotope data using memory correction,
-calibration, and drift correction.
-Uses the processing options set in the parameter 'config'.
-Calculates quality indicators for each dataset such as delta excess and the pooled 
-standard deviation.
+This function implements processing of Picarro stable isotope data
+including memory correction, drift correction, calibration, calculation of
+d-excess values and assessment of information for quality control
+monitoring. All processing options are set via parameters in the
+\code{config} variable.
+}
+\seealso{
+\code{\link{processSingleDataset}}
 }

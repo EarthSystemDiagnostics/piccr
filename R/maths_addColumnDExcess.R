@@ -1,11 +1,11 @@
-#' Add column dExcess
+#' Calculate d-excess
 #'
-#' Add the column "dExcess" to the dataset. dExcess is 
-#' calculated as dExcess = dD - 8 * d18O.
+#' Calculate the second-order parameter d-excess from the d18O and dD values of
+#' a given data set according to \code{d-excess = dD - 8 * d18O}.
 #' 
-#' @param dataset A data.frame.
+#' @param dataset a data frame with measurement data of a specific data set.
 #'
-#' @return A data.frame.
+#' @return The input \code{dataset} supplemented by the column \code{dExcess}.
 #' 
 addColumnDExcess <- function(dataset){
   

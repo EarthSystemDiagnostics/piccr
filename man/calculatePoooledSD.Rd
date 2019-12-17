@@ -2,23 +2,38 @@
 % Please edit documentation in R/maths_calculatePoooledStdDev.R
 \name{calculatePoooledSD}
 \alias{calculatePoooledSD}
-\title{calculate poooled standard deviation}
+\title{Calculate pooled standard deviation}
+\source{
+https://en.wikipedia.org/wiki/Pooled_variance
+}
 \usage{
 calculatePoooledSD(dataset)
 }
 \arguments{
-\item{datasets}{A data.frame with isotope measurement data.}
+\item{dataset}{a data frame with measurement data of a specific data set.}
 }
 \value{
-A list with the two named elements
-        "d18O" and "dD" (the pooled standard deviation for d18O and dD).
+A list with two elements \code{d18O} and \code{dD} with the pooled
+  standard deviation for d18O and dD, respeectively.
 }
 \description{
-Calculate the pooled standard deviation for d18O and dD. The pooled standard
-deviation is calculated using the following formulas:
+Calculate the pooled standard deviation for d18O and dD for a given Picarro
+data set, which provides a measure for the overall stability of consecutive
+injections in the Picarro data.
 }
 \details{
-x = (n_1 - 1) \* sd_1^2 + ... + (n_k - 1) \* sd_k^2
-    y = n_1 + ... + n_k - k
-    sdPooled = sqrt( x / y )
+The pooled standard deviation provides a way to estimate the standard
+deviation of several populations which may have different mean values but for
+which you can assume that the standard deviation of each population is the
+same. For Picarro data, the different populations are the individual samples
+and we assume that the true standard deviation of the injections for a
+specific sample is the same for all samples. The pooled standard deviation
+\eqn{\sigma_p} for \eqn{k} samples is then calculated according to
+\deqn{
+x = (n_1 - 1) * \sigma_1^2 + ... + (n_k - 1) * \sigma_k^2
+y = n_1 + ... + n_k - k
+\sigma_p = sqrt(x / y)
+}
+where \eqn{n_i} and \eqn{\sigma_i} are the number of injections and the
+standard deviation for sample \eqn{i}, respectively.
 }

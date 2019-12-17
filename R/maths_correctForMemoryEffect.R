@@ -1,12 +1,25 @@
 #' Correct for memory effect
 #' 
-#' Take a data.frame with isotope measurement data and apply memory correction to it.
+#' Correct a given measurement data set for the memory effect by applying
+#' memory coefficients estimated based on analysing the standards in the first
+#' standard block.
+#' 
+#' @param dataset a data frame with measurement data of a specific data set. It
+#'   needs to contain the additional columns \code{block} and
+#'   \code{vial_group} which are not included in the raw Picarro output.
 #'
-#' @param dataset A data.frame.
-#'
-#' @return A list. It contains the two named elements
-#'         "datasetMemoryCorrected" and "memoryCoefficients".
-#'
+#' @return A named list with two elements:
+#'   \describe{
+#'   \item{\code{datasetMemoryCorrected}:}{the input \code{dataset} with the
+#'     d18O and dD columns corrected for memory effect.}
+#'   \item{\code{memoryCoefficients}:}{a data frame of estimated memory
+#'     coefficients (see \code{\link{calculateMemoryCoefficients}} for
+#'     details).}
+#' }
+#' @seealso \code{\link{calculateMemoryCoefficients}},
+#'   \code{\link{groupStandardsInBlocks}},
+#'   \code{\link{assignVialsToGroups}}
+#' 
 correctForMemoryEffect <- function(dataset){
   
   memoryCoefficients <- calculateMemoryCoefficients(dataset)
@@ -16,7 +29,33 @@ correctForMemoryEffect <- function(dataset){
               memoryCoefficients = memoryCoefficients))
 }
 
+#' Calculate memory coefficients
+#'
+#' Calculate memory coefficients using the data of standards measured in the
+#' first standard block at the beginning of the measurement sequence.
+#'
+#' Memory coefficients are estimated based on the formula in
+#' \code{\link{formulaMemCoeff}} for the (n - 1) of the n standards in the first
+#' standard block (per definition, no coefficients can be calulated for the very
+#' first standard in the block), and the average across these (n - 1) individual
+#' sets of memory coefficients is calculated. The maximum number of mean memory
+#' coefficients is given by the maximum number of injections of the used
+#' standards.
+#' 
+#' @param dataset a data frame with measurement data of a specific data set. It
+#'   needs to contain the additional columns \code{block} and
+#'   \code{vial_group} which are not included in the raw Picarro output.
 #' @import dplyr
+#'
+#' @return A data frame with rows corresponding to injection numbers and columns
+#'   to standards and isotopic species; specifically, for each unique vial block
+#'   of standards, memory coefficients for d18O and dD are returned. The
+#'   mean memory coefficients are returned in the columns \code{memoryCoeffD18O}
+#'   (d18O) and \code{memoryCoeffDD} (dD). See also the package vignette for
+#'   more details.
+#' @seealso \code{\link{groupStandardsInBlocks}},
+#'   \code{\link{assignVialsToGroups}}
+#' 
 calculateMemoryCoefficients <- function(dataset) {
   
   block1 <- filter(dataset, block == 1)
@@ -62,7 +101,28 @@ calculateMemoryCoefficients <- function(dataset) {
   return(memCoeffOutput)
 }
 
+#' Apply memory correction
+#'
+#' Apply a memory correction to a specific data set given a set of memory
+#' coefficients for d18O and dD as a function of the injection number.
+#'
+#' Note that if the number of supplied memory coefficients does not match the
+#' maximum number of sample injections in the given data set, the memory
+#' coefficients are padded with \code{1}'s to match the data. The memory
+#' correction is applied according to the formula in
+#' \code{\link{formulaCorrectMem}}.
+#' 
+#' @param dataset a data frame with measurement data of a specific data set.
+#' @param memoryCoefficients a data frame of memory coefficients; must include
+#'   the columns \code{Inj Nr} (injection number), \code{memoryCoeffD18O}
+#'   (memory coefficients for d18O) and \code{memoryCoeffDD} (memory
+#'   coefficients for dD).
 #' @import dplyr
+#'
+#' @return The input \code{dataset} with the d18O and dD columns corrected for
+#'   memory effect.
+#' @seealso \code{\link{formulaCorrectMem}}
+#' 
 applyMemoryCorrection <- function(dataset, memoryCoefficients){
   
   # get list with one dataframe per sample
@@ -115,7 +175,35 @@ applyMemoryCorrection <- function(dataset, memoryCoefficients){
   return(dataset)
 }
 
+#' Estimate true sample values
+#'
+#' To calculate memory coefficients, an estimate of the true values of the
+#' standard vials is needed. This function estimates these from the mean of the
+#' last three injections of the standard vials, thereby assuming a sufficiently
+#' large number of injections to provide good, i.e. memory-free, estimates.
+#' 
+#' @param dataset a data frame with a block of standard vial measurements;
+#'   usually the first standard block at the beginning of the measurement
+#'   sequence.
+#' @param ... names of column variables which are used to group the data in
+#'   \code{block} into unique sets of standard vials; in the default programme
+#'   flow of \code{piccr}, \code{Identifier 1} and \code{vial_group} are used.
 #' @import dplyr
+#'
+#' @return The input data set supplemented by four new columns:
+#'   \describe{
+#'   \item{\code{deltaTrueD18O}:}{the estimated true d18O value of the current
+#'     vial.}
+#'   \item{\code{deltaTrueDD}:}{the estimated true dD value of the current
+#'     vial.}
+#'   \item{\code{deltaTruePrevD18O}:}{the estimated true d18O value of the
+#'     previous vial.}
+#'   \item{\code{deltaTruePrevDD}:}{the estimated true dD value of the previous
+#'     vial.}
+#' }
+#' @seealso \code{\link{groupStandardsInBlocks}},
+#'   \code{\link{assignVialsToGroups}}
+#' 
 getDeltaTrueAndDeltaTruePrevForEachSample <- function(dataset, ...){
   
   lastThreeInj <- dataset %>%
@@ -143,10 +231,38 @@ getDeltaTrueAndDeltaTruePrevForEachSample <- function(dataset, ...){
   return(deltasForAllRows)
 }
 
+#' Memory coefficients
+#'
+#' Formula to calculate memory coefficients; see the package vignette for
+#' details.
+#' 
+#' @param data numeric vector with measured values of a certain sample for
+#'   consecutive injections.
+#' @param deltaTrue numeric vector with the (estimated) true value of that
+#'   sample.
+#' @param deltaTruePrev numeric vector with the (estimated) true value of the
+#'   previous sample.
+#' 
+#' @return numeric vector of the same length as \code{data} with the memory
+#'   coefficients.
+#' 
 formulaMemCoeff <- function(data, deltaTrue, deltaTruePrev){
   (data - deltaTruePrev) / (deltaTrue - deltaTruePrev)
 }
 
+#' Memory correction
+#'
+#' Formula for the memory correction; see the package vignette for
+#' details.
+#' 
+#' @param data numeric vector with measured sample values.
+#' @param memCoeff numeric vector with memory coefficients matching the
+#'   injection number of the values in \code{data}.
+#' @param deltaTruePrev numeric vector of (estimated) true values of the
+#'   respective previous sample of the samples in \code{data}.
+#'
+#' @return the input vector \code{data} corrected for memory.
+#' 
 formulaCorrectMem <- function(data, memCoeff, deltaTruePrev){
   data + (1 - memCoeff) / memCoeff * (data - deltaTruePrev)
 }

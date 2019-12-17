@@ -2,16 +2,18 @@
 % Please edit documentation in R/helpers_smallFunctions.R
 \name{parseConfig}
 \alias{parseConfig}
-\title{Read the specified YAML configuration file for piccr processing.}
+\title{Read the YAML configuration file}
 \usage{
 parseConfig(configFile)
 }
 \arguments{
-\item{configFile}{A character string naming the config file.}
+\item{configFile}{a character string with the file path of the configuration
+file.}
 }
 \value{
-A list.
+A list of the parameters read from the configuration file.
 }
 \description{
-Read the specified YAML configuration file for piccr processing.
+Read in the specified YAML configuration file for the \code{piccr}
+processing.
 }

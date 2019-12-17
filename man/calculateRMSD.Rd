@@ -2,14 +2,14 @@
 % Please edit documentation in R/maths_calculateRMSD.R
 \name{calculateRMSD}
 \alias{calculateRMSD}
-\title{Root-mean-square deviation}
+\title{Calculate root-mean-square deviation}
 \usage{
 calculateRMSD(v1, v2, na.rm = FALSE)
 }
 \arguments{
-\item{v1}{Numeric vector for which to compute the rmsd with \code{v2}.}
+\item{v1}{numeric vector for which to compute the rmsd with \code{v2}.}
 
-\item{v2}{Numeric vector for which to compute the rmsd with \code{v1}; must
+\item{v2}{numeric vector for which to compute the rmsd with \code{v1}; must
 be of the same length as \code{v1}.}
 
 \item{na.rm}{a logical value indicating whether \code{NA} values should be

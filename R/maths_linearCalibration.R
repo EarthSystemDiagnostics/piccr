@@ -1,22 +1,25 @@
-#' linearCalibration
+#' Calibrate data using single block
 #'
-#' Take a data.frame with isotope measurement data and 
-#' calibrate it. Does not include drift correction.
-#' Note: 
-#'  - If config$use_memory_correction is TRUE all injections are used for 
-#'    calibration, else only the last three injections are used.
-#'  - If config$use_triple_calibration is TRUE all standards in the specified
-#'    block are used for calibration. If it is FALSE, only the first and last
-#'    standards are used.
-#'    
-#' @param dataset A data.frame with isotope measurement data. It dataframe should 
-#'                contain the additional columns "block" and 
-#'                "useForMemCorr" (not included in the raw Picarro output).
-#' @param config A named list. Need to contain the boolean elements "use_memory_correction"
-#'               and "use_three_point_calibration".
-#' @param block A number. Use the standards in this block for calibration. Default: 1.
+#' Calibrate a given data set using calibration slope and intercept values
+#' estimated with standards from a particular standard block of the measurement
+#' sequence. The calibration parameters are obtained from regressing the
+#' expected standard values against their measured values.
 #'
-#' @return A data.frame.
+#' If memory correction was applied to the data, all injections are used from
+#' the standard data, else only the last three injections. If a two-point
+#' calibration is switched on, only the two standards with the lowest and
+#' highest isotopic values are used, regardless of how many calibration
+#' standards are actually set in the dataset.
+#'
+#' @inheritParams calibrateUsingDoubleCalibration
+#' @param block a single integer giving the number of the standard block which
+#'   is to be used for estimating the calibration parameters; defaults to
+#'   \code{1} (first block in the measurement sequence).
+#'
+#' @return The input \code{dataset} with the d18O and dD values calibrated
+#'   according to the single-block calibration.
+#' @seealso \code{\link{groupStandardsInBlocks}},
+#'   \code{\link{associateStandardsWithConfigInfo}}
 #' 
 linearCalibration <- function(dataset, config, block = 1){
   
@@ -26,6 +29,30 @@ linearCalibration <- function(dataset, config, block = 1){
   return(calibratedDataset)
 }
 
+#' Get calibration parameters
+#'
+#' Obtain calibration slope and intercept values as estimated from standards in
+#' a particular standard block of the measurement sequence from regressing the
+#' expected standard values against their measured values.
+#'
+#' If memory correction was applied to the data, all injections are used from
+#' the standard data, else only the last three injections. If a two-point
+#' calibration is switched on, only the two standards with the lowest and
+#' highest isotopic values are used, regardless of how many calibration
+#' standards are actually set in the dataset.
+#'
+#' @inheritParams linearCalibration
+#'
+#' @return A named list with elements \code{d18O} and \code{dD} where each
+#' element is again a list with two elements:
+#' \describe{
+#' \item{\code{intercept}:}{numeric; the estimated intercept of the
+#'   calibration.}
+#' \item{\code{slope}:}{numeric; the estimated slope of the calibration.}
+#' }
+#' @seealso \code{\link{groupStandardsInBlocks}},
+#'   \code{\link{associateStandardsWithConfigInfo}}
+#' 
 getCalibInterceptAndSlope <- function(dataset, config, useBlock){
   
   trainingData <- getTrainingData(dataset, config, useBlock)
@@ -46,7 +73,26 @@ getCalibInterceptAndSlope <- function(dataset, config, useBlock){
   )
 }
 
+#' Get calibration training data
+#'
+#' Obtain the standard data to be used for a regression of expected against
+#' measured values in order to estimate calibration slope and intercept.
+#'
+#' If memory correction was applied to the data, all injections are used from
+#' the standard data, else only the last three injections. If a two-point
+#' calibration is switched on, only the two standards with the lowest and
+#' highest isotopic values are used, regardless of how many calibration
+#' standards are actually set in the dataset.
+#' 
+#' @inheritParams linearCalibration
 #' @import dplyr
+#' 
+#' @return The input \code{dataset} filtered by the requested standard block
+#'   (\code{useBlock}) and by the standards set as calibration standards in
+#'   \code{config}.
+#' @seealso \code{\link{groupStandardsInBlocks}},
+#'   \code{\link{associateStandardsWithConfigInfo}}
+#' 
 getTrainingData <- function(dataset, config, useBlock) {
   
   trainingData <- filter(dataset, block == useBlock, useForCalibration == TRUE)
@@ -70,6 +116,17 @@ getTrainingData <- function(dataset, config, useBlock) {
   return(trainingData)
 }
 
+#' Select lowest and highest standard
+#'
+#' From a group of standards, select the two standards that exhibit the lowest
+#' and highest isotope values.
+#'
+#' @param groups a list of vectors from splitting a data frame block of
+#'   standards by their \code{Identifier 1} values through calling
+#'   \code{\link{split}}.
+#' 
+#' @return A data frame with all injections from the two selected standards.
+#' 
 selectGroupsForTwoPointCalib <- function(groups){
 
   orderedByIsotopeVal <- order(purrr::map_dbl(groups, ~ mean(.$`d(18_16)Mean`, na.rm = TRUE)))
@@ -77,7 +134,23 @@ selectGroupsForTwoPointCalib <- function(groups){
   return(highestAndLowestIsotopeVal)
 }
 
+#' Apply linear calibration
+#'
+#' Apply a linear calibration to a specific data set given calibration slope and
+#' intercept values.
+#' 
+#' @param dataset a data frame with measurement data of a specific data set.
+#' @param calibrationParams a named list with elements \code{d18O} and \code{dD}
+#'   where each element is again a list with two elements:
+#'   \describe{
+#'   \item{\code{intercept}:}{numeric; calibration intercept.}
+#'   \item{\code{slope}:}{numeric; calibration slope.}
+#' }
 #' @import dplyr
+#'
+#' @return The input \code{dataset} with the d18O and dD values calibrated
+#'   according to the given calibration parameters.
+#' 
 applyCalibration <- function(dataset, calibrationParams){
   
   d18OIntercept <- calibrationParams$d18O$intercept

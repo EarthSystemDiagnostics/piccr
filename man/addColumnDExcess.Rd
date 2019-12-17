@@ -2,17 +2,17 @@
 % Please edit documentation in R/maths_addColumnDExcess.R
 \name{addColumnDExcess}
 \alias{addColumnDExcess}
-\title{Add column dExcess}
+\title{Calculate d-excess}
 \usage{
 addColumnDExcess(dataset)
 }
 \arguments{
-\item{dataset}{A data.frame.}
+\item{dataset}{a data frame with measurement data of a specific data set.}
 }
 \value{
-A data.frame.
+The input \code{dataset} supplemented by the column \code{dExcess}.
 }
 \description{
-Add the column "dExcess" to the dataset. dExcess is 
-calculated as dExcess = dD - 8 * d18O.
+Calculate the second-order parameter d-excess from the d18O and dD values of
+a given data set according to \code{d-excess = dD - 8 * d18O}.
 }

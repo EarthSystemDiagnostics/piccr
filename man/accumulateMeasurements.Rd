@@ -2,25 +2,32 @@
 % Please edit documentation in R/helpers_processDataForOutput.R
 \name{accumulateMeasurements}
 \alias{accumulateMeasurements}
-\title{accumulate measurements}
+\title{Accumulate measurements}
 \usage{
 accumulateMeasurements(dataset, config)
 }
 \arguments{
-\item{config}{A named list. Needs to contain the component
-'average_over_inj'.}
+\item{dataset}{a data frame with corrected and calibrated measurement data of
+a specific data set.}
 
-\item{datasets}{A data frame with the data set.}
+\item{config}{A named list of configuration parameters (e.g. as read from the
+\code{config.yaml} file) containing at least the component
+\code{average_over_inj}.}
 }
 \value{
-A data frame.
+A data frame with nine columns with the injection-averaged values of
+  d18O, dH and d-excess together with their standard deviations as well as
+  the respective \code{Identifier 1}, \code{Identifier 2} and \code{block}
+  specifiers.
 }
 \description{
-Average the delta.O18, delta.H2 and d.Excess values for each 
-sample from a dataset and calculate their standard deviation.
+Calculate the average across a specified number of injections of the d18O,
+dH and d-excess values for each measured sample of a dataset and calculate
+the standard deviation of the means.
 }
 \details{
-Uses the config parameter 'average_over_inj'. If it is
--1 or 'all', all injections are used to calculate the averages
-and standard deviations.
+The functions uses the config parameter \code{average_over_inj}, which
+specifies the injections to average. If it is -1 or 'all', all injections are
+used, if it is set to a single integer `n`, the last `n` injections are used,
+else if it is set to a range `n1:n2`, injections `n1:n2` are used.
 }

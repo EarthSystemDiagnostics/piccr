@@ -2,28 +2,38 @@
 % Please edit documentation in R/helpers_smallFunctions.R
 \name{associateStandardsWithConfigInfo}
 \alias{associateStandardsWithConfigInfo}
-\title{Associate standards with config info}
+\title{Associate standards with configuration information}
 \usage{
 associateStandardsWithConfigInfo(dataset, config)
 }
 \arguments{
-\item{dataset}{A data.frame.}
+\item{dataset}{a data frame with measurement data of a specific data set.}
 
-\item{config}{A named list. Needs to contain the component
-'standards'; a named list with the components
-'name', 'o18_True', 'H2_True', 'use_for_drift_correction',
-'use_for_calibration', and 'use_as_control_standard'.}
+\item{config}{A named list which needs to contain at least the component
+  \code{standards} which is expected to be a named list of the following
+  components:
+  \describe{
+  \item{\code{name}:}{character; the name of the standard as specified by the
+    \code{Identifier 1} value in the data set.}
+  \item{\code{o18_True}:}{numeric; the expected d18O value of the standard.}
+  \item{\code{H2_True}:}{numeric; the expected dD value of the standard.}
+  \item{\code{use_for_drift_correction}:}{logical; shall the standard be
+    used to calculate the drift correction?}
+  \item{\code{use_for_calibration}:}{logical; shall the standard be
+    used for calibration?}
+  \item{\code{use_as_control_standard}:}{logical: shall the standard be
+    used as a quality control standard?}
+}}
 }
 \value{
-A data.frame.
+The input \code{dataset} supplemented by the columns \code{o18_True},
+  \code{H2_True}, \code{useForDriftCorrection}, \code{useForCalibration}, and
+  \code{useAsControlStandard}.
 }
 \description{
-Associate each standard in the given dataset with the 
-config info for that standard (true values for 018 
-and H2, use for drift correction, use for calibration).
-}
-\details{
-The output dataset will contain the columns o18_True, H2_True,
-useForDriftCorrection, and useForCalibration. The values will
-be NA for probes.
+Associate each standard in the given dataset with the configuration
+information for this standard, i.e. expected values for d18O and dH and the
+flag parameters whether the standard shall be used for drift correction and
+calibration or as a control standard. For normal samples, these values are
+set to \code{NA}.
 }
