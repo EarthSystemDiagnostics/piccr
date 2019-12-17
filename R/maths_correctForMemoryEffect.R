@@ -68,8 +68,8 @@ calculateMemoryCoefficients <- function(dataset) {
   # get the mean mem coeff as a dataframe
   meanMemoryCoefficients <- memoryCoefficients %>%
     group_by(`Inj Nr`) %>%
-    summarise(memoryCoeffD18O = mean(memoryCoeffD18O, na.rm = T), 
-              memoryCoeffDD = mean(memoryCoeffDD, na.rm = T))
+    summarise(memoryCoeffD18O = mean(memoryCoeffD18O, na.rm = TRUE),
+              memoryCoeffDD = mean(memoryCoeffDD, na.rm = TRUE))
   
   # extract the mem coeff for each standard as a list of dataframes
   memoryCoeffForEachStandard <- memoryCoefficients %>%
@@ -137,8 +137,8 @@ applyMemoryCorrection <- function(dataset, memoryCoefficients){
   memoryCorrectedH2[[1]]  <- rep(NA, nrow(samples[[1]]))
   
   # Store state in these vars. Initialize to mean of last three injections of first sample.
-  deltaTruePrevO18 <- mean(tail(samples[[1]]$`d(18_16)Mean`, 3), na.rm = T)
-  deltaTruePrevH2  <- mean(tail(samples[[1]]$`d(D_H)Mean`, 3), na.rm = T)
+  deltaTruePrevO18 <- mean(tail(samples[[1]]$`d(18_16)Mean`, 3), na.rm = TRUE)
+  deltaTruePrevH2  <- mean(tail(samples[[1]]$`d(D_H)Mean`, 3), na.rm = TRUE)
   
   for (i in 2:length(samples)){
     
@@ -159,8 +159,8 @@ applyMemoryCorrection <- function(dataset, memoryCoefficients){
       joinedData$`d(D_H)Mean`, joinedData$memoryCoeffDD, deltaTruePrevH2)
     
     # update delta true prev. If the new value is NA use the last known value.
-    deltaTruePrevO18New <- mean(o18MemoryCorrected, na.rm = T)
-    deltaTruePrevH2New  <- mean(dDMemoryCorrected, na.rm = T)
+    deltaTruePrevO18New <- mean(o18MemoryCorrected, na.rm = TRUE)
+    deltaTruePrevH2New  <- mean(dDMemoryCorrected, na.rm = TRUE)
     if (!is.na(deltaTruePrevO18New)) deltaTruePrevO18 <- deltaTruePrevO18New
     if (!is.na(deltaTruePrevH2New)) deltaTruePrevH2 <- deltaTruePrevH2New
     
@@ -211,8 +211,8 @@ getDeltaTrueAndDeltaTruePrevForEachSample <- function(dataset, ...){
     slice((n()-2):n())
   
   deltaTrue <-lastThreeInj  %>%
-    summarise(deltaTrueD18O = mean(`d(18_16)Mean`, na.rm = T),
-              deltaTrueDD = mean(`d(D_H)Mean`, na.rm = T), 
+    summarise(deltaTrueD18O = mean(`d(18_16)Mean`, na.rm = TRUE),
+              deltaTrueDD = mean(`d(D_H)Mean`, na.rm = TRUE),
               Line = min(Line))
   
   deltaTrueInCorrectOrder <- deltaTrue %>%

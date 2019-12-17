@@ -38,8 +38,8 @@ calculatePoooledSD <- function(dataset){
    pooledStdDev <- stdDevForEachSample %>%
      mutate(summand.d18O = (n-1) * sd.d18O ^ 2,
             summand.dD = (n-1) * sd.dD ^ 2) %>% 
-     summarise(numerator.d18O = sum(summand.d18O, na.rm = T),
-               numerator.dD = sum(summand.dD, na.rm = T), 
+     summarise(numerator.d18O = sum(summand.d18O, na.rm = TRUE),
+               numerator.dD = sum(summand.dD, na.rm = TRUE),
                denominator = sum(n) - n()) %>%
      summarise(pooledStdDev.d18O = sqrt(numerator.d18O / denominator),
                pooledStdDev.dD = sqrt(numerator.dD / denominator))
