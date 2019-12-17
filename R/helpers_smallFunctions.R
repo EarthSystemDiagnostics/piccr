@@ -40,7 +40,8 @@ readFiles <- function(config) {
   filenames <- list.files(path = folder, pattern = file_pattern)
   pathsToFiles <- file.path(folder, filenames)
   
-  datasets <- purrr::map(pathsToFiles, readr::read_csv)
+  datasets <- purrr::map(pathsToFiles, readr::read_csv,
+                         col_types = readr::cols())
   names(datasets) <- filenames
   
   return(datasets)
