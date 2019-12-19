@@ -26,7 +26,7 @@
 #'   standard deviation for d18O and dD, respeectively.
 #' @source https://en.wikipedia.org/wiki/Pooled_variance
 #' 
-calculatePoooledSD <- function(dataset){
+calculatePooledSD <- function(dataset){
  
    stdDevForEachSample <- dataset %>% 
      group_by(`Identifier 1`, block, vial_group) %>%

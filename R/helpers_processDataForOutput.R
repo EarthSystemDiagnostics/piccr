@@ -25,7 +25,7 @@
 #'     and \code{dD} of the pooled standard deviations across all measured
 #'     vials.}
 #' }
-#' @seealso \code{\link{calculatePoooledSD}}
+#' @seealso \code{\link{calculatePooledSD}}
 #' 
 getQualityControlInfo <- function(dataset, accumulatedDataset) {
 
@@ -60,7 +60,7 @@ getQualityControlInfo <- function(dataset, accumulatedDataset) {
 
   return(list(
     deviationsFromTrue = select(deviationDataOfStandards, -useAsControlStandard),
-    pooledSD = calculatePoooledSD(dataset),
+    pooledSD = calculatePooledSD(dataset),
     rmsdDeviationsFromTrue = rmsdDeviationDataOfStandards,
     deviationOfControlStandard = deviationOfControlStandard
   ))

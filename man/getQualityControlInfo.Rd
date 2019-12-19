@@ -36,5 +36,5 @@ Obtain the quality control information for a processed data set based on the
 deviations of the measured standards from their expected values.
 }
 \seealso{
-\code{\link{calculatePoooledSD}}
+\code{\link{calculatePooledSD}}
 }
