@@ -290,3 +290,91 @@ assignVialsToGroups <- function(dataset) {
   return(dataset)
 
 }
+
+#' Calculate pooled standard deviation
+#'
+#' Calculate the pooled standard deviation for d18O and dD for a given Picarro
+#' data set, which provides a measure for the overall stability of consecutive
+#' injections in the Picarro data.
+#'
+#' The pooled standard deviation provides a way to estimate the standard
+#' deviation of several populations which may have different mean values but for
+#' which you can assume that the standard deviation of each population is the
+#' same. For Picarro data, the different populations are the individual samples
+#' and we assume that the true standard deviation of the injections for a
+#' specific sample is the same for all samples. The pooled standard deviation
+#' \eqn{\sigma_p} for \eqn{k} samples is then calculated according to
+#' \deqn{
+#' x = (n_1 - 1) * \sigma_1^2 + ... + (n_k - 1) * \sigma_k^2
+#' y = n_1 + ... + n_k - k
+#' \sigma_p = sqrt(x / y)
+#' }
+#' where \eqn{n_i} and \eqn{\sigma_i} are the number of injections and the
+#' standard deviation for sample \eqn{i}, respectively.
+#'
+#' @param dataset a data frame with measurement data of a specific data set.
+#' @import dplyr
+#'
+#' @return A list with two elements \code{d18O} and \code{dD} with the pooled
+#'   standard deviation for d18O and dD, respeectively.
+#' @source https://en.wikipedia.org/wiki/Pooled_variance
+#'
+calculatePooledSD <- function(dataset){
+
+   stdDevForEachSample <- dataset %>%
+     group_by(`Identifier 1`, block, vial_group) %>%
+     summarise(n = n(),
+               sd.d18O = sd(`d(18_16)Mean`, na.rm = TRUE),
+               sd.dD = sd(`d(D_H)Mean`), na.rm = TRUE) %>%
+     ungroup()
+
+   pooledStdDev <- stdDevForEachSample %>%
+     mutate(summand.d18O = (n-1) * sd.d18O ^ 2,
+            summand.dD = (n-1) * sd.dD ^ 2) %>%
+     summarise(numerator.d18O = sum(summand.d18O, na.rm = TRUE),
+               numerator.dD = sum(summand.dD, na.rm = TRUE),
+               denominator = sum(n) - n()) %>%
+     summarise(pooledStdDev.d18O = sqrt(numerator.d18O / denominator),
+               pooledStdDev.dD = sqrt(numerator.dD / denominator))
+
+  list(d18O = pooledStdDev$pooledStdDev.d18O,
+       dD = pooledStdDev$pooledStdDev.dD)
+}
+
+#' Calculate d-excess
+#'
+#' Calculate the second-order parameter d-excess from the d18O and dD values of
+#' a given data set according to \code{d-excess = dD - 8 * d18O}.
+#'
+#' @param dataset a data frame with measurement data of a specific data set.
+#'
+#' @return The input \code{dataset} supplemented by the column \code{dExcess}.
+#'
+addColumnDExcess <- function(dataset){
+
+  dplyr::mutate(dataset, dExcess = `d(D_H)Mean` - `d(18_16)Mean` * 8)
+}
+
+#' Calculate root-mean-square deviation
+#'
+#' Calculate the root-mean-square deviation (rmsd) of two numeric vectors.
+#'
+#' @param v1 numeric vector for which to compute the rmsd with \code{v2}.
+#' @param v2 numeric vector for which to compute the rmsd with \code{v1}; must
+#' be of the same length as \code{v1}.
+#' @param na.rm a logical value indicating whether \code{NA} values should be
+#' stripped before the computation proceeds. Defaults to \code{FALSE}.
+#'
+#' @return The root-mean-square deviation of \code{v1} and \code{v2}, or
+#' \code{NA} (for \code{na.rm = FALSE}) if any of their elements is \code{NA}.
+#'
+calculateRMSD <- function(v1, v2, na.rm = FALSE) {
+
+  if (length(v1) != length(v2)) {
+    stop("Arguments must have the same length.")
+  }
+  res <- sqrt(mean((v1 - v2)^2, na.rm = na.rm))
+
+  return(res)
+
+}
