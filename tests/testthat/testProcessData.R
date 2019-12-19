@@ -69,3 +69,14 @@ test_that("check that no NAs were introduced", {
   }
   
 })
+
+test_that("check that calibration method 2 runs", {
+
+  config$calibration_method <- 2
+  actual <- processData(datasets[1], config)
+
+  expect_is(actual[[1]]$calibratedAndDriftCorrected, "data.frame")
+  expect_equal(dim(actual[[1]]$memoryCorrected),
+               dim(actual[[1]]$calibratedAndDriftCorrected))
+
+})
