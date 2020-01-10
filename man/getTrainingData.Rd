@@ -20,6 +20,9 @@ included in the raw Picarro output.}
     standards as specified by the data set column \code{useForCalibration} be
     used as calibration standards (\code{TRUE}) or only two (\code{FALSE})?}
 }}
+
+\item{useBlock}{a single integer giving the number of the standard block
+which contains the data of the requested standards.}
 }
 \value{
 The input \code{dataset} filtered by the requested standard block

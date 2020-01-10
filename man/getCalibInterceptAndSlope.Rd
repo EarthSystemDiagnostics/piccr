@@ -20,6 +20,9 @@ included in the raw Picarro output.}
     standards as specified by the data set column \code{useForCalibration} be
     used as calibration standards (\code{TRUE}) or only two (\code{FALSE})?}
 }}
+
+\item{useBlock}{a single integer giving the number of the standard block which
+is to be used for estimating the calibration parameters.}
 }
 \value{
 A named list with elements \code{d18O} and \code{dD} where each

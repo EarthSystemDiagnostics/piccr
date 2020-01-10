@@ -41,6 +41,8 @@ linearCalibration <- function(dataset, config, block = 1){
 #' highest isotopic values are used, regardless of how many calibration
 #' standards are actually set in the dataset.
 #'
+#' @param useBlock a single integer giving the number of the standard block which
+#'   is to be used for estimating the calibration parameters.
 #' @inheritParams linearCalibration
 #'
 #' @return A named list with elements \code{d18O} and \code{dD} where each
@@ -83,7 +85,9 @@ getCalibInterceptAndSlope <- function(dataset, config, useBlock){
 #' calibration is switched on, only the two standards with the lowest and
 #' highest isotopic values are used, regardless of how many calibration
 #' standards are actually set in the dataset.
-#' 
+#'
+#' @param useBlock a single integer giving the number of the standard block
+#'   which contains the data of the requested standards.
 #' @inheritParams linearCalibration
 #' @import dplyr
 #' 
