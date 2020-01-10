@@ -63,9 +63,9 @@ test_that("check that no NAs were introduced", {
     
   actual <- processData(datasets, config)
   
-  for (dataset in actual$processed) {
-    expect_equal(sum(is.na(dataset$`delta.O18`)), 1)
-    expect_equal(sum(is.na(dataset$`delta.H2`)), 1)
+  for (dataset in actual) {
+    expect_equal(sum(is.na(dataset$processed$`delta.O18`)), 2)
+    expect_equal(sum(is.na(dataset$processed$`delta.H2`)), 2)
   }
   
 })
