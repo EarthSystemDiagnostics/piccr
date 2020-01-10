@@ -51,6 +51,8 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL){
 }
 
 #' Build section "AVERAGE OVER ALL FILES"
+#'
+#' @param processedData a list as output by \code{processData()}.
 buildFirstSection <- function(processedData){
   
   meanPooledSdO18 <- mean(purrr::map_dbl(processedData$pooledStdDev, ~ .$d18O))
@@ -65,6 +67,8 @@ buildFirstSection <- function(processedData){
 }
 
 #' Build section "VALUES FOR EACH FILE"
+#'
+#' @param processedData a list as output by \code{processData()}.
 #' @import dplyr
 buildSecondSection <- function(processedData){
   
@@ -79,6 +83,9 @@ buildSecondSection <- function(processedData){
 }
 
 #' Build section "INTER STANDARD BIAS TO LITERATURE VALUES FOR EACH FILE"
+#'
+#' @param processedData a list as output by \code{processData()}.
+#' @param config a named list with the contents of the config file.
 #' @import dplyr
 buildThirdSection <- function(processedData, config){
   
