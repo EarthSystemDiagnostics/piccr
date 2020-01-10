@@ -109,12 +109,10 @@ getTrainingData <- function(dataset, config, useBlock) {
       ungroup()
   }
   
-  # if two-point calibration is to be used, discard middle standard
+  # if two-point calibration is to be used, discard middle standards
   if (config$use_three_point_calibration == FALSE) {
-    trainingData <- trainingData %>% 
-      split(.$`Identifier 1`) %>% 
-      selectGroupsForTwoPointCalib() %>%
-      bind_rows()
+    trainingData <- trainingData %>%
+      selectStandardsForTwoPointCalib()
   }
   
   return(trainingData)
@@ -122,20 +120,27 @@ getTrainingData <- function(dataset, config, useBlock) {
 
 #' Select lowest and highest standard
 #'
-#' From a group of standards, select the two standards that exhibit the lowest
-#' and highest isotope values.
+#' From a data set of standards, select the two standards that exhibit the
+#' lowest and highest isotope values.
 #'
-#' @param groups a list of vectors from splitting a data frame block of
-#'   standards by their \code{Identifier 1} values through calling
-#'   \code{\link{split}}.
+#' @param dataset a data frame with the isotopic data for a set of standards
+#'   from a specific block.
+#' @import dplyr
 #' 
 #' @return A data frame with all injections from the two selected standards.
 #' 
-selectGroupsForTwoPointCalib <- function(groups){
+selectStandardsForTwoPointCalib <- function(dataset){
 
-  orderedByIsotopeVal <- order(purrr::map_dbl(groups, ~ mean(.$`d(18_16)Mean`, na.rm = TRUE)))
-  highestAndLowestIsotopeVal <- groups[c(orderedByIsotopeVal[1], utils::tail(orderedByIsotopeVal, 1))]
-  return(highestAndLowestIsotopeVal)
+  groups <- dataset %>%
+    split(.$`Identifier 1`)
+
+  orderedByIsotopeVal <- order(
+    purrr::map_dbl(groups, ~ mean(.$`d(18_16)Mean`, na.rm = TRUE)))
+
+  highestAndLowestStandard <- bind_rows(
+    groups[c(orderedByIsotopeVal[1], utils::tail(orderedByIsotopeVal, 1))])
+
+  return(highestAndLowestStandard)
 }
 
 #' Apply linear calibration
