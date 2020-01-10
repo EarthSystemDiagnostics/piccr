@@ -54,7 +54,9 @@
 #' 
 processData <- function(datasets, config){
   
-  purrr::map(names(datasets), processSingleDataset, config = config, datasets = datasets)
+  names(datasets) %>%
+    purrr::map(processSingleDataset, config = config, datasets = datasets) %>%
+    stats::setNames(names(datasets))
 }
 
 #' Process a single Picarro CRDS stable isotope data set

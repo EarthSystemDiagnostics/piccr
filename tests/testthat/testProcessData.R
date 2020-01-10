@@ -80,3 +80,11 @@ test_that("check that calibration method 2 runs", {
                dim(actual[[1]]$calibratedAndDriftCorrected))
 
 })
+
+test_that("check that data set names are preserved", {
+
+  actual <- processData(datasets, config)
+
+  expect_equal(names(actual), names(datasets))
+
+})
