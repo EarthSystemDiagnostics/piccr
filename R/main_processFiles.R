@@ -9,23 +9,28 @@
 #'   that includes the parameter settings to use for the processing; see the
 #'   example file provided with \code{piccr} (`system.file("extdata",
 #'   "config.yaml", package = "piccr")`) for details.
+#' @param writeOutput logical; shall processed data and quality control
+#'   information be written to disk in the location specified by the
+#'   configuration file? Defaults to \code{TRUE}.
 #' @import dplyr
 #'
-#' @return A list the same length as the number of raw Picarro files in the
-#'   input directory; each list element contains the output from
+#' @return Invisibly, a list the same length as the number of raw Picarro files
+#'   in the input directory; each list element contains the output from
 #'   \code{\link{processSingleDataset}}.
 #' @seealso \code{\link{processData}}, \code{\link{processSingleDataset}}
 #' @export
 #' 
-processFiles <- function(configFile){
+processFiles <- function(configFile, writeOutput = TRUE){
   
   config <- parseConfig(configFile)
   
   processedData <- readFiles(config) %>% 
     processData(config)
   
-  writeDataToFile(processedData, config)
-  outputSummaryFile(processedData, config)
+  if (writeOutput) {
+    writeDataToFile(processedData, config)
+    outputSummaryFile(processedData, config)
+  }
   
-  return(processedData)
+  return(invisible(processedData))
 }

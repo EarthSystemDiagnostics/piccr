@@ -4,17 +4,21 @@
 \alias{processFiles}
 \title{Process Picarro CRDS measurement files}
 \usage{
-processFiles(configFile)
+processFiles(configFile, writeOutput = TRUE)
 }
 \arguments{
 \item{configFile}{A character string naming the YAML configuration file
 that includes the parameter settings to use for the processing; see the
 example file provided with \code{piccr} (`system.file("extdata",
 "config.yaml", package = "piccr")`) for details.}
+
+\item{writeOutput}{logical; shall processed data and quality control
+information be written to disk in the location specified by the
+configuration file? Defaults to \code{TRUE}.}
 }
 \value{
-A list the same length as the number of raw Picarro files in the
-  input directory; each list element contains the output from
+Invisibly, a list the same length as the number of raw Picarro files
+  in the input directory; each list element contains the output from
   \code{\link{processSingleDataset}}.
 }
 \description{
