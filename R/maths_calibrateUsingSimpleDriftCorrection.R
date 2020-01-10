@@ -83,13 +83,13 @@ calculateDriftSlope <- function(dataset, config){
   
   # TODO: clean this code
   slopeD18O <- dataForEachStandard %>%
-    purrr::map(function(x) lm(`d(18_16)Mean` ~ SecondsSinceStart, data = x)) %>%
-    purrr::map_dbl(~ coef(.)[[2]]) %>%
+    purrr::map(function(x) stats::lm(`d(18_16)Mean` ~ SecondsSinceStart, data = x)) %>%
+    purrr::map_dbl(~ stats::coef(.)[[2]]) %>%
     mean()
   
   slopeDD <- dataForEachStandard %>%
-    purrr::map(function(x) lm(`d(D_H)Mean` ~ SecondsSinceStart, data = x)) %>%
-    purrr::map_dbl(~ coef(.)[[2]]) %>%
+    purrr::map(function(x) stats::lm(`d(D_H)Mean` ~ SecondsSinceStart, data = x)) %>%
+    purrr::map_dbl(~ stats::coef(.)[[2]]) %>%
     mean()
   
   list(d18O = slopeD18O, dD = slopeDD)

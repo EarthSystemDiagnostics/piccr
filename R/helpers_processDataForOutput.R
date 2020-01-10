@@ -164,11 +164,11 @@ doAccumulate <- function(dataset){
               block = block[[1]],
               delta.O18 = mean(`d(18_16)Mean`, na.rm = TRUE),
               delta.H2 = mean(`d(D_H)Mean`, na.rm = TRUE),
-              sd.O18 = sd(`d(18_16)Mean`, na.rm = TRUE),
-              sd.H2 = sd(`d(D_H)Mean`, na.rm = TRUE),
+              sd.O18 = stats::sd(`d(18_16)Mean`, na.rm = TRUE),
+              sd.H2 = stats::sd(`d(D_H)Mean`, na.rm = TRUE),
               d.Excess = mean(dExcess, na.rm = TRUE),
               sd.d.Excess =
-                sqrt((sd(`d(D_H)Mean`, na.rm = TRUE))^2 + 64 * (sd(`d(18_16)Mean`, na.rm = TRUE)^2)))
+                sqrt((stats::sd(`d(D_H)Mean`, na.rm = TRUE))^2 + 64 * (stats::sd(`d(18_16)Mean`, na.rm = TRUE)^2)))
 }
 
 #' Number of warm-up standard vials

@@ -81,11 +81,11 @@ calculateMemoryCoefficients <- function(dataset) {
 
   memoryCoeffForEachStandard <- memoryCoeffForEachStandard %>%
     group_split(`Identifier 1`, `vial_group`) %>%
-    setNames(groupNames)
+    stats::setNames(groupNames)
 
   memoryCoeffForEachStandard <- purrr::map(names(memoryCoeffForEachStandard), ~ {
     data <- select(memoryCoeffForEachStandard[[.]], `Inj Nr`, memoryCoeffD18O, memoryCoeffDD)
-    setNames(data, c("Inj Nr", stringr::str_c(., "_d18O"), stringr::str_c(., "_dD")))
+    stats::setNames(data, c("Inj Nr", stringr::str_c(., "_d18O"), stringr::str_c(., "_dD")))
   })
   
   # join the mean mem coeff and the mem coeff for each standard into one dataframe
@@ -137,8 +137,8 @@ applyMemoryCorrection <- function(dataset, memoryCoefficients){
   memoryCorrectedH2[[1]]  <- rep(NA, nrow(samples[[1]]))
   
   # Store state in these vars. Initialize to mean of last three injections of first sample.
-  deltaTruePrevO18 <- mean(tail(samples[[1]]$`d(18_16)Mean`, 3), na.rm = TRUE)
-  deltaTruePrevH2  <- mean(tail(samples[[1]]$`d(D_H)Mean`, 3), na.rm = TRUE)
+  deltaTruePrevO18 <- mean(utils::tail(samples[[1]]$`d(18_16)Mean`, 3), na.rm = TRUE)
+  deltaTruePrevH2  <- mean(utils::tail(samples[[1]]$`d(D_H)Mean`, 3), na.rm = TRUE)
   
   for (i in 2:length(samples)){
     

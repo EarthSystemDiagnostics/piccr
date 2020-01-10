@@ -324,8 +324,8 @@ calculatePooledSD <- function(dataset){
    stdDevForEachSample <- dataset %>%
      group_by(`Identifier 1`, block, vial_group) %>%
      summarise(n = n(),
-               sd.d18O = sd(`d(18_16)Mean`, na.rm = TRUE),
-               sd.dD = sd(`d(D_H)Mean`), na.rm = TRUE) %>%
+               sd.d18O = stats::sd(`d(18_16)Mean`, na.rm = TRUE),
+               sd.dD = stats::sd(`d(D_H)Mean`), na.rm = TRUE) %>%
      ungroup()
 
    pooledStdDev <- stdDevForEachSample %>%

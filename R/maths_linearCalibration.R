@@ -61,13 +61,13 @@ getCalibInterceptAndSlope <- function(dataset, config, useBlock){
 
   # params from inverse regression to have least noise on predictor variable
 
-  d18OModel <- lm(`d(18_16)Mean` ~ o18_True, data = trainingData)
-  d18OIntercept <- -1 * coef(d18OModel)[[1]] / coef(d18OModel)[[2]]
-  d18OSlope <- 1 / coef(d18OModel)[[2]]
+  d18OModel <- stats::lm(`d(18_16)Mean` ~ o18_True, data = trainingData)
+  d18OIntercept <- -1 * stats::coef(d18OModel)[[1]] / stats::coef(d18OModel)[[2]]
+  d18OSlope <- 1 / stats::coef(d18OModel)[[2]]
   
-  dDModel <- lm(`d(D_H)Mean` ~ H2_True, data = trainingData)
-  dDIntercept <- -1 * coef(dDModel)[[1]] / coef(dDModel)[[2]]
-  dDSlope <- 1 / coef(dDModel)[[2]]
+  dDModel <- stats::lm(`d(D_H)Mean` ~ H2_True, data = trainingData)
+  dDIntercept <- -1 * stats::coef(dDModel)[[1]] / stats::coef(dDModel)[[2]]
+  dDSlope <- 1 / stats::coef(dDModel)[[2]]
   
   list(
     d18O = list(intercept = d18OIntercept, slope = d18OSlope),
@@ -134,7 +134,7 @@ getTrainingData <- function(dataset, config, useBlock) {
 selectGroupsForTwoPointCalib <- function(groups){
 
   orderedByIsotopeVal <- order(purrr::map_dbl(groups, ~ mean(.$`d(18_16)Mean`, na.rm = TRUE)))
-  highestAndLowestIsotopeVal <- groups[c(orderedByIsotopeVal[1], tail(orderedByIsotopeVal, 1))]
+  highestAndLowestIsotopeVal <- groups[c(orderedByIsotopeVal[1], utils::tail(orderedByIsotopeVal, 1))]
   return(highestAndLowestIsotopeVal)
 }
 
