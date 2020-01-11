@@ -8,31 +8,82 @@ buildOutputList(name, config, dataset, memoryCorrected, memoryCoefficients,
   calibrated, calibratedAndDriftCorrected, accumulated, qualityControlInfo)
 }
 \arguments{
-\item{config}{A list. Needs to contain the component $use_memory_correction, a logical.}
+\item{name}{the file name of the data set.}
 
-\item{dataset}{A data.frame.}
+\item{config}{a named list containing the logical component
+\code{use_memory_correction} which specifies if memory correction was used
+in the processing.}
 
-\item{memoryCorrected}{A data.frame.}
+\item{dataset}{a data frame with the raw measurement data.}
 
-\item{memoryCoefficients}{A data.frame.}
+\item{memoryCorrected}{a data frame with the memory-corrected measurement
+data.}
 
-\item{calibrated}{A data.frame.}
+\item{memoryCoefficients}{a data frame of estimated memory coefficients.}
 
-\item{calibratedAndDriftCorrected}{A data.frame.}
+\item{calibrated}{a data frame with the (memory-corrected and) calibrated
+measurement data.}
 
-\item{processedData}{A named list. Has the components $accumulatedData (a data.frame), 
-$deviationsFromTrue (a data.frame), $rmsdDeviationsFromTrue
-(a list), $pooledSD (a list), and $deviationOfControlStandard (a list).}
+\item{calibratedAndDriftCorrected}{a data frame with the (memory-corrected),
+calibrated and drift-corrected measurement data.}
+
+\item{accumulated}{a data frame with the corrected and calibrated data
+averaged over a specified number of injections.}
+
+\item{qualityControlInfo}{the output of \code{\link{getQualityControlInfo}}.}
 }
 \value{
-A nested list structure
+A named list with 13 components:
+  \describe{
+  \item{\code{name}:}{the file name of the data set.}
+  \item{\code{raw}:}{a data frame with the raw measurement data.}
+  \item{\code{memoryCorrected}:}{a data frame with the memory-corrected
+    measurement data, or \code{NULL} if no memory correction was applied.}
+  \item{\code{calibrated}:}{a data frame with the calibrated measurement
+    data based either on raw or memory-corrected data.}
+  \item{\code{calibratedAndDriftCorrected}:}{a data frame with the calibrated
+    and drift-corrected measurement data, or \code{NULL} if no drift
+    correction was applied.}
+  \item{\code{processed}:}{a data frame with the corrected and calibrated
+    measurement data averaged over a specified number of injections.}
+
+  \item{\code{memoryCoefficients}:}{a data frame with the estimated memory
+    coefficients.}
+  \item{\code{deviationsFromTrue}:}{data frame with the measured (and
+    processsed) value (d18O and dH), the expected value, and the deviation of
+    the measured from the expected value for each analysed standard.}
+  \item{\code{rmsdDeviationsFromTrue}:}{a list with the two elements
+    \code{d18O} and \code{dD} with the respective root mean square deviation
+    across all deviations in \code{deviationsFromTrue} (with the very first
+    standard of the measurement sequence excluded).}
+  \item{\code{deviationOfControlStandard}:}{a list with the two elements
+    \code{d18O} and \code{dD} of the deviations from the expected value for
+    the quality control standard(s) specified in the config file.}
+  \item{\code{pooledSD}:}{a list with the two elements \code{d18O}
+    and \code{dD} of the pooled standard deviations across all measured
+    vials.}
+  \item{\code{calibrationParams}:}{calibration parameters; not yet
+    implemented.}
+  \item{\code{driftParams}:}{estimated drift parameters; not yet
+    implemented.}
+}
 }
 \description{
-This is the final processing step for each dataset. After all the processing is done, input
-all relevant information and construct the output for a single dataset for the function
-processData(..).
+This function performs the final processing step for a specific dataset after
+all corrections are done by collecting the relevant data and information and
+returning them in a single output structure.
 }
-\details{
-Note: If you change the output of this function, don't forget to update
-the roxygen docstring (section return value) of the function processData(..).
+\note{
+If you change the output of this function, remember to update
+the roxygen docstring (section return value) in `piccr_output.R`.
+}
+\seealso{
+\code{\link{processData}},
+  \code{\link{calculateMemoryCoefficients}},
+  \code{\link{correctForMemoryEffect}},
+  \code{\link{linearCalibration}},
+  \code{\link{calibrateUsingSimpleDriftCorrection}},
+  \code{\link{calibrateUsingDoubleCalibration}},
+  \code{\link{accumulateMeasurements}},
+  \code{\link{getQualityControlInfo}}.
 }

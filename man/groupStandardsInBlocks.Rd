@@ -7,17 +7,18 @@
 groupStandardsInBlocks(dataset, config)
 }
 \arguments{
-\item{dataset}{A data.frame.}
+\item{dataset}{a data frame with measurement data of a specific data set.}
 
-\item{config}{A named list. Needs to contain the component
-$standards; a list of lists where each innermost
-list needs to contain the component $name.}
+\item{config}{A named list which needs to contain at least the component
+\code{standards} which is expected to be a list containing at least the
+component \code{name} giving the name for each used standard as specified
+by the \code{Identifier 1} column of the data set.}
 }
 \value{
-A data.frame.
+The input \code{dataset} supplemented by the column \code{block}
+  which counts the number of standard blocks across the measurement. For
+  normal samples, this value is set to \code{NA}.
 }
 \description{
-For each standard injection, determine which standard block
-it belongs to. The results are stored in the column 'block'.
-For probes the value is NA.
+Determine for each standard injection which standard block it belongs to.
 }

@@ -2,27 +2,24 @@
 % Please edit documentation in R/helpers_writeDataToFile.R
 \name{writeDataToFile}
 \alias{writeDataToFile}
-\title{writeDataToFile}
+\title{Save processed data}
 \usage{
 writeDataToFile(datasets, config)
 }
 \arguments{
-\item{datasets}{A nested list, as output by processData(..).
-Contains the component $processed.}
+\item{datasets}{a list of processed measurement data as output by
+\code{\link{processData}} or minimum a list of lists with each sublist
+containing a processed data set in the component \code{processed}.}
 
-\item{config}{A named list. Needs to contain at least the components
-'output_directory' and 'include_standards_in_output'.}
-}
-\value{
-No relevant return value
+\item{config}{a named list which needs to contain the following components:
+  \describe{
+  \item{\code{output_directory}:}{character string with the directory path
+    where the data shall be saved.}
+  \item{\code{include_standards_in_output}:}{logical; if \code{TRUE} the
+  processed data of measured standards is included in the output.}
+}}
 }
 \description{
-Save processed datasets to disc. Note that the component 
-'datasets$processed' contains the dataframes that are
-saved.
-}
-\details{
-Uses the following config arguments:
-  - 'output_directory'
-  - 'include_standards_in_output'
+Save a given number of processed datasets on disc as csv files in a specified
+directory.
 }

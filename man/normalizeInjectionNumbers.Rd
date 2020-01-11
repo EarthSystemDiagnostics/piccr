@@ -7,14 +7,13 @@
 normalizeInjectionNumbers(dataset)
 }
 \arguments{
-\item{datasets}{A data.frame.}
+\item{dataset}{a data frame with measurement data of a specific data set.}
 }
 \value{
-A data.frame. The column of injection numbers has been 
-        re-calculated accounting for possible consecutive vials 
-        of the same probe.
+The input \code{dataset} with the column of injection numbers
+  re-calculated accounting for possible consecutive vials of the same probe.
 }
 \description{
-Re-calculate injection numbers to account for probes being measured
-from two or more consectuive vials.
+Re-calculate the injection numbers to account for probes being measured
+from two or more consecutive vials.
 }

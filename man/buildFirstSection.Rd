@@ -6,6 +6,9 @@
 \usage{
 buildFirstSection(processedData)
 }
+\arguments{
+\item{processedData}{a list as output by \code{processData()}.}
+}
 \description{
 Build section "AVERAGE OVER ALL FILES"
 }

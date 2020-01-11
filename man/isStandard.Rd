@@ -2,20 +2,22 @@
 % Please edit documentation in R/helpers_smallFunctions.R
 \name{isStandard}
 \alias{isStandard}
-\title{Determine if a given ID belongs to a standard.}
+\title{Determine if a given probe is a standard.}
 \usage{
 isStandard(id1, config)
 }
 \arguments{
-\item{id1}{A character vector. The id to test for.}
+\item{id1}{character vector; the ID to test for.}
 
-\item{config}{A named list. Needs to contain the component 'standards'.
-'standards' is a list, each element needs to contain the
-component 'name'.}
+\item{config}{A named list which needs to contain at least the component
+\code{standards} which is expected to be a list containing at least the
+component \code{name} giving the name for each used standard as specified
+by the \code{Identifier 1} column of the data set.}
 }
 \value{
-A logical.
+logical; \code{TRUE} if the requested ID is found in the
+  \code{config} data base of standards, else \code{FALSE}.
 }
 \description{
-Determine if a given ID belongs to a standard.
+Determine if a given probe is a standard based on its ID value.
 }

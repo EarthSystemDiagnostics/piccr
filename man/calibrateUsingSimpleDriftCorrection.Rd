@@ -2,24 +2,35 @@
 % Please edit documentation in R/maths_calibrateUsingSimpleDriftCorrection.R
 \name{calibrateUsingSimpleDriftCorrection}
 \alias{calibrateUsingSimpleDriftCorrection}
-\title{Calibrate using simple drift correction}
+\title{Calibrate data using single-block calibration and linear drift correction}
 \usage{
 calibrateUsingSimpleDriftCorrection(dataset, config)
 }
 \arguments{
-\item{config}{A named list of config arguments. The required config arguments 
-are the same as for the function "linearDriftCorrection".}
+\item{dataset}{a data frame with measurement data of a specific data set. It
+needs to contain the additional columns \code{block},
+\code{useForCalibration}, \code{useForDriftCorr}, \code{o18_True} and
+\code{H2_True} which are not included in the raw Picarro output.}
 
-\item{datasets}{A data.frame with isotope measurement data.
-Should contain the additional columns "block", 
-"useForDriftCorr", and "useForMemCorr" (not included in the 
-raw Picarro output).}
+\item{config}{a named list which needs to contain the following elements:
+\describe{
+  \item{\code{use_memory_correction}:}{logical; has a memory correction been
+  applied to the input data?}
+  \item{\code{use_three_point_calibration}:}{logical; shall three or more
+    standards as specified by the data set column \code{useForCalibration} be
+    used as calibration standards (\code{TRUE}) or only two (\code{FALSE})?}
+}}
 }
 \value{
-A data.frame.
+The input \code{dataset} with the d18O and dD values calibrated
+  according to drift correction and single calibration.
 }
 \description{
-Apply calibration and drift correction to the input dataset. Uses
-linear drift correction and linear calibration. The calibration uses
-only the standards in block 1.
+Calibrate a given data set using calibration slope and intercept values
+estimated with standards from the beginning of the measurement sequence
+following a linear drift correction against measurement time.
+}
+\seealso{
+\code{\link{groupStandardsInBlocks}},
+  \code{\link{associateStandardsWithConfigInfo}}
 }

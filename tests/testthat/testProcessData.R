@@ -63,9 +63,28 @@ test_that("check that no NAs were introduced", {
     
   actual <- processData(datasets, config)
   
-  for (dataset in actual$processed) {
-    expect_equal(sum(is.na(dataset$`delta.O18`)), 1)
-    expect_equal(sum(is.na(dataset$`delta.H2`)), 1)
+  for (dataset in actual) {
+    expect_equal(sum(is.na(dataset$processed$`delta.O18`)), 2)
+    expect_equal(sum(is.na(dataset$processed$`delta.H2`)), 2)
   }
   
+})
+
+test_that("check that calibration method 2 runs", {
+
+  config$calibration_method <- 2
+  actual <- processData(datasets[1], config)
+
+  expect_is(actual[[1]]$calibratedAndDriftCorrected, "data.frame")
+  expect_equal(dim(actual[[1]]$memoryCorrected),
+               dim(actual[[1]]$calibratedAndDriftCorrected))
+
+})
+
+test_that("check that data set names are preserved", {
+
+  actual <- processData(datasets, config)
+
+  expect_equal(names(actual), names(datasets))
+
 })

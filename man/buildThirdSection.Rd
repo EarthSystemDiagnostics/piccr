@@ -6,6 +6,11 @@
 \usage{
 buildThirdSection(processedData, config)
 }
+\arguments{
+\item{processedData}{a list as output by \code{processData()}.}
+
+\item{config}{a named list with the contents of the config file.}
+}
 \description{
 Build section "INTER STANDARD BIAS TO LITERATURE VALUES FOR EACH FILE"
 }
