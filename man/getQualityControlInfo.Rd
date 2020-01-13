@@ -7,23 +7,34 @@
 getQualityControlInfo(dataset, accumulatedDataset)
 }
 \arguments{
-\item{dataset}{a data frame with corrected and calibrated measurement data
-of a specific data set.}
+\item{dataset}{a data frame with corrected and calibrated measurement data of
+a specific data set.}
 
 \item{accumulatedDataset}{a data frame with the accumulated
 (i.e. injection-averaged) measurement data for this data set.}
 }
 \value{
 A list with three elements:
-  $deviationsFromTrue (data frame with the deviations from the true value for
-   each measured standard.)
-  $rmsdDeviationsFromTrue (list with elements \code{d18O} and \code{dD} with
-   the rmsd across \code{deviationsFromTrue} (very first standard excluded).)
-  $deviationOfControlStandard (list with elements \code{Identifier 1},
-  \code{d18O} and \code{dD} with the deviations from the true value for the
-  quality control standard(s) in \code{Identifier 1}.)
+  \describe{
+  \item{\code{deviationsFromTrue}:}{data frame with the measured (and
+    processsed) value (d18O and dH), the expected value, and the deviation of
+    the measured from the expected value for each analysed standard.}
+  \item{\code{rmsdDeviationsFromTrue}:}{a list with the two elements
+    \code{d18O} and \code{dD} with the respective root mean square deviation
+    across all deviations in \code{deviationsFromTrue} (with the very first
+    standard of the measurement sequence excluded).}
+  \item{\code{deviationOfControlStandard}:}{a list with the two elements
+    \code{d18O} and \code{dD} of the deviations from the expected value for
+    the quality control standard(s) specified in the config file.}
+  \item{\code{pooledSD}:}{a list with the two elements \code{d18O}
+    and \code{dD} of the pooled standard deviations across all measured
+    vials.}
+}
 }
 \description{
-Obtain the quality control information for a data set based on the deviations
-of the measured standards from their true values.
+Obtain the quality control information for a processed data set based on the
+deviations of the measured standards from their expected values.
+}
+\seealso{
+\code{\link{calculatePooledSD}}
 }

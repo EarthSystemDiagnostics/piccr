@@ -1,11 +1,11 @@
-library(testthat)
-library(tidyverse)
+library(tibble)
+library(dplyr)
 
 context("test processing data for output")
 
 test_that("test quality control output structure", {
 
-  dataset1 <- tribble(
+  dataset1 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Identifier 2`, ~block, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~dExcess, ~o18_True, ~H2_True, ~useAsControlStandard, ~Sample, ~vial_group,
     # -- / -------------- / -------------- / ----- / -------- / -------------- / ------------ / --------/ ---------/ --------/ ---------------------/ -------/ -----------
     1,     "WU",            "w",             1,      1,         0.9,             8.5,           15,       1,         10,       FALSE,                 1,       1,
@@ -25,7 +25,7 @@ test_that("test quality control output structure", {
     15,    "C",             "x",             3,      1,         2.3,             19.1,           -2,       2,         20,      FALSE,                 7,       2,
     16,    "C",             "x",             3,      2,         2.45,            22.7,           2,        2,         20,      FALSE,                 7,       2
   )
-  expected1 <- tribble(
+  expected1 <- tibble::tribble(
     ~Sample, ~`Identifier 1`, ~block, ~d18OMeasured, ~d18OTrue, ~d18ODeviation, ~dDMeasured, ~dDTrue, ~dDDeviation,
     # -----/ ---------------/ ------/ -------------/ ---------/ --------------/ -----------/ -------/ ------------
     1,       "WU",            1,      1,             1,         0,              9.4,         10,      0.6,
@@ -44,7 +44,7 @@ test_that("test quality control output structure", {
   expect_is(actual1, "data.frame")
 
   expect_length(actual2, 4)
-  expect_equal(mutate_if(actual2$deviationsFromTrue, is.numeric, round, digits = 5), expected1)
+  expect_equal(dplyr::mutate_if(actual2$deviationsFromTrue, is.numeric, round, digits = 5), expected1)
   expect_equal(actual2$deviationOfControlStandard, expected2)
   expect_equal(lapply(actual2$rmsdDeviationsFromTrue, round, 3), expected3)
   expect_equal(lapply(actual2$pooledSD, round, 3), expected4)
@@ -52,7 +52,7 @@ test_that("test quality control output structure", {
 
 test_that("test correct vial count of very first standard in file", {
 
-  dataset1 <- tribble(
+  dataset1 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Identifier 2`, ~`Inj Nr`, ~Sample, ~vial_group,
     # ---/ ---------------/ ---------------/ ---------/ -------/ -----------/
     1,     "A",             "x",             1,         1,       1,
@@ -65,7 +65,7 @@ test_that("test correct vial count of very first standard in file", {
     8,     "C",             "z",             2,         3,       1,
     9,     "C",             "z",             3,         3,       1
   )
-  dataset2 <- tribble(
+  dataset2 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Identifier 2`, ~`Inj Nr`, ~Sample, ~vial_group,
     # ---/ ---------------/ ---------------/ ---------/ -------/ -----------/
     1,     "A",             "x",             1,         1,       1,

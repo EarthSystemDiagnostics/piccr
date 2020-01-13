@@ -1,5 +1,3 @@
-library(testthat)
-library(tidyverse)
 library(rlist)
 
 context("Do a full run using example configs")

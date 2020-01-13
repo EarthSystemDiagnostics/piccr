@@ -6,6 +6,9 @@
 \usage{
 buildSecondSection(processedData)
 }
+\arguments{
+\item{processedData}{a list as output by \code{processData()}.}
+}
 \description{
 Build section "VALUES FOR EACH FILE"
 }

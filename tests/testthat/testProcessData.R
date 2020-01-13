@@ -1,5 +1,5 @@
-library(testthat)
 library(readr)
+library(stringr)
 library(yaml)
 
 context("test processData")
@@ -9,17 +9,17 @@ configPath <- system.file("extdata", "config.yaml", package = "piccr")
 # test should be able to run from the repository root directory or from the directory
 # tests/testthat. If the directory is testthat, set the input directory to 
 # test_data in the config and set the output directory to test_data/output.
-configContents <- read_file(configPath)
+configContents <- readr::read_file(configPath)
 if (endsWith(getwd(), "testthat")) {
-  configContents <- str_replace(configContents, "input_directory:\\s+.+\\n", "input_directory:  test_data\n")
-  configContents <- str_replace(configContents, "output_directory:\\s+.+\\n", "output_directory:  test_data/output\n")
+  configContents <- stringr::str_replace(configContents, "input_directory:\\s+.+\\n", "input_directory:  test_data\n")
+  configContents <- stringr::str_replace(configContents, "output_directory:\\s+.+\\n", "output_directory:  test_data/output\n")
 }
 config <- yaml::yaml.load(configContents)
 
 datasets <- list(
-  HIDS2041_IsoWater_20151126_115726.csv = read_csv("test_data/HIDS2041_IsoWater_20151126_115726.csv"),
-  HIDS2041_IsoWater_20151125_111138.csv = read_csv("test_data/HIDS2041_IsoWater_20151125_111138.csv"),  
-  HIDS2041_IsoWater_20151127_143940.csv = read_csv("test_data/HIDS2041_IsoWater_20151127_143940.csv")
+  HIDS2041_IsoWater_20151126_115726.csv = readr::read_csv("test_data/HIDS2041_IsoWater_20151126_115726.csv"),
+  HIDS2041_IsoWater_20151125_111138.csv = readr::read_csv("test_data/HIDS2041_IsoWater_20151125_111138.csv"),  
+  HIDS2041_IsoWater_20151127_143940.csv = readr::read_csv("test_data/HIDS2041_IsoWater_20151127_143940.csv")
 )
 
 test_that("check general output structure", {
@@ -63,9 +63,28 @@ test_that("check that no NAs were introduced", {
     
   actual <- processData(datasets, config)
   
-  for (dataset in actual$processed) {
-    expect_equal(sum(is.na(dataset$`delta.O18`)), 1)
-    expect_equal(sum(is.na(dataset$`delta.H2`)), 1)
+  for (dataset in actual) {
+    expect_equal(sum(is.na(dataset$processed$`delta.O18`)), 2)
+    expect_equal(sum(is.na(dataset$processed$`delta.H2`)), 2)
   }
   
+})
+
+test_that("check that calibration method 2 runs", {
+
+  config$calibration_method <- 2
+  actual <- processData(datasets[1], config)
+
+  expect_is(actual[[1]]$calibratedAndDriftCorrected, "data.frame")
+  expect_equal(dim(actual[[1]]$memoryCorrected),
+               dim(actual[[1]]$calibratedAndDriftCorrected))
+
+})
+
+test_that("check that data set names are preserved", {
+
+  actual <- processData(datasets, config)
+
+  expect_equal(names(actual), names(datasets))
+
 })

@@ -2,21 +2,35 @@
 % Please edit documentation in R/maths_calibrateUsingDoubleCalibration.R
 \name{calibrateUsingDoubleCalibration}
 \alias{calibrateUsingDoubleCalibration}
-\title{Calibrate the given dataset using double calibration}
+\title{Calibrate data using double-block calibration}
 \usage{
 calibrateUsingDoubleCalibration(dataset, config)
 }
 \arguments{
-\item{dataset}{A data.frame with isotope measurement data.
-Should contain the additional columns "block" and 
-"useForMemCorr" (not included in the raw Picarro output).}
+\item{dataset}{a data frame with measurement data of a specific data set. It
+needs to contain the additional columns \code{block},
+\code{useForCalibration}, \code{o18_True} and \code{H2_True} which are not
+included in the raw Picarro output.}
 
-\item{config}{A named list. Need to contain the boolean elements "use_memory_correction"
-and "use_three_point_calibration".}
+\item{config}{a named list which needs to contain the following elements:
+\describe{
+  \item{\code{use_memory_correction}:}{logical; has a memory correction been
+  applied to the input data?}
+  \item{\code{use_three_point_calibration}:}{logical; shall three or more
+    standards as specified by the data set column \code{useForCalibration} be
+    used as calibration standards (\code{TRUE}) or only two (\code{FALSE})?}
+}}
 }
 \value{
-A data.frame.
+The input \code{dataset} with the d18O and dD values calibrated
+  according to the double-block calibration.
 }
 \description{
-Calibrate the given dataset using double calibration
+Calibrate a given data set using calibration slope and intercept values which
+are linearly interpolated between the first and the final block of standard
+measurements within the measurement sequence.
+}
+\seealso{
+\code{\link{groupStandardsInBlocks}},
+  \code{\link{associateStandardsWithConfigInfo}}
 }

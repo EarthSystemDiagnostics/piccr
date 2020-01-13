@@ -7,12 +7,27 @@
 correctForMemoryEffect(dataset)
 }
 \arguments{
-\item{dataset}{A data.frame.}
+\item{dataset}{a data frame with measurement data of a specific data set. It
+needs to contain the additional columns \code{block} and
+\code{vial_group} which are not included in the raw Picarro output.}
 }
 \value{
-A list. It contains the two named elements
-        "datasetMemoryCorrected" and "memoryCoefficients".
+A named list with two elements:
+  \describe{
+  \item{\code{datasetMemoryCorrected}:}{the input \code{dataset} with the
+    d18O and dD columns corrected for memory effect.}
+  \item{\code{memoryCoefficients}:}{a data frame of estimated memory
+    coefficients (see \code{\link{calculateMemoryCoefficients}} for
+    details).}
+}
 }
 \description{
-Take a data.frame with isotope measurement data and apply memory correction to it.
+Correct a given measurement data set for the memory effect by applying
+memory coefficients estimated based on analysing the standards in the first
+standard block.
+}
+\seealso{
+\code{\link{calculateMemoryCoefficients}},
+  \code{\link{groupStandardsInBlocks}},
+  \code{\link{assignVialsToGroups}}
 }

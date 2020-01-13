@@ -2,25 +2,22 @@
 % Please edit documentation in R/helpers_smallFunctions.R
 \name{readFiles}
 \alias{readFiles}
-\title{Read files}
+\title{Read in measurement files}
 \usage{
 readFiles(config)
 }
 \arguments{
-\item{config}{A named list. Needs to contain at least the#
-components 'input_directory' and 'file_extension'.}
+\item{config}{A named list which needs to contain at least the
+components \code{input_directory} (the directory which contains the files
+to be read in) and \code{file_extension} (the file name extension to look
+for).}
 }
 \value{
-A named list of dataframes. The names of the 
-        list elements correspond to the file names in the
-        input directory.
+A named list of data frames where the names of the list elements
+  correspond to the file names in the input directory and where each data
+  frame contains the data read in from the file.
 }
 \description{
-Read all files from a given input directory that have a 
-given file extension. Only works for csv files.
-}
-\details{
-The input directory and the file extension are given in
-the config args 'input_directory' and 'file_extension'
-respectively.
+Read all files from a given input directory that match a given file
+extension. Note that only csv files are supported.
 }

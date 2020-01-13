@@ -1,4 +1,3 @@
-library(testthat)
 library(readr)
 library(stringr)
 
@@ -9,8 +8,8 @@ d2Content <- "Identifier 1,c,d\na,3.1,\nb,9,-2\n"
 
 config <- list(output_directory = tempdir(), include_standards_in_output = TRUE)
 datasets <- list(
-  list(name = "d1.csv", processed = read_csv(d1Content)), 
-  list(name = "d2.csv", processed = read_csv(d2Content))
+  list(name = "d1.csv", processed = readr::read_csv(d1Content)), 
+  list(name = "d2.csv", processed = readr::read_csv(d2Content))
 )
 
 test_that("test correct files are created (output dir exists)", {
@@ -39,9 +38,9 @@ test_that("test correct files are created (output dir does not exists)", {
 test_that("test file contents are correct", {
   writeDataToFile(datasets, config)
   
-  expect_identical(read_file(file.path(tempdir(), "d1.csv")),
+  expect_identical(readr::read_file(file.path(tempdir(), "d1.csv")),
                    d1Content)
-  expect_identical(read_file(file.path(tempdir(), "d2.csv")),
+  expect_identical(readr::read_file(file.path(tempdir(), "d2.csv")),
                    d2Content)
 })
 
@@ -52,10 +51,10 @@ test_that("test don't include standards in output (case standard in file)", {
   
   writeDataToFile(datasets, config)
   
-  expect_identical(read_file(file.path(tempdir(), "d1.csv")),
+  expect_identical(readr::read_file(file.path(tempdir(), "d1.csv")),
                    "Identifier 1,a,b\n")
   
-  expect_identical(read_file(file.path(tempdir(), "d2.csv")),
+  expect_identical(readr::read_file(file.path(tempdir(), "d2.csv")),
                    "Identifier 1,c,d\nb,9,-2\n")
 })
 
@@ -66,10 +65,10 @@ test_that("test don't include standards in output (case only probes in file)", {
   
   writeDataToFile(datasets, config)
   
-  expect_identical(read_file(file.path(tempdir(), "d1.csv")),
+  expect_identical(readr::read_file(file.path(tempdir(), "d1.csv")),
                    d1Content)
   
-  expect_identical(read_file(file.path(tempdir(), "d2.csv")),
+  expect_identical(readr::read_file(file.path(tempdir(), "d2.csv")),
                    d2Content)
 })
 
@@ -80,9 +79,9 @@ test_that("test don't include standards in output (case standard list empty)", {
   
   writeDataToFile(datasets, config)
   
-  expect_identical(read_file(file.path(tempdir(), "d1.csv")),
+  expect_identical(readr::read_file(file.path(tempdir(), "d1.csv")),
                    d1Content)
   
-  expect_identical(read_file(file.path(tempdir(), "d2.csv")),
+  expect_identical(readr::read_file(file.path(tempdir(), "d2.csv")),
                    d2Content)
 })

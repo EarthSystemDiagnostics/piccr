@@ -2,19 +2,23 @@
 % Please edit documentation in R/helpers_smallFunctions.R
 \name{addColumnSecondsSinceStart}
 \alias{addColumnSecondsSinceStart}
-\title{Add the column 'SecondsSinceStart' to the given dataset.}
+\title{Calculate seconds since start}
 \usage{
 addColumnSecondsSinceStart(dataset)
 }
 \arguments{
-\item{dataset}{A data.frame. Needs to contain the column
-'Time Code'. The elements of 'Time Code' should
-be character vectors of the format 'yyyy/mm/ddhh:mm:ss'
-(e.g. '2019/11/2510:00:00').}
+\item{dataset}{a data frame with measurement data of a specific data set.}
 }
 \value{
-A data.frame that includes the column 'SecondsSinceStart'.
+The input \code{dataset} supplemented by the column
+\code{SecondsSinceStart} which gives the seconds elapsed since the start of
+the measurement.
 }
 \description{
-Add the column 'SecondsSinceStart' to the given dataset.
+Calculate the seconds elapsed since the start of the measurement.
+}
+\details{
+The input data frame is expected to contain the column
+\code{Time Code} with values as character vectors of the format
+'yyyy/mm/ddhh:mm:ss' (e.g. '2019/11/2510:00:00').
 }

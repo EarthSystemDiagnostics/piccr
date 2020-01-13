@@ -1,5 +1,3 @@
-library(tidyverse)
-
 #' outputSummaryFile
 #' 
 #' Write a summary file to disc. The summary file contains
@@ -41,7 +39,7 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL){
   secondSection <- buildSecondSection(processedData)
   thirdSection  <- buildThirdSection(processedData, config)
   
-  summaryText <- str_c(
+  summaryText <- stringr::str_c(
     firstSection, 
     "\n\n", 
     secondSection, 
@@ -49,30 +47,35 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL){
     thirdSection
   )
   
-  write_file(summaryText, outputFile)
+  readr::write_file(summaryText, outputFile)
 }
 
 #' Build section "AVERAGE OVER ALL FILES"
+#'
+#' @param processedData a list as output by \code{processData()}.
 buildFirstSection <- function(processedData){
   
-  meanPooledSdO18 <- mean(map_dbl(processedData$pooledStdDev, ~ .$d18O))
-  meanPooledSdH2  <- mean(map_dbl(processedData$pooledStdDev, ~ .$dD))
+  meanPooledSdO18 <- mean(purrr::map_dbl(processedData$pooledStdDev, ~ .$d18O))
+  meanPooledSdH2  <- mean(purrr::map_dbl(processedData$pooledStdDev, ~ .$dD))
   
   sprintf(
-    str_c("### AVERAGE OVER ALL FILES: ###\n\n",
-          "pooled standard deviation delta O18: %.2f\n",
-          "pooled standard deviation delta H2: %.2f"),
+    stringr::str_c("### AVERAGE OVER ALL FILES: ###\n\n",
+                   "pooled standard deviation delta O18: %.2f\n",
+                   "pooled standard deviation delta H2: %.2f"),
     meanPooledSdO18, meanPooledSdH2
   )
 }
 
 #' Build section "VALUES FOR EACH FILE"
+#'
+#' @param processedData a list as output by \code{processData()}.
+#' @import dplyr
 buildSecondSection <- function(processedData){
   
-  tableAsString <- map2_chr(processedData$pooledStdDev, names(processedData$pooledStdDev), 
-                            ~ sprintf("%s, %.2f, %.2f", .y, .x$d18O, .x$dD)) %>%
+  tableAsString <- purrr::map2_chr(processedData$pooledStdDev, names(processedData$pooledStdDev), 
+                                   ~ sprintf("%s, %.2f, %.2f", .y, .x$d18O, .x$dD)) %>%
                    paste(collapse = "\n")
-  str_c(
+  stringr::str_c(
     "### VALUES FOR EACH FILE: ###\n\n",
     "file name, pooled sd delta O18, pooled sd delta H2\n",
     tableAsString
@@ -80,17 +83,21 @@ buildSecondSection <- function(processedData){
 }
 
 #' Build section "INTER STANDARD BIAS TO LITERATURE VALUES FOR EACH FILE"
+#'
+#' @param processedData a list as output by \code{processData()}.
+#' @param config a named list with the contents of the config file.
+#' @import dplyr
 buildThirdSection <- function(processedData, config){
   
   # make true values easily accessible
-  trueValues <- map(
+  trueValues <- purrr::map(
     config$standards, 
     ~ list(o18_True = .$o18_True, H2_True = .$H2_True)
   )
-  names(trueValues) <- map_chr(config$standards, ~ .$name)
+  names(trueValues) <- purrr::map_chr(config$standards, ~ .$name)
   
   # construct list of biases
-  biasesList <- map2(
+  biasesList <- purrr::map2(
     processedData$processed, names(processedData$processed), ~ apply(.x, 1, function(row){
       block <- row[["block"]]
       name <- row[["Identifier 1"]]
@@ -105,11 +112,11 @@ buildThirdSection <- function(processedData, config){
   
   # create output text for the true values
   trueValuesText <- config$standards %>%
-    map_chr(~ sprintf("%s, %.2f, %.2f", .$name, .$o18_True, .$H2_True)) %>%
+    purrr::map_chr(~ sprintf("%s, %.2f, %.2f", .$name, .$o18_True, .$H2_True)) %>%
     paste(collapse = "\n")
   
   # join text sections into one
-  str_c(
+  stringr::str_c(
     "### INTER STANDARD BIAS TO LITERATURE VALUES FOR EACH FILE: ###\n\n",
     "## LITERATURE VALUES ##\n",
     "standard, O18, H2",

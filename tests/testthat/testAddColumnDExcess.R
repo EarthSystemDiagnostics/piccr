@@ -1,11 +1,10 @@
-library(testthat)
-library(tidyverse)
+library(tibble)
 
 context("test addColumnDExcess (d_excess = dH - 8 * d18O)")
 
 test_that("test addColumnDExcess", {
   
-  dataset1 <- tribble(
+  dataset1 <- tibble::tribble(
     ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~otherCol,
     # ------------ / ------------ / -------- /
     1,               4,             10,
@@ -14,7 +13,7 @@ test_that("test addColumnDExcess", {
     -4,              1,             10,
     5,               0,             10
   )
-  expected1 <- tribble(
+  expected1 <- tibble::tribble(
     ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~otherCol, ~dExcess,
     # ------- / --------- / -------- / --------
     1,         4,             10,        -4,
@@ -23,7 +22,7 @@ test_that("test addColumnDExcess", {
     -4,        1,             10,        33,
     5,         0,             10,        -40
   ) 
-  dataset2 <- tribble(
+  dataset2 <- tibble::tribble(
     ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~otherCol,
     # ------- / --------- / -------
     1,          8,             10,
@@ -32,7 +31,7 @@ test_that("test addColumnDExcess", {
     -5,         100,           10,
     -20,        0,             10
   )
-  expected2 <- tribble(
+  expected2 <- tibble::tribble(
     ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~otherCol, ~dExcess,
     # ------- / -------- / -------- / --------
     1,         8,             10,        0,

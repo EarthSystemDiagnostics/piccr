@@ -1,11 +1,10 @@
-library(testthat)
-library(tidyverse)
+library(tibble)
 
-context("test calculatePooledStdDev")
+context("test calculatePooledSD")
 
-test_that("test calculatePooledStdDev", {
+test_that("test calculatePooledSD", {
   
-  dataset1 <- tribble(
+  dataset1 <- tibble::tribble(
     ~`Identifier 1`, ~block, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~vial_group,
     # ------------ / ----- / -------------- / ------------ / -----------
     "C",             1,      1,               1,             1,
@@ -22,7 +21,7 @@ test_that("test calculatePooledStdDev", {
     "C",             2,      4,               -4,            2
   )
   
-  actual <- calculatePoooledSD(dataset1)
+  actual <- calculatePooledSD(dataset1)
   
   expect_equal(actual$d18O, 1.207615, tolerance = 1e-6)
   expect_equal(actual$dD, 2.919047,  tolerance = 1e-6)
