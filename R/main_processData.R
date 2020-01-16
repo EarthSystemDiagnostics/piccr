@@ -54,7 +54,8 @@
 #' 
 processData <- function(datasets, config){
 
-  message(sprintf("\nRunning piccr version %s.\n", packageVersion("piccr")))
+  message(sprintf("\nRunning piccr version %s.\n",
+                  utils::packageVersion("piccr")))
 
   names(datasets) %>%
     purrr::map(processSingleDataset, config = config, datasets = datasets) %>%
