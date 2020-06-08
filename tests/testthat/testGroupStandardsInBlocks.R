@@ -12,7 +12,7 @@ test_that("test for dataframe with single row (contains standard)", {
   dfWithGroupedStandardsExpected <- tibble::tibble(
     `Identifier 1` = "STD_A",
     val = 3,
-    block = 1
+    block = 1L
   )
   dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
   
@@ -27,7 +27,7 @@ test_that("test for dataframe with single row (does not contain standard)", {
   dfWithGroupedStandardsExpected <- tibble::tibble(
     `Identifier 1` = "Probe",
     val = 3,
-    block = NA
+    block = NA_integer_
   )
   dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
   
@@ -42,7 +42,7 @@ test_that("test for dataframe with mulitple rows (first standard, then probe)", 
   dfWithGroupedStandardsExpected <- tibble::tibble(
     `Identifier 1` = c("STD_A", "Probe"),
     val = c(3, 7),
-    block = c(1, NA)
+    block = c(1L, NA)
   )
   dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
   
@@ -57,7 +57,7 @@ test_that("test for dataframe with mulitple rows (probe, standard, probe)", {
   dfWithGroupedStandardsExpected <- tibble::tibble(
     `Identifier 1` = c("Probe", "STD_A", "Probe"),
     val = c(1, 3, 7),
-    block = c(NA, 1, NA)
+    block = c(NA, 1L, NA)
   )
   dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
   
@@ -72,7 +72,7 @@ test_that("test for dataframe with mulitple rows (standard, probe, standard)", {
   dfWithGroupedStandardsExpected <- tibble::tibble(
     `Identifier 1` = c("STD_A", "Probe", "STD_B"),
     val = c(1, 3, 7),
-    block = c(1, NA, 2)
+    block = c(1L, NA, 2L)
   )
   dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
   
@@ -87,7 +87,7 @@ test_that("test for mulitple rows (standard, probe, standard, probe, standard)",
   dfWithGroupedStandardsExpected <- tibble::tibble(
     `Identifier 1` = c("STD_A", "Probe", "Probe", "STD_B", "STD_A", "Probe", "STD_A"),
     val = 1:7,
-    block = c(1, NA, NA, 2, 2, NA, 3)
+    block = c(1L, NA, NA, 2L, 2L, NA, 3L)
   )
   dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
   

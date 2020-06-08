@@ -127,7 +127,7 @@ associateStandardsWithConfigInfo <- function(dataset, config){
 #' 
 groupStandardsInBlocks <- function(dataset, config){
     
-  dataset <- tibble::add_column(dataset, block = NA)
+  dataset <- tibble::add_column(dataset, block = NA_integer_)
   currBlock <- 0
   inBlock <- FALSE
   
