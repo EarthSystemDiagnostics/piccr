@@ -127,22 +127,30 @@ associateStandardsWithConfigInfo <- function(dataset, config){
 #' 
 groupStandardsInBlocks <- function(dataset, config){
     
-  dataset <- tibble::add_column(dataset, block = NA)
+  dataset <- tibble::add_column(dataset, block = NA_integer_)
   currBlock <- 0
   inBlock <- FALSE
   
-  for(row in 1:nrow(dataset)){
-    id1 = dataset[row, "Identifier 1"]
-    if(isStandard(id1, config)){
-      if(inBlock){
-        dataset[row, "block"] <- currBlock
+  for (irow in 1 : nrow(dataset)) {
+
+    id1 <- dataset[irow, "Identifier 1"]
+
+    if (isStandard(id1, config)) {
+
+      if (inBlock) {
+
+        dataset[irow, "block"] <- currBlock
+
       } else {
+
         currBlock <- currBlock + 1
         inBlock <- TRUE
-        dataset[row, "block"] <- currBlock
+        dataset[irow, "block"] <- currBlock
       }
+
     } else {
-      dataset[row, "block"] <- NA
+
+      dataset[irow, "block"] <- NA
       inBlock <- FALSE
     }
   }

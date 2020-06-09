@@ -172,21 +172,21 @@ test_that("test memory corrected datasets", {
 test_that("test memory coefficients", {
 
   memCoeffExpected1 <- tibble::tribble(
-    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD, ~A_vial1_d18O, ~A_vial1_dD, ~B_vial1_d18O, ~B_vial1_dD, ~C_vial1_d18O, ~C_vial1_dD,
-    # ------ / --------------- / ------------- / ------------ / ---------- / ------------ / ---------- / ------------ / -----------
-    1,         0.75,             0.76,           NA_real_,      NA_real_,    0.75,          0.71,        0.75,          0.81,
-    2,         1.0,              1.05,           NA_real_,      NA_real_,    1,             1.06,        1,             1.04,
-    3,         1.25,             1.18,           NA_real_,      NA_real_,    1.25,          1.22,        1.25,          1.15,
+    ~`Inj Nr`, ~A_vial1_d18O, ~A_vial1_dD, ~B_vial1_d18O, ~B_vial1_dD, ~C_vial1_d18O, ~C_vial1_dD, ~memoryCoeffD18O, ~memoryCoeffDD,
+    # ------ / ------------ / ---------- / ------------ / ---------- / ------------ / ---------- / --------------- / --------------
+    1,         NA_real_,      NA_real_,    0.75,          0.71,        0.75,          0.81,        0.75,             0.76,
+    2,         NA_real_,      NA_real_,    1,             1.06,        1,             1.04,        1.0,              1.05,
+    3,         NA_real_,      NA_real_,    1.25,          1.22,        1.25,          1.15,        1.25,             1.18
   )
 
   memCoeffExpected2 <- tibble::tribble(
-    ~`Inj Nr`, ~memoryCoeffD18O, ~memoryCoeffDD, ~A_vial1_d18O, ~A_vial1_dD, ~B_vial1_d18O, ~B_vial1_dD, ~C_vial1_d18O, ~C_vial1_dD,
-    # ------ / --------------- / ------------- / ------------ / ---------- / ------------ / ---------- / ------------ / -----------
-    1,         0.985,            0.992,          NA_real_,      NA_real_,    0.984,        0.992,        0.985,         0.992,
-    2,         0.990,            0.986,          NA_real_,      NA_real_,    0.990,        0.986,        0.990,         0.986,
-    3,         0.995,            0.992,          NA_real_,      NA_real_,    0.995,        0.992,        0.995,         0.992,
-    4,         1.0,              1.002,          NA_real_,      NA_real_,    1.000,        1.002,        1.000,         1.002,
-    5,         1.005,            1.007,          NA_real_,      NA_real_,    1.005,        1.007,        1.005,         1.007
+    ~`Inj Nr`, ~A_vial1_d18O, ~A_vial1_dD, ~B_vial1_d18O, ~B_vial1_dD, ~C_vial1_d18O, ~C_vial1_dD, ~memoryCoeffD18O, ~memoryCoeffDD,
+    # ------ / ------------ / ---------- / ------------ / ---------- / ------------ / ---------- / --------------- / --------------
+    1,         NA_real_,      NA_real_,    0.984,        0.992,        0.985,         0.992,       0.985,            0.992,
+    2,         NA_real_,      NA_real_,    0.990,        0.986,        0.990,         0.986,       0.990,            0.986,
+    3,         NA_real_,      NA_real_,    0.995,        0.992,        0.995,         0.992,       0.995,            0.992,
+    4,         NA_real_,      NA_real_,    1.000,        1.002,        1.000,         1.002,       1.0,              1.002,
+    5,         NA_real_,      NA_real_,    1.005,        1.007,        1.005,         1.007,       1.005,            1.007
   )
 
   actual1 <- correctForMemoryEffect(dataset1)

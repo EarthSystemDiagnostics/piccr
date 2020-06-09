@@ -109,26 +109,24 @@ test_that("test that vial grouping yields proper injection numbers", {
   expected <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~block, ~vial_group,
     # -- / -------------- / -------- / -------------- / -------------/ ------/ ------------
-    1,     "STD_A",         1,         1,               1,             1,      1,
-    2,     "STD_A",         2,         1,               1,             1,      1,
-    3,     "STD_B",         1,         2,               2,             1,      1,
-    4,     "STD_B",         2,         2,               2,             1,      1,
-    5,     "STD_C",         1,         3,               3,             1,      1,
-    6,     "STD_C",         2,         3,               3,             1,      1,
-    7,     "STD_A",         1,         1,               1,             1,      2,
-    8,     "STD_A",         2,         1,               1,             1,      2,
-    9,     "STD_A",         3,         1,               1,             1,      2,
-    10,    "STD_A",         4,         1,               1,             1,      2,
-    11,    "PROBE_A",       1,         10,              10,            NA,     1,
-    12,    "PROBE_B",       1,         20,              20,            NA,     1,
-    13,    "PROBE_A",       1,         10,              10,            NA,     2,
-    14,    "STD_B",         1,         2,               2,             2,      2,
-    15,    "STD_B",         2,         2,               2,             2,      2,
-    16,    "STD_A",         1,         1,               1,             2,      3,
-    17,    "STD_A",         2,         1,               1,             2,      3
+    1,     "STD_A",         1L,        1,               1,             1L,     1,
+    2,     "STD_A",         2L,        1,               1,             1L,     1,
+    3,     "STD_B",         1L,        2,               2,             1L,     1,
+    4,     "STD_B",         2L,        2,               2,             1L,     1,
+    5,     "STD_C",         1L,        3,               3,             1L,     1,
+    6,     "STD_C",         2L,        3,               3,             1L,     1,
+    7,     "STD_A",         1L,        1,               1,             1L,     2,
+    8,     "STD_A",         2L,        1,               1,             1L,     2,
+    9,     "STD_A",         3L,        1,               1,             1L,     2,
+    10,    "STD_A",         4L,        1,               1,             1L,     2,
+    11,    "PROBE_A",       1L,        10,              10,            NA,     1,
+    12,    "PROBE_B",       1L,        20,              20,            NA,     1,
+    13,    "PROBE_A",       1L,        10,              10,            NA,     2,
+    14,    "STD_B",         1L,        2,               2,             2L,     2,
+    15,    "STD_B",         2L,        2,               2,             2L,     2,
+    16,    "STD_A",         1L,        1,               1,             2L,     3,
+    17,    "STD_A",         2L,        1,               1,             2L,     3
   )
-
-  expected$`Inj Nr` <- as.integer(expected$`Inj Nr`)
 
   actual <- dataset %>%
     groupStandardsInBlocks(config) %>%
