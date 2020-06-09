@@ -103,16 +103,18 @@ getTrainingData <- function(dataset, config, useBlock) {
   
   # if no memory correction is applied, use only the last three injections for calibration
   if (config$use_memory_correction == FALSE) {
-    trainingData <- trainingData %>% 
+    trainingData <- trainingData %>%
       group_by(`Identifier 1`, `vial_group`) %>%
-      slice((n()-2):n()) %>% 
-      ungroup()
+      slice((n() - 2) : n()) %>%
+      ungroup() %>%
+      arrange(Line)
   }
   
   # if two-point calibration is to be used, discard middle standards
   if (config$use_three_point_calibration == FALSE) {
     trainingData <- trainingData %>%
-      selectStandardsForTwoPointCalib()
+      selectStandardsForTwoPointCalib() %>%
+      arrange(Line)
   }
   
   return(trainingData)
