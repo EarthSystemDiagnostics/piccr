@@ -76,7 +76,8 @@ calculateMemoryCoefficients <- function(dataset) {
     select(`Inj Nr`, `Identifier 1`, vial_group, memoryCoeffD18O, memoryCoeffDD)
 
   groupNames <- memoryCoeffForEachStandard %>%
-    group_keys(`Identifier 1`, `vial_group`) %>%
+    group_by(`Identifier 1`, `vial_group`) %>%
+    group_keys() %>%
     apply(1, function(x) {paste(x, collapse = "_vial")})
 
   memoryCoeffForEachStandard <- memoryCoeffForEachStandard %>%
