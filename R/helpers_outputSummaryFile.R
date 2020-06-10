@@ -223,3 +223,11 @@ printQualityControl <- function(datasets, printDeviations = FALSE, n = 3) {
 
   return(invisible(datasets))
 }
+
+printRunInfo <- function(configFile) {
+
+  cat(sprintf("piccr; version %s\n", utils::packageVersion("piccr")))
+  cat(sprintf("* config file: %s\n", configFile))
+  cat(sprintf("* processing date: %s\n\n", Sys.time()))
+
+}
