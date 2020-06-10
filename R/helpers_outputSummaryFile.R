@@ -143,6 +143,7 @@ gatherQualityControlInfo <- function(datasets) {
 
   rmsdQualityControl <- purrr::map_dfr(datasets, function(x) {
     tibble::tibble(file = x$name,
+                   name = paste(x$deviationOfControlStandard$name, sep = ", "),
                    d18O = rmsd(x$deviationOfControlStandard$d18O),
                    dD = rmsd(x$deviationOfControlStandard$dD))})
 

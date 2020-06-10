@@ -34,7 +34,7 @@ test_that("test quality control output structure", {
     6,       "B",             3,      3,             3,         0,              29.75,       30,      0.25,
     7,       "C",             3,      2.375,         2,         -0.375,         20.9,        20,      -0.9
     )
-  expected2 <- list(d18O = -0.1, dD = 1.25)
+  expected2 <- list(name = "QC", d18O = -0.1, dD = 1.25)
   expected3 <- list(d18O = 0.194, dD = 0.836)
   expected4 <- list(d18O = 0.382, dD = 3.427)
   

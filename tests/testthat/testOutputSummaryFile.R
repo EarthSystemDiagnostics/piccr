@@ -25,24 +25,24 @@ deviationsFromTrue2 <- tibble::tribble(
 processedData <- list(
   good = list(
     name = "good",
-    deviationOfControlStandard = list(d18O = 0.01, dD = 0.1),
+    deviationOfControlStandard = list(name = "QC", d18O = 0.01, dD = 0.1),
     rmsdDeviationsFromTrue = list(d18O = 0.05, dD = 0.5),
     pooledSD = list(d18O = 0.03, dD = 0.3),
     deviationsFromTrue = deviationsFromTrue1
   ),
   bad = list(
     name = "bad",
-    deviationOfControlStandard = list(d18O = 0.1, dD = 1),
+    deviationOfControlStandard = list(name = "QC", d18O = 0.1, dD = 1),
     rmsdDeviationsFromTrue = list(d18O = 0.5, dD = 5),
     pooledSD = list(d18O = 0.3, dD = 3),
     deviationsFromTrue = deviationsFromTrue2
   )
 )
 qc <- tibble::tribble(
-  ~file,  ~d18O, ~dD,
-  # -- /  ---- / -- /
-  "good", 0.01,  0.1,
-  "bad",  0.1,   1
+  ~file,  ~name, ~d18O, ~dD,
+  # -- /  ---- / ---- / -- /
+  "good", "QC",  0.01,  0.1,
+  "bad",  "QC",  0.1,   1
 )
 rmsdAll <- tibble::tribble(
   ~file,  ~d18O, ~dD,
