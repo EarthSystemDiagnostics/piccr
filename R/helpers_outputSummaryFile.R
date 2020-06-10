@@ -173,6 +173,8 @@ gatherQualityControlInfo <- function(datasets) {
 
 printQualityControl <- function(datasets, printDeviations = FALSE, n = 3) {
 
+  rmsd <- function(d) {sqrt(mean(d^2, na.rm = TRUE))}
+
   qualityControlInfo <- gatherQualityControlInfo(datasets)
 
   cat("\n# ----------------------------------------------\n")
@@ -183,13 +185,13 @@ printQualityControl <- function(datasets, printDeviations = FALSE, n = 3) {
 
   cat("\n# RMSD of quality control standards:\n")
   cat(sprintf("d18O = %1.2f, dD = %1.1f\n",
-              mean(qualityControlInfo$rmsdQualityControl$d18O),
-              mean(qualityControlInfo$rmsdQualityControl$dD)))
+              rmsd(qualityControlInfo$rmsdQualityControl$d18O),
+              rmsd(qualityControlInfo$rmsdQualityControl$dD)))
 
   cat("\n# RMSD of all standards:\n")
   cat(sprintf("d18O = %1.2f, dD = %1.1f\n",
-              mean(qualityControlInfo$rmsdAllStandards$d18O),
-              mean(qualityControlInfo$rmsdAllStandards$dD)))
+              rmsd(qualityControlInfo$rmsdAllStandards$d18O),
+              rmsd(qualityControlInfo$rmsdAllStandards$dD)))
 
   cat("\n# Pooled standard deviation:\n")
   cat(sprintf("d18O = %1.2f, dD = %1.1f\n",
