@@ -35,10 +35,10 @@ outputSummaryFile <- function(processedData, config, configFile, outputFile = NU
   if(is.null(outputFile)) 
     outputFile <- file.path(config$output_directory, "run.info")
 
-  runInfo <- capture.output(printRunInfo(configFile)) %>%
+  runInfo <- utils::capture.output(printRunInfo(configFile)) %>%
     paste(collapse = "\n")
 
-  qualityControl <- capture.output(
+  qualityControl <- utils::capture.output(
     printQualityControl(processedData, printDeviations = TRUE, n = NA)) %>%
     paste(collapse = "\n")
 
