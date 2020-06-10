@@ -161,3 +161,65 @@ gatherQualityControlInfo <- function(datasets) {
     )
   )
 }
+
+printQualityControl <- function(datasets, printDeviations = FALSE, n = 3) {
+
+  qualityControlInfo <- gatherQualityControlInfo(datasets)
+
+  cat("\n# ----------------------------------------------\n")
+  cat("\n# --- Summary of quality control information ---\n")
+  cat("\n# ----------------------------------------------\n")
+
+  cat("\n# --- Average data for entire processing run ---\n")
+
+  cat("\n# RMSD of quality control standards:\n")
+  cat(sprintf("d18O = %1.2f, dD = %1.1f\n",
+              mean(qualityControlInfo$rmsdQualityControl$d18O),
+              mean(qualityControlInfo$rmsdQualityControl$dD)))
+
+  cat("\n# RMSD of all standards:\n")
+  cat(sprintf("d18O = %1.2f, dD = %1.1f\n",
+              mean(qualityControlInfo$rmsdAllStandards$d18O),
+              mean(qualityControlInfo$rmsdAllStandards$dD)))
+
+  cat("\n# Pooled standard deviation:\n")
+  cat(sprintf("d18O = %1.2f, dD = %1.1f\n",
+              mean(qualityControlInfo$pooledSD$d18O),
+              mean(qualityControlInfo$pooledSD$dD)))
+
+  cat("\n# --- Specific data for each measurement file ---\n")
+
+  cat("\n# RMSD of quality control standards:\n")
+  print(qualityControlInfo$rmsdQualityControl,
+        n = nrow(qualityControlInfo$rmsdQualityControl))
+
+  cat("\n# RMSD of all standards:\n")
+  print(qualityControlInfo$rmsdAllStandards)
+
+  cat("\n# Pooled standard deviation:\n")
+  print(qualityControlInfo$pooledSD)
+
+  if (printDeviations) {
+
+    nmax <- length(qualityControlInfo$deviationsFromTrue)
+    subset <- TRUE
+    if (is.na(n) | n > nmax) {
+      n <- nmax
+      subset <- FALSE
+    }
+
+    cat("\n# --- Specific deviations from true standard values ---\n\n")
+
+    if (subset) {
+      cat(sprintf("# Displaying output for first %i measurement files;\n", n))
+      cat("# adjust function parameter 'n' to display a different number.\n\n")
+    }
+
+    for (i in 1 : n) {
+      x <- qualityControlInfo$deviationsFromTrue[i]
+      print(x, n = nrow(x))
+    }
+  }
+
+  return(invisible(datasets))
+}
