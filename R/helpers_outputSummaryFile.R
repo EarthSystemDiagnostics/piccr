@@ -29,25 +29,34 @@
 #'
 #' @return No relevant return value
 #' 
-outputSummaryFile <- function(processedData, config, outputFile = NULL){
+outputSummaryFile <- function(processedData, config, configFile, outputFile = NULL){
   
   # set default value for outputFile if needed
   if(is.null(outputFile)) 
     outputFile <- file.path(config$output_directory, "run.info")
-  
-  firstSection  <- buildFirstSection(processedData)
-  secondSection <- buildSecondSection(processedData)
-  thirdSection  <- buildThirdSection(processedData, config)
-  
-  summaryText <- stringr::str_c(
-    firstSection, 
-    "\n\n", 
-    secondSection, 
-    "\n\n", 
-    thirdSection
-  )
-  
-  readr::write_file(summaryText, outputFile)
+
+  runInfo <- capture.output(printRunInfo(configFile)) %>%
+    paste(collapse = "\n")
+
+  qualityControl <- capture.output(
+    printQualityControl(processedData, printDeviations = TRUE, n = NA)) %>%
+    paste(collapse = "\n")
+
+  cat(runInfo, qualityControl, sep = "", file = outputFile)
+
+  ## firstSection  <- buildFirstSection(processedData)
+  ## secondSection <- buildSecondSection(processedData)
+  ## thirdSection  <- buildThirdSection(processedData, config)
+
+  ## summaryText <- stringr::str_c(
+  ##   firstSection,
+  ##   "\n\n",
+  ##   secondSection,
+  ##   "\n\n",
+  ##   thirdSection
+  ## )
+
+  ## readr::write_file(summaryText, outputFile)
 }
 
 #' Build section "AVERAGE OVER ALL FILES"
@@ -211,7 +220,9 @@ printQualityControl <- function(datasets, printDeviations = FALSE, n = 3) {
     cat("\n# --- Specific deviations from true standard values ---\n\n")
 
     if (subset) {
-      cat(sprintf("# Displaying output for first %i measurement files;\n", n))
+      cat(sprintf(
+        "# ... displaying output for first %i (of %i) measurement files;\n",
+        n, nmax))
       cat("# adjust function parameter 'n' to display a different number.\n\n")
     }
 
