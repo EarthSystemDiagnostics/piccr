@@ -127,3 +127,37 @@ buildThirdSection <- function(processedData, config){
     biasesText
   )
 }
+
+gatherQualityControlInfo <- function(datasets) {
+
+  rmsd <- function(d) {sqrt(mean(d^2, na.rm = TRUE))}
+
+  rmsdQualityControl <- purrr::map_dfr(datasets, function(x) {
+    tibble::tibble(file = x$name,
+                   d18O = rmsd(x$deviationOfControlStandard$d18O),
+                   dD = rmsd(x$deviationOfControlStandard$dD))})
+
+  rmsdAllStandards <- purrr::map_dfr(datasets, function(x) {
+    tibble::tibble(file = x$name,
+                   d18O = x$rmsdDeviationsFromTrue$d18O,
+                   dD = x$rmsdDeviationsFromTrue$dD)})
+
+  pooledSD <- purrr::map_dfr(datasets, function(x) {
+    tibble::tibble(file = x$name,
+                   d18O = x$pooledSD$d18O,
+                   dD = x$pooledSD$dD)})
+
+  deviationsFromTrue <- lapply(datasets, function(x) {
+    x$deviationsFromTrue %>%
+      dplyr::select(Sample, `Identifier 1`, block, d18ODeviation, dDDeviation)
+  })
+
+  return(
+    list(
+      rmsdQualityControl = rmsdQualityControl,
+      rmsdAllStandards = rmsdAllStandards,
+      pooledSD = pooledSD,
+      deviationsFromTrue = deviationsFromTrue
+    )
+  )
+}
