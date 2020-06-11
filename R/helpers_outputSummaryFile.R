@@ -139,13 +139,11 @@ buildThirdSection <- function(processedData, config){
 
 gatherQualityControlInfo <- function(datasets) {
 
-  rmsd <- function(d) {sqrt(mean(d^2, na.rm = TRUE))}
-
   rmsdQualityControl <- purrr::map_dfr(datasets, function(x) {
     tibble::tibble(file = x$name,
                    name = paste(x$deviationOfControlStandard$name, sep = ", "),
-                   d18O = rmsd(x$deviationOfControlStandard$d18O),
-                   dD = rmsd(x$deviationOfControlStandard$dD))})
+                   d18O = calculateRMSD(x$deviationOfControlStandard$d18O),
+                   dD = calculateRMSD(x$deviationOfControlStandard$dD))})
 
   rmsdAllStandards <- purrr::map_dfr(datasets, function(x) {
     tibble::tibble(file = x$name,
@@ -185,8 +183,6 @@ gatherQualityControlInfo <- function(datasets) {
 #'
 printQualityControl <- function(datasets, printDeviations = FALSE, n = 3) {
 
-  rmsd <- function(d) {sqrt(mean(d^2, na.rm = TRUE))}
-
   qualityControlInfo <- gatherQualityControlInfo(datasets)
 
   cat("\n# ----------------------------------------------\n")
@@ -197,13 +193,13 @@ printQualityControl <- function(datasets, printDeviations = FALSE, n = 3) {
 
   cat("\n# RMSD of quality control standards:\n")
   cat(sprintf("d18O = %1.2f, dD = %1.1f\n",
-              rmsd(qualityControlInfo$rmsdQualityControl$d18O),
-              rmsd(qualityControlInfo$rmsdQualityControl$dD)))
+              calculateRMSD(qualityControlInfo$rmsdQualityControl$d18O),
+              calculateRMSD(qualityControlInfo$rmsdQualityControl$dD)))
 
   cat("\n# RMSD of all standards:\n")
   cat(sprintf("d18O = %1.2f, dD = %1.1f\n",
-              rmsd(qualityControlInfo$rmsdAllStandards$d18O),
-              rmsd(qualityControlInfo$rmsdAllStandards$dD)))
+              calculateRMSD(qualityControlInfo$rmsdAllStandards$d18O),
+              calculateRMSD(qualityControlInfo$rmsdAllStandards$dD)))
 
   cat("\n# Pooled standard deviation:\n")
   cat(sprintf("d18O = %1.2f, dD = %1.1f\n",
