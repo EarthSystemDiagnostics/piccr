@@ -172,6 +172,17 @@ gatherQualityControlInfo <- function(datasets) {
   )
 }
 
+#' Print quality control
+#'
+#' dummy text
+#'
+#' @param datasets dummy
+#' @param printDeviations dummy
+#' @param n dummy
+#'
+#' @return dummy
+#' @export
+#'
 printQualityControl <- function(datasets, printDeviations = FALSE, n = 3) {
 
   rmsd <- function(d) {sqrt(mean(d^2, na.rm = TRUE))}
