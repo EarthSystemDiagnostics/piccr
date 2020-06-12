@@ -136,11 +136,10 @@ test_that("writing of quality control data works", {
   # ----------------------------------------------------------------------------
   # test writing to output file
 
-  config <- list()
+  config <- list(config_file_name = "myconfig.yaml")
   tmpfile <- tempfile()
-  configFile <- "myconfig.yaml"
 
-  outputSummaryFile(processedData, config, configFile, tmpfile)
+  outputSummaryFile(processedData, config, tmpfile)
 
   expected <- stringr::str_c(expected1, expected2, expected4)
 

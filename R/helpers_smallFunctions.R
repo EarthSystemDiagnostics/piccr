@@ -11,11 +11,14 @@
 parseConfig <- function(configFile){
   
   tryCatch({
-    yaml::read_yaml(configFile)
+    config <- yaml::read_yaml(configFile)
   }, error = function(e) {
     stop("Error reading config file. Make sure that you specified the 
          correct path and that read permissions are given.")
   })
+  config$config_file_name <- configFile
+
+  return(config)
 }
 
 #' Read in measurement files

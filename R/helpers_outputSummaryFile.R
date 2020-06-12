@@ -20,27 +20,25 @@
 #'
 #' @param processedData the processed measurement data as output by
 #'   \code{\link{processData}}.
-#' @param config a named list with the contents read from the configuration
-#'   file \code{configFile}, which was used for the processing; at least, it
-#'   needs to contain the element \code{output_directory} to set the output
-#'   directory for the summary file, if no explicit directory is given in the
-#'   argument \code{outputFile}.
-#' @param configFile the file name of the YAML configuration file which was
-#'   used for the processing.
+#' @param config a named list with the contents read from the YAML configuration
+#'   file, which was used for the processing; at least, it needs to contain the
+#'   element \code{output_directory} to set the output directory for the summary
+#'   file, if no explicit directory is given in the argument \code{outputFile},
+#'   and the element \code{config_file_name} with the file path of the used YAML
+#'   configuration file.
 #' @param outputFile an optional character vector with an alternative file path
 #'   (including file name) for the summary file. If \code{NULL} (the default),
 #'   the file \code{run.info} in the directory \code{config$output_directory}
 #'   is created.
 #' @seealso \code{\link{processFiles}}
 #' 
-outputSummaryFile <- function(processedData, config,
-                              configFile, outputFile = NULL) {
+outputSummaryFile <- function(processedData, config, outputFile = NULL) {
 
   # set default value for outputFile if needed
   if (is.null(outputFile))
     outputFile <- file.path(config$output_directory, "run.info")
 
-  runInfo <- utils::capture.output(printRunInfo(configFile)) %>%
+  runInfo <- utils::capture.output(printRunInfo(config$config_file_name)) %>%
     paste(collapse = "\n")
 
   qualityControl <- utils::capture.output(

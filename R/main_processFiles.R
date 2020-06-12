@@ -29,7 +29,7 @@ processFiles <- function(configFile, writeOutput = TRUE){
   
   if (writeOutput) {
     writeDataToFile(processedData, config)
-    outputSummaryFile(processedData, config, configFile)
+    outputSummaryFile(processedData, config)
   }
   
   return(invisible(processedData))

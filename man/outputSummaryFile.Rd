@@ -4,20 +4,18 @@
 \alias{outputSummaryFile}
 \title{Output quality control summary file}
 \usage{
-outputSummaryFile(processedData, config, configFile, outputFile = NULL)
+outputSummaryFile(processedData, config, outputFile = NULL)
 }
 \arguments{
 \item{processedData}{the processed measurement data as output by
 \code{\link{processData}}.}
 
-\item{config}{a named list with the contents read from the configuration
-file \code{configFile}, which was used for the processing; at least, it
-needs to contain the element \code{output_directory} to set the output
-directory for the summary file, if no explicit directory is given in the
-argument \code{outputFile}.}
-
-\item{configFile}{the file name of the YAML configuration file which was
-used for the processing.}
+\item{config}{a named list with the contents read from the YAML configuration
+file, which was used for the processing; at least, it needs to contain the
+element \code{output_directory} to set the output directory for the summary
+file, if no explicit directory is given in the argument \code{outputFile},
+and the element \code{config_file_name} with the file path of the used YAML
+configuration file.}
 
 \item{outputFile}{an optional character vector with an alternative file path
 (including file name) for the summary file. If \code{NULL} (the default),
