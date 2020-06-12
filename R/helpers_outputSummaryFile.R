@@ -1,38 +1,43 @@
-#' outputSummaryFile
+#' Output quality control summary file
 #' 
-#' Write a summary file to disc. The summary file contains
-#' quality indicators and consists of three sections: 
-#'   - AVERAGE OVER ALL FILES: This section contains the
-#'     pooled standard deviation (O18 and H2) averaged 
-#'     over all files.
-#'     (More parameters will be added in the future.)
-#'   - VALUES FOR EACH FILE: This section contains the 
-#'     pooled standard deviation (O18 and H2) for each file.
-#'   - INTER STANDARD BIAS TO LITERATURE VALUES FOR EACH FILE:
-#'     This section displays the deviation of the measured
-#'     delta.O18 and delta.H2 values to the true values for
-#'     each file.
+#' Write an output file to disc summarising the quality control information from
+#' the processing steps for each processed file as well as for the entire
+#' processing run. Note that if the data is processed again, the summary file is
+#' silently overwritten.
 #'
-#' @param processedData A list as output by processData(..). 
-#'                      It needs to contain the components
-#'                      $pooledStdDev (a named list where each
-#'                      element is of the form 'list(d18O = .., dD = ..)')
-#'                      and $processed (a named list of dataframes).
-#' @param config A named list. Needs to contain the component 
-#'               $standards (A list of lists. Each innermost list 
-#'               contains the components $name, $o18_True, and  $H2_True).
-#'               Should contain $output_directory if no explicit
-#'               value is given for the argument outputFile.
-#' @param outputFile (Optional) A character vector. Path to the output file.
-#'                   If it is not given, the file 'run.info' in the
-#'                   directory config$output_directory is used.
+#' The summary file consists of three sections:
+#' \itemize{
+#'   \item the first section gives the overall values for the entire processing
+#'         run of the root-mean-square deviation (rmsd) of the quality control
+#'         standards, the rmsd of all used standards, and the mean value of the
+#'         pooled standard deviation per sample;
+#'   \item the second section contains tables with the above values for each
+#'         processed measurement file;
+#'   \item the third section contains a table which lists for each processed
+#'         measurement file the individual deviations of each used standard from
+#'         its true value.
+#' }
 #'
-#' @return No relevant return value
+#' @param processedData the processed measurement data as output by
+#'   \code{\link{processData}}.
+#' @param config a named list with the contents read from the configuration
+#'   file \code{configFile}, which was used for the processing; at least, it
+#'   needs to contain the element \code{output_directory} to set the output
+#'   directory for the summary file, if no explicit directory is given in the
+#'   argument \code{outputFile}.
+#' @param configFile the file name of the YAML configuration file which was
+#'   used for the processing.
+#' @param outputFile an optional character vector with an alternative file path
+#'   (including file name) for the summary file. If \code{NULL} (the default),
+#'   the file \code{run.info} in the directory \code{config$output_directory}
+#'   is created.
+#' @seealso \code{\link{processFiles}}
 #' 
-outputSummaryFile <- function(processedData, config, configFile, outputFile = NULL){
-  
+outputSummaryFile <- function(processedData, config,
+                              configFile, outputFile = NULL) {
+
   # set default value for outputFile if needed
-  if(is.null(outputFile)) 
+  if (is.null(outputFile))
     outputFile <- file.path(config$output_directory, "run.info")
 
   runInfo <- utils::capture.output(printRunInfo(configFile)) %>%
@@ -43,100 +48,34 @@ outputSummaryFile <- function(processedData, config, configFile, outputFile = NU
     paste(collapse = "\n")
 
   cat(runInfo, qualityControl, sep = "", file = outputFile)
-
-  ## firstSection  <- buildFirstSection(processedData)
-  ## secondSection <- buildSecondSection(processedData)
-  ## thirdSection  <- buildThirdSection(processedData, config)
-
-  ## summaryText <- stringr::str_c(
-  ##   firstSection,
-  ##   "\n\n",
-  ##   secondSection,
-  ##   "\n\n",
-  ##   thirdSection
-  ## )
-
-  ## readr::write_file(summaryText, outputFile)
 }
 
-#' Build section "AVERAGE OVER ALL FILES"
+#' Quality control information across processing run
 #'
-#' @param processedData a list as output by \code{processData()}.
-buildFirstSection <- function(processedData){
-  
-  meanPooledSdO18 <- mean(purrr::map_dbl(processedData$pooledStdDev, ~ .$d18O))
-  meanPooledSdH2  <- mean(purrr::map_dbl(processedData$pooledStdDev, ~ .$dD))
-  
-  sprintf(
-    stringr::str_c("### AVERAGE OVER ALL FILES: ###\n\n",
-                   "pooled standard deviation delta O18: %.2f\n",
-                   "pooled standard deviation delta H2: %.2f"),
-    meanPooledSdO18, meanPooledSdH2
-  )
-}
-
-#' Build section "VALUES FOR EACH FILE"
+#' This is an auxiliary function to gather the various quality control
+#' information determined for each processed measurement file across all such
+#' files from a given processing run.
 #'
-#' @param processedData a list as output by \code{processData()}.
-#' @import dplyr
-buildSecondSection <- function(processedData){
-  
-  tableAsString <- purrr::map2_chr(processedData$pooledStdDev, names(processedData$pooledStdDev), 
-                                   ~ sprintf("%s, %.2f, %.2f", .y, .x$d18O, .x$dD)) %>%
-                   paste(collapse = "\n")
-  stringr::str_c(
-    "### VALUES FOR EACH FILE: ###\n\n",
-    "file name, pooled sd delta O18, pooled sd delta H2\n",
-    tableAsString
-  )
-}
-
-#' Build section "INTER STANDARD BIAS TO LITERATURE VALUES FOR EACH FILE"
+#' @param datasets the processed measurement data as output by
+#'   \code{\link{processFiles}} (or by \code{\link{processData}} directly).
 #'
-#' @param processedData a list as output by \code{processData()}.
-#' @param config a named list with the contents of the config file.
-#' @import dplyr
-buildThirdSection <- function(processedData, config){
-  
-  # make true values easily accessible
-  trueValues <- purrr::map(
-    config$standards, 
-    ~ list(o18_True = .$o18_True, H2_True = .$H2_True)
-  )
-  names(trueValues) <- purrr::map_chr(config$standards, ~ .$name)
-  
-  # construct list of biases
-  biasesList <- purrr::map2(
-    processedData$processed, names(processedData$processed), ~ apply(.x, 1, function(row){
-      block <- row[["block"]]
-      name <- row[["Identifier 1"]]
-      if(!is.na(block)) # if the block is na the sample is a standard
-        sprintf("%s, %s, %.f, %.2f, %.2f", .y, name, as.numeric(block), 
-                as.numeric(row[["delta.O18"]]) - trueValues[[name]][["o18_True"]],
-                as.numeric(row[["delta.H2"]]) - trueValues[[name]][["H2_True"]])
-    })
-  )
-  # convert list of biases to string
-  biasesText <- paste(unlist(biasesList), collapse = "\n")
-  
-  # create output text for the true values
-  trueValuesText <- config$standards %>%
-    purrr::map_chr(~ sprintf("%s, %.2f, %.2f", .$name, .$o18_True, .$H2_True)) %>%
-    paste(collapse = "\n")
-  
-  # join text sections into one
-  stringr::str_c(
-    "### INTER STANDARD BIAS TO LITERATURE VALUES FOR EACH FILE: ###\n\n",
-    "## LITERATURE VALUES ##\n",
-    "standard, O18, H2",
-    trueValuesText,
-    "\n\n",
-    "## BIAS ##\n",
-    "file name, standard, block, bias O18, bias H2\n",
-    biasesText
-  )
-}
-
+#' @return A named list with four elements:
+#' \describe{
+#'   \item{\code{rmsdQualityControl}:}{a tibble for the root-mean-square
+#'   deviation (rmsd) of the quality control standard for each measurement file,
+#'   listing the file name, the name(s) of the quality control standard, and the
+#'   rmsd values for the oxygen and hydrogen isotope values.}
+#'   \item{\code{rmsdAllStandards}:}{a tibble for the root-mean-square
+#'   deviation (rmsd) of all measured standards for each measurement file,
+#'   listing the file name and the rmsd values for the oxygen and hydrogen
+#'   isotope values.}
+#'   \item{\code{pooledSD}:}{a tibble for the pooled standard deviation across
+#'   the samples measured in each measurement file, listing the file name and
+#'   the pooled SD values for the oxygen and hydrogen isotope values.}
+#'   \item{\code{deviationsFromTrue}:}{a list of tibbles, where each tibble
+#'   lists the deviations of all measured standards from their true values for a
+#'   processed measurement file.}
+#' }
 gatherQualityControlInfo <- function(datasets) {
 
   rmsdQualityControl <- purrr::map_dfr(datasets, function(x) {
@@ -170,15 +109,43 @@ gatherQualityControlInfo <- function(datasets) {
   )
 }
 
-#' Print quality control
+#' Print quality control information
 #'
-#' dummy text
+#' Print a summary of the quality control information for a piccr processing run
+#' of several measurement files.
 #'
-#' @param datasets dummy
-#' @param printDeviations dummy
-#' @param n dummy
+#' Per default, the functions prints the following two sections:
+#' \itemize{
+#'   \item the first section gives the overall values for the entire processing
+#'         run of the root-mean-square deviation (rmsd) of the quality control
+#'         standards, the rmsd of all used standards, and the mean value of the
+#'         pooled standard deviation per sample;
+#'   \item the second section contains tables with the above values for each
+#'         processed measurement file.
+#' }
+#' Additional information can be switched on via the respective function
+#' parameters, such as the deviations of all measured standards from their true
+#' values.
 #'
-#' @return dummy
+#' @param datasets the processed measurement data as output by
+#'   \code{\link{processFiles}} (or by \code{\link{processData}} directly).
+#' @param printDeviations logical to control whether the specific deviations
+#'   from the true value of each measured standard are printed for the processed
+#'   measurement datasets (defaults to \code{FALSE}).
+#' @param n integer to control the number of printed datasets if
+#'   \code{printDeviations = TRUE}; default is to print the first three
+#'   processed datasets, set to \code{NA} to print all of them.
+#'
+#' @return The input \code{datasets} are returned invisibly.
+#' @examples
+#' # Most conveniently, this function is combined with the processing function
+#' # in a pipe:
+#' \dontrun{
+#'   library(magrittr)
+#'   library(piccr)
+#'
+#'   processFiles("my_config_file.yaml") %>% printQualityControl()
+#' }
 #' @export
 #'
 printQualityControl <- function(datasets, printDeviations = FALSE, n = 3) {
@@ -245,6 +212,17 @@ printQualityControl <- function(datasets, printDeviations = FALSE, n = 3) {
   return(invisible(datasets))
 }
 
+#' Print piccr run information
+#'
+#' Auxiliary function to build the top section of the quality control summary
+#' file printing information on the piccr version which was used for the
+#' processing run, the name of the used YAML configuration file, and the
+#' processing date.
+#'
+#' @param configFile the file name of the YAML configuration file which was
+#'   used for the processing.
+#' @seealso \code{\link{outputSummaryFile}}
+#'
 printRunInfo <- function(configFile) {
 
   cat(sprintf("piccr; version %s\n", utils::packageVersion("piccr")))

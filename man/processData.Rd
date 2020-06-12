@@ -27,8 +27,8 @@ data as output by the Picarro device.}
   available injections; set to a single integer `n` to use the last `n`
   injections; set to a range `n1:n2` to use the injection range `n1:n2`.}
 \item{\code{standards}:}{a list the same length as the number of standards
-  used in the measurement data sets; each list is a list with the following
-  elements:
+  used in the measurement data sets; each element is itself a list with the
+  following elements:
   \itemize{
   \item \code{name}: character; the name of the standard as specified by the
     \code{Identifier 1} value in the data set.

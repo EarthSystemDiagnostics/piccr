@@ -2,20 +2,50 @@
 % Please edit documentation in R/helpers_outputSummaryFile.R
 \name{printQualityControl}
 \alias{printQualityControl}
-\title{Print quality control}
+\title{Print quality control information}
 \usage{
 printQualityControl(datasets, printDeviations = FALSE, n = 3)
 }
 \arguments{
-\item{datasets}{dummy}
+\item{datasets}{the processed measurement data as output by
+\code{\link{processFiles}} (or by \code{\link{processData}} directly).}
 
-\item{printDeviations}{dummy}
+\item{printDeviations}{logical to control whether the specific deviations
+from the true value of each measured standard are printed for the processed
+measurement datasets (defaults to \code{FALSE}).}
 
-\item{n}{dummy}
+\item{n}{integer to control the number of printed datasets if
+\code{printDeviations = TRUE}; default is to print the first three
+processed datasets, set to \code{NA} to print all of them.}
 }
 \value{
-dummy
+The input \code{datasets} are returned invisibly.
 }
 \description{
-dummy text
+Print a summary of the quality control information for a piccr processing run
+of several measurement files.
+}
+\details{
+Per default, the functions prints the following two sections:
+\itemize{
+  \item the first section gives the overall values for the entire processing
+        run of the root-mean-square deviation (rmsd) of the quality control
+        standards, the rmsd of all used standards, and the mean value of the
+        pooled standard deviation per sample;
+  \item the second section contains tables with the above values for each
+        processed measurement file.
+}
+Additional information can be switched on via the respective function
+parameters, such as the deviations of all measured standards from their true
+values.
+}
+\examples{
+# Most conveniently, this function is combined with the processing function
+# in a pipe:
+\dontrun{
+  library(magrittr)
+  library(piccr)
+
+  processFiles("my_config_file.yaml") \%>\% printQualityControl()
+}
 }

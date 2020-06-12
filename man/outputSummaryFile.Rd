@@ -2,41 +2,48 @@
 % Please edit documentation in R/helpers_outputSummaryFile.R
 \name{outputSummaryFile}
 \alias{outputSummaryFile}
-\title{outputSummaryFile}
+\title{Output quality control summary file}
 \usage{
-outputSummaryFile(processedData, config, outputFile = NULL)
+outputSummaryFile(processedData, config, configFile, outputFile = NULL)
 }
 \arguments{
-\item{processedData}{A list as output by processData(..). 
-It needs to contain the components
-$pooledStdDev (a named list where each
-element is of the form 'list(d18O = .., dD = ..)')
-and $processed (a named list of dataframes).}
+\item{processedData}{the processed measurement data as output by
+\code{\link{processData}}.}
 
-\item{config}{A named list. Needs to contain the component 
-$standards (A list of lists. Each innermost list 
-contains the components $name, $o18_True, and  $H2_True).
-Should contain $output_directory if no explicit
-value is given for the argument outputFile.}
+\item{config}{a named list with the contents read from the configuration
+file \code{configFile}, which was used for the processing; at least, it
+needs to contain the element \code{output_directory} to set the output
+directory for the summary file, if no explicit directory is given in the
+argument \code{outputFile}.}
 
-\item{outputFile}{(Optional) A character vector. Path to the output file.
-If it is not given, the file 'run.info' in the
-directory config$output_directory is used.}
-}
-\value{
-No relevant return value
+\item{configFile}{the file name of the YAML configuration file which was
+used for the processing.}
+
+\item{outputFile}{an optional character vector with an alternative file path
+(including file name) for the summary file. If \code{NULL} (the default),
+the file \code{run.info} in the directory \code{config$output_directory}
+is created.}
 }
 \description{
-Write a summary file to disc. The summary file contains
-quality indicators and consists of three sections: 
-  - AVERAGE OVER ALL FILES: This section contains the
-    pooled standard deviation (O18 and H2) averaged 
-    over all files.
-    (More parameters will be added in the future.)
-  - VALUES FOR EACH FILE: This section contains the 
-    pooled standard deviation (O18 and H2) for each file.
-  - INTER STANDARD BIAS TO LITERATURE VALUES FOR EACH FILE:
-    This section displays the deviation of the measured
-    delta.O18 and delta.H2 values to the true values for
-    each file.
+Write an output file to disc summarising the quality control information from
+the processing steps for each processed file as well as for the entire
+processing run. Note that if the data is processed again, the summary file is
+silently overwritten.
+}
+\details{
+The summary file consists of three sections:
+\itemize{
+  \item the first section gives the overall values for the entire processing
+        run of the root-mean-square deviation (rmsd) of the quality control
+        standards, the rmsd of all used standards, and the mean value of the
+        pooled standard deviation per sample;
+  \item the second section contains tables with the above values for each
+        processed measurement file;
+  \item the third section contains a table which lists for each processed
+        measurement file the individual deviations of each used standard from
+        its true value.
+}
+}
+\seealso{
+\code{\link{processFiles}}
 }
