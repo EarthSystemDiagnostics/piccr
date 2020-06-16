@@ -50,8 +50,8 @@ standards:
     use_for_calibration: yes
     use_as_control_standard: no
   - name: NGT
-    o18_True: -34.40
-    H2_True: -265.5
+    o18_True: -33.89
+    H2_True: -261.0
     use_for_drift_correction: no
     use_for_calibration: no
     use_as_control_standard: yes

@@ -47,7 +47,7 @@ getQualityControlInfo <- function(dataset, accumulatedDataset) {
 
   deviationOfControlStandard <- deviationDataOfStandards %>%
     filter(useAsControlStandard == TRUE) %>%
-    select(d18O = d18ODeviation, dD = dDDeviation) %>%
+    select(name = `Identifier 1`, d18O = d18ODeviation, dD = dDDeviation) %>%
     as.list()
 
   vialCountOfFirstStd <- getVialCountOfFirstStd(dataset)
