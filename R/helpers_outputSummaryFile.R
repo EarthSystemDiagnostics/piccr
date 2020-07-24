@@ -42,7 +42,8 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL) {
     paste(collapse = "\n")
 
   qualityControl <- utils::capture.output(
-    printQualityControl(processedData, printDeviations = TRUE, n = NA)) %>%
+    printQualityControl(processedData, printDeviations = TRUE, n = NA,
+                        whichMemoryCoefficients = "all")) %>%
     paste(collapse = "\n")
 
   cat(runInfo, qualityControl, sep = "", file = outputFile)
@@ -153,6 +154,7 @@ gatherQualityControlInfo <- function(datasets) {
 #' @param n integer to control the number of printed datasets if
 #'   \code{printDeviations = TRUE}; default is to print the first three
 #'   processed datasets, set to \code{NA} to print all of them.
+#' @import dplyr
 #'
 #' @return The input \code{datasets} are returned invisibly.
 #' @examples
@@ -166,7 +168,9 @@ gatherQualityControlInfo <- function(datasets) {
 #' }
 #' @export
 #'
-printQualityControl <- function(datasets, printDeviations = FALSE, n = 3) {
+printQualityControl <- function(datasets, printDeviations = FALSE, n = 3,
+                                printMemoryCoefficients = TRUE,
+                                whichMemoryCoefficients = "mean") {
 
   qualityControlInfo <- gatherQualityControlInfo(datasets)
 
@@ -202,6 +206,33 @@ printQualityControl <- function(datasets, printDeviations = FALSE, n = 3) {
 
   cat("\n# Pooled standard deviation:\n")
   print(qualityControlInfo$pooledSD)
+
+  if (printMemoryCoefficients) {
+
+    if (whichMemoryCoefficients == "mean") {
+
+      x <- qualityControlInfo$memoryCoefficients %>%
+        filter(dataset == "mean") %>%
+        select(-dataset)
+
+      cat("\n# --- Mean memory coefficients ---\n\n")
+      print(x, n = nrow(x))
+
+    } else if (whichMemoryCoefficients == "all") {
+
+      x <- qualityControlInfo$memoryCoefficients
+
+      cat("\n# --- Overall mean and file means of memory coefficients ---\n\n")
+      print(x, n = nrow(x))
+
+    } else {
+
+      cat("\n")
+      warning("Unknown option for printing memory coefficients; ",
+              "select either 'all' or only the 'mean' memory coefficients.",
+              call. = FALSE)
+    }
+  }
 
   if (printDeviations) {
 

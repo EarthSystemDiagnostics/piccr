@@ -137,7 +137,17 @@ test_that("writing of quality control data works", {
     capture.output(print(pooledSD)) %>% paste(collapse = "\n")
   )
 
-  expected3 <- stringr::str_c(
+  expected3a <- stringr::str_c(
+    "\n\n# --- Mean memory coefficients ---\n\n",
+    capture.output(print(memCoeff[1 : 4, -1])) %>% paste(collapse = "\n")
+  )
+
+  expected3b <- stringr::str_c(
+    "\n\n# --- Overall mean and file means of memory coefficients ---\n\n",
+    capture.output(print(memCoeff)) %>% paste(collapse = "\n")
+  )
+
+  expected4 <- stringr::str_c(
     "\n\n# --- Specific deviations from true standard values ---\n\n",
     "# ... displaying output for first 1 (of 2) measurement files;\n",
     "# adjust function parameter 'n' to display a different number.\n\n",
@@ -146,7 +156,7 @@ test_that("writing of quality control data works", {
     "\n"
   )
 
-  expected4 <- stringr::str_c(
+  expected5 <- stringr::str_c(
     "\n\n# --- Specific deviations from true standard values ---\n\n",
     "$good\n",
     capture.output(print(deviationsFromTrue1)) %>% paste(collapse = "\n"),
@@ -158,13 +168,26 @@ test_that("writing of quality control data works", {
   # ----------------------------------------------------------------------------
   # test printing function
 
-  expected <- stringr::str_c(expected2, expected3)
+  expected <- stringr::str_c(expected2, expected3a, expected4)
 
   actual <- capture.output(
     printQualityControl(processedData, printDeviations = TRUE, n = 1)) %>%
     paste(collapse = "\n")
 
   expect_equal(actual, expected)
+
+  expected <- stringr::str_c(expected2, expected3b, expected4)
+
+  actual <- capture.output(
+    printQualityControl(processedData, printDeviations = TRUE, n = 1,
+                        whichMemoryCoefficients = "all")) %>%
+    paste(collapse = "\n")
+
+  expect_equal(actual, expected)
+
+  expect_warning(capture.output(printQualityControl(
+    processedData, printDeviations = TRUE, n = 1,
+    whichMemoryCoefficients = "wrong string")))
 
   # ----------------------------------------------------------------------------
   # test writing to output file
@@ -174,7 +197,7 @@ test_that("writing of quality control data works", {
 
   outputSummaryFile(processedData, config, tmpfile)
 
-  expected <- stringr::str_c(expected1, expected2, expected4)
+  expected <- stringr::str_c(expected1, expected2, expected3b, expected5)
 
   actual <- readr::read_file(tmpfile)
 
