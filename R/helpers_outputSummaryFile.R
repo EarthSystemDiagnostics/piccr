@@ -57,8 +57,9 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL) {
 #'
 #' @param datasets the processed measurement data as output by
 #'   \code{\link{processFiles}} (or by \code{\link{processData}} directly).
+#' @import dplyr
 #'
-#' @return A named list with four elements:
+#' @return A named list with five elements:
 #' \describe{
 #'   \item{\code{rmsdQualityControl}:}{a tibble for the root-mean-square
 #'   deviation (rmsd) of the quality control standard for each measurement file,
@@ -74,6 +75,10 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL) {
 #'   \item{\code{deviationsFromTrue}:}{a list of tibbles, where each tibble
 #'   lists the deviations of all measured standards from their true values for a
 #'   processed measurement file.}
+#'   \item{\code{memoryCoefficients}:}{a tibble of the mean and the SD of the
+#'   average memory coefficients depending on the injection number per each
+#'   processed measurement file and of the mean and the SD of the overall
+#'   average memory coefficients.}
 #' }
 gatherQualityControlInfo <- function(datasets) {
 
@@ -95,7 +100,7 @@ gatherQualityControlInfo <- function(datasets) {
 
   deviationsFromTrue <- lapply(datasets, function(x) {
     x$deviationsFromTrue %>%
-      dplyr::select(Sample, `Identifier 1`, block, d18ODeviation, dDDeviation)
+      select(Sample, `Identifier 1`, block, d18ODeviation, dDDeviation)
   })
 
   memCoeffDatasets <- purrr::map_dfr(datasets, function(x) {
@@ -107,15 +112,15 @@ gatherQualityControlInfo <- function(datasets) {
                    sdDD = x$memoryCoefficients$`sdMemoryCoeffDD`)})
 
   memCoeffMean <- memCoeffDatasets %>%
-    dplyr::group_by(`Inj Nr`) %>%
-    dplyr::summarise(dataset = "mean",
+    group_by(`Inj Nr`) %>%
+    summarise(dataset = "mean",
                      meanD18O = mean(meanD18O),
                      meanDD = mean(meanDD),
-                     sdD18O = sqrt(sum(sdD18O^2)) / dplyr::n(),
-                     sdDD = sqrt(sum(sdDD^2)) / dplyr::n()) %>%
-    dplyr::relocate(dataset, .before = `Inj Nr`)
+                     sdD18O = sqrt(sum(sdD18O^2)) / n(),
+                     sdDD = sqrt(sum(sdDD^2)) / n()) %>%
+    relocate(dataset, .before = `Inj Nr`)
 
-  memoryCoefficients <- dplyr::bind_rows(memCoeffMean, memCoeffDatasets)
+  memoryCoefficients <- bind_rows(memCoeffMean, memCoeffDatasets)
 
   return(
     list(
@@ -133,7 +138,7 @@ gatherQualityControlInfo <- function(datasets) {
 #' Print a summary of the quality control information for a piccr processing run
 #' of several measurement files.
 #'
-#' Per default, the functions prints the following two sections:
+#' Per default, the functions prints the following three sections:
 #' \itemize{
 #'   \item the first section gives the overall values for the entire processing
 #'         run of the root-mean-square deviation (rmsd) of the quality control
@@ -141,6 +146,9 @@ gatherQualityControlInfo <- function(datasets) {
 #'         pooled standard deviation per sample;
 #'   \item the second section contains tables with the above values for each
 #'         processed measurement file.
+#'   \item the third section contains a table of the overall memory
+#'         coefficients depending on the injection number averaged across the
+#'         processing run together with their estimated standard deviations.
 #' }
 #' Additional information can be switched on via the respective function
 #' parameters, such as the deviations of all measured standards from their true
@@ -154,6 +162,14 @@ gatherQualityControlInfo <- function(datasets) {
 #' @param n integer to control the number of printed datasets if
 #'   \code{printDeviations = TRUE}; default is to print the first three
 #'   processed datasets, set to \code{NA} to print all of them.
+#' @param printMemoryCoefficients logical to control whether the estimated
+#'   memory coefficients shall be printed; defaults to \code{TRUE}.
+#' @param whichMemoryCoefficients character string to signal which part of the
+#'   estimated memory coefficients are printed if \code{printMemoryCoefficients
+#'   = TRUE}. Possible options are "mean" (the default) to print only the values
+#'   for the overall average memory coefficients or "all" to also print the
+#'   values for the average memory coefficients per each processed measurement
+#'   data set.
 #' @import dplyr
 #'
 #' @return The input \code{datasets} are returned invisibly.

@@ -11,7 +11,7 @@ gatherQualityControlInfo(datasets)
 \code{\link{processFiles}} (or by \code{\link{processData}} directly).}
 }
 \value{
-A named list with four elements:
+A named list with five elements:
 \describe{
   \item{\code{rmsdQualityControl}:}{a tibble for the root-mean-square
   deviation (rmsd) of the quality control standard for each measurement file,
@@ -27,6 +27,10 @@ A named list with four elements:
   \item{\code{deviationsFromTrue}:}{a list of tibbles, where each tibble
   lists the deviations of all measured standards from their true values for a
   processed measurement file.}
+  \item{\code{memoryCoefficients}:}{a tibble of the mean and the SD of the
+  average memory coefficients depending on the injection number per each
+  processed measurement file and of the mean and the SD of the overall
+  average memory coefficients.}
 }
 }
 \description{

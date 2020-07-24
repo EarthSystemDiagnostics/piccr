@@ -4,7 +4,8 @@
 \alias{printQualityControl}
 \title{Print quality control information}
 \usage{
-printQualityControl(datasets, printDeviations = FALSE, n = 3)
+printQualityControl(datasets, printDeviations = FALSE, n = 3,
+  printMemoryCoefficients = TRUE, whichMemoryCoefficients = "mean")
 }
 \arguments{
 \item{datasets}{the processed measurement data as output by
@@ -17,6 +18,16 @@ measurement datasets (defaults to \code{FALSE}).}
 \item{n}{integer to control the number of printed datasets if
 \code{printDeviations = TRUE}; default is to print the first three
 processed datasets, set to \code{NA} to print all of them.}
+
+\item{printMemoryCoefficients}{logical to control whether the estimated
+memory coefficients shall be printed; defaults to \code{TRUE}.}
+
+\item{whichMemoryCoefficients}{character string to signal which part of the
+estimated memory coefficients are printed if \code{printMemoryCoefficients
+= TRUE}. Possible options are "mean" (the default) to print only the values
+for the overall average memory coefficients or "all" to also print the
+values for the average memory coefficients per each processed measurement
+data set.}
 }
 \value{
 The input \code{datasets} are returned invisibly.
@@ -26,7 +37,7 @@ Print a summary of the quality control information for a piccr processing run
 of several measurement files.
 }
 \details{
-Per default, the functions prints the following two sections:
+Per default, the functions prints the following three sections:
 \itemize{
   \item the first section gives the overall values for the entire processing
         run of the root-mean-square deviation (rmsd) of the quality control
@@ -34,6 +45,9 @@ Per default, the functions prints the following two sections:
         pooled standard deviation per sample;
   \item the second section contains tables with the above values for each
         processed measurement file.
+  \item the third section contains a table of the overall memory
+        coefficients depending on the injection number averaged across the
+        processing run together with their estimated standard deviations.
 }
 Additional information can be switched on via the respective function
 parameters, such as the deviations of all measured standards from their true
