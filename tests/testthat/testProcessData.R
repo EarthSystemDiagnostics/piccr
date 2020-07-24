@@ -39,7 +39,7 @@ test_that("check general output structure", {
 
   expect_true(is.data.frame(actual[[1]]$memoryCorrected))
   expect_true(is.data.frame(actual[[1]]$memoryCoefficients))
-  expect_equal(ncol(actual[[1]]$memoryCoefficients), 11)
+  expect_equal(ncol(actual[[1]]$memoryCoefficients), 13)
 
   expect_true(is.data.frame(actual[[1]]$calibrated))
   expect_true(is.data.frame(actual[[1]]$calibratedAndDriftCorrected))

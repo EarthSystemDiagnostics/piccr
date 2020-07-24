@@ -172,21 +172,21 @@ test_that("test memory corrected datasets", {
 test_that("test memory coefficients", {
 
   memCoeffExpected1 <- tibble::tribble(
-    ~`Inj Nr`, ~A_vial1_d18O, ~A_vial1_dD, ~B_vial1_d18O, ~B_vial1_dD, ~C_vial1_d18O, ~C_vial1_dD, ~memoryCoeffD18O, ~memoryCoeffDD,
-    # ------ / ------------ / ---------- / ------------ / ---------- / ------------ / ---------- / --------------- / --------------
-    1,         NA_real_,      NA_real_,    0.75,          0.71,        0.75,          0.81,        0.75,             0.76,
-    2,         NA_real_,      NA_real_,    1,             1.06,        1,             1.04,        1.0,              1.05,
-    3,         NA_real_,      NA_real_,    1.25,          1.22,        1.25,          1.15,        1.25,             1.18
+    ~`Inj Nr`, ~A_vial1_d18O, ~A_vial1_dD, ~B_vial1_d18O, ~B_vial1_dD, ~C_vial1_d18O, ~C_vial1_dD, ~memoryCoeffD18O, ~memoryCoeffDD, ~sdMemoryCoeffD18O, ~sdMemoryCoeffDD,
+    # ------ / ------------ / ---------- / ------------ / ---------- / ------------ / ---------- / --------------- / ------------- / ----------------- / ----------------
+    1,         NA_real_,      NA_real_,    0.75,          0.71,        0.75,          0.81,        0.75,             0.76,           0,                  0.07,
+    2,         NA_real_,      NA_real_,    1,             1.06,        1,             1.04,        1.0,              1.05,           0,                  0.02,
+    3,         NA_real_,      NA_real_,    1.25,          1.22,        1.25,          1.15,        1.25,             1.18,           0,                  0.05
   )
 
   memCoeffExpected2 <- tibble::tribble(
-    ~`Inj Nr`, ~A_vial1_d18O, ~A_vial1_dD, ~B_vial1_d18O, ~B_vial1_dD, ~C_vial1_d18O, ~C_vial1_dD, ~memoryCoeffD18O, ~memoryCoeffDD,
-    # ------ / ------------ / ---------- / ------------ / ---------- / ------------ / ---------- / --------------- / --------------
-    1,         NA_real_,      NA_real_,    0.984,        0.992,        0.985,         0.992,       0.985,            0.992,
-    2,         NA_real_,      NA_real_,    0.990,        0.986,        0.990,         0.986,       0.990,            0.986,
-    3,         NA_real_,      NA_real_,    0.995,        0.992,        0.995,         0.992,       0.995,            0.992,
-    4,         NA_real_,      NA_real_,    1.000,        1.002,        1.000,         1.002,       1.0,              1.002,
-    5,         NA_real_,      NA_real_,    1.005,        1.007,        1.005,         1.007,       1.005,            1.007
+    ~`Inj Nr`, ~A_vial1_d18O, ~A_vial1_dD, ~B_vial1_d18O, ~B_vial1_dD, ~C_vial1_d18O, ~C_vial1_dD, ~memoryCoeffD18O, ~memoryCoeffDD, ~sdMemoryCoeffD18O, ~sdMemoryCoeffDD,
+    # ------ / ------------ / ---------- / ------------ / ---------- / ------------ / ---------- / --------------- / ------------- / ----------------- / ----------------
+    1,         NA_real_,      NA_real_,    0.984,        0.992,        0.985,         0.992,       0.985,            0.992,          0.001,              0,
+    2,         NA_real_,      NA_real_,    0.990,        0.986,        0.990,         0.986,       0.990,            0.986,          0,                  0,
+    3,         NA_real_,      NA_real_,    0.995,        0.992,        0.995,         0.992,       0.995,            0.992,          0,                  0,
+    4,         NA_real_,      NA_real_,    1.000,        1.002,        1.000,         1.002,       1.0,              1.002,          0,                  0,
+    5,         NA_real_,      NA_real_,    1.005,        1.007,        1.005,         1.007,       1.005,            1.007,          0,                  0,
   )
 
   actual1 <- correctForMemoryEffect(dataset1)
@@ -393,13 +393,14 @@ test_that("test that vial grouping gives correct memory coefficients output", {
 
   actual <- calculateMemoryCoefficients(dataset4)
 
-  expect_equal(dim(actual), c(4, 11))
+  expect_equal(dim(actual), c(4, 13))
   expect_equal(colnames(actual),
                c("Inj Nr", "A_vial1_d18O", "A_vial1_dD",
                  "A_vial2_d18O", "A_vial2_dD",
                  "B_vial1_d18O", "B_vial1_dD",
                  "C_vial1_d18O", "C_vial1_dD",
-                 "memoryCoeffD18O", "memoryCoeffDD"))
+                 "memoryCoeffD18O", "memoryCoeffDD",
+                 "sdMemoryCoeffD18O", "sdMemoryCoeffDD"))
 
 })
 

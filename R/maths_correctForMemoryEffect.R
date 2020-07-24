@@ -68,8 +68,11 @@ calculateMemoryCoefficients <- function(dataset) {
   # get the mean mem coeff as a dataframe
   meanMemoryCoefficients <- memoryCoefficients %>%
     group_by(`Inj Nr`) %>%
-    summarise(memoryCoeffD18O = mean(memoryCoeffD18O, na.rm = TRUE),
-              memoryCoeffDD = mean(memoryCoeffDD, na.rm = TRUE))
+    summarise(sdMemoryCoeffD18O = sd(memoryCoeffD18O, na.rm = TRUE),
+              sdMemoryCoeffDD = sd(memoryCoeffDD, na.rm = TRUE),
+              memoryCoeffD18O = mean(memoryCoeffD18O, na.rm = TRUE),
+              memoryCoeffDD = mean(memoryCoeffDD, na.rm = TRUE)) %>%
+    relocate(sdMemoryCoeffD18O, sdMemoryCoeffDD, .after = last_col())
   
   # extract the mem coeff for each standard as a list of dataframes
   memoryCoeffForEachStandard <- memoryCoefficients %>%
