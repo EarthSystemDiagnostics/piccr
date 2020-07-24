@@ -238,7 +238,7 @@ printQualityControl <- function(datasets, printDeviations = FALSE, n = 3,
 
     nmax <- length(qualityControlInfo$deviationsFromTrue)
     subset <- TRUE
-    if (is.na(n) | n > nmax) {
+    if (is.na(n) | n >= nmax) {
       n <- nmax
       subset <- FALSE
     }
@@ -253,8 +253,10 @@ printQualityControl <- function(datasets, printDeviations = FALSE, n = 3,
     }
 
     for (i in 1 : n) {
-      x <- qualityControlInfo$deviationsFromTrue[i]
+      x <- qualityControlInfo$deviationsFromTrue[[i]]
+      cat(sprintf("Dataset: %s\n", datasets[[i]]$name))
       print(x, n = nrow(x))
+      if (i != n) cat("\n")
     }
   }
 

@@ -151,18 +151,16 @@ test_that("writing of quality control data works", {
     "\n\n# --- Specific deviations from true standard values ---\n\n",
     "# ... displaying output for first 1 (of 2) measurement files;\n",
     "# adjust function parameter 'n' to display a different number.\n\n",
-    "$good\n",
-    capture.output(print(deviationsFromTrue1)) %>% paste(collapse = "\n"),
-    "\n"
+    "Dataset: good\n",
+    capture.output(print(deviationsFromTrue1)) %>% paste(collapse = "\n")
   )
 
   expected5 <- stringr::str_c(
     "\n\n# --- Specific deviations from true standard values ---\n\n",
-    "$good\n",
+    "Dataset: good\n",
     capture.output(print(deviationsFromTrue1)) %>% paste(collapse = "\n"),
-    "\n\n$bad\n",
-    capture.output(print(deviationsFromTrue2)) %>% paste(collapse = "\n"),
-    "\n"
+    "\n\nDataset: bad\n",
+    capture.output(print(deviationsFromTrue2)) %>% paste(collapse = "\n")
   )
 
   # ----------------------------------------------------------------------------
