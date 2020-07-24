@@ -22,20 +22,37 @@ deviationsFromTrue2 <- tibble::tribble(
   3,     "QC",              2L,      -0.1,          -1,
   4,     "C",               3L,      0.7,           -7
 )
+memoryCoefficients1 <- tibble::tribble(
+  ~`Inj Nr`, ~`StdA_vial1_d18O`, ~`StdA_vial1_dD`, ~`StdB_vial1_d18O`, ~`StdB_vial1_dD`, ~memoryCoeffD18O, ~memoryCoeffDD, ~sdMemoryCoeffD18O, ~sdMemoryCoeffDD,
+  # ------ / ----------------- / --------------- / ----------------- / --------------- / --------------- / ------------- / ----------------- / ----------------
+  1,         0.96,               0.94,             0.96,               0.94,              0.96,            0.94,           0,                  0,
+  2,         0.98,               0.97,             0.98,               0.97,              0.98,            0.97,           0,                  0,
+  3,         1,                  1,                1,                  1,                 1,               1,              0,                  0
+)
+memoryCoefficients2 <- tibble::tribble(
+  ~`Inj Nr`, ~`StdA_vial1_d18O`, ~`StdA_vial1_dD`, ~`StdB_vial1_d18O`, ~`StdB_vial1_dD`, ~memoryCoeffD18O, ~memoryCoeffDD, ~sdMemoryCoeffD18O, ~sdMemoryCoeffDD,
+  # ------ / ----------------- / --------------- / ----------------- / --------------- / --------------- / ------------- / ----------------- / ----------------
+  1,         0.96,               0.94,             0.96,               0.94,              0.96,            0.94,           0,                  0,
+  2,         0.98,               0.97,             0.98,               0.97,              0.98,            0.97,           0,                  0,
+  3,         1,                  1,                1,                  1,                 1,               1,              0,                  0,
+  4,         1,                  1,                1,                  1,                 1,               1,              0,                  0
+)
 processedData <- list(
   good = list(
     name = "good",
     deviationOfControlStandard = list(name = "QC", d18O = 0.01, dD = 0.1),
     rmsdDeviationsFromTrue = list(d18O = 0.05, dD = 0.5),
     pooledSD = list(d18O = 0.03, dD = 0.3),
-    deviationsFromTrue = deviationsFromTrue1
+    deviationsFromTrue = deviationsFromTrue1,
+    memoryCoefficients = memoryCoefficients1
   ),
   bad = list(
     name = "bad",
     deviationOfControlStandard = list(name = "QC", d18O = 0.1, dD = 1),
     rmsdDeviationsFromTrue = list(d18O = 0.5, dD = 5),
     pooledSD = list(d18O = 0.3, dD = 3),
-    deviationsFromTrue = deviationsFromTrue2
+    deviationsFromTrue = deviationsFromTrue2,
+    memoryCoefficients = memoryCoefficients2
   )
 )
 qc <- tibble::tribble(
@@ -56,6 +73,21 @@ pooledSD <- tibble::tribble(
   "good", 0.03,  0.3,
   "bad",  0.3,   3
 )
+memCoeff <- tibble::tribble(
+  ~dataset, ~`Inj Nr`, ~meanD18O, ~meanDD, ~sdD18O, ~sdDD,
+  # ---- / -------- / -------- / ------ / ------ / ------
+  "mean",  1,         0.96,      0.94,    0,       0,
+  "mean",  2,         0.98,      0.97,    0,       0,
+  "mean",  3,         1,         1,       0,       0,
+  "mean",  4,         1,         1,       0,       0,
+  "good",  1,         0.96,      0.94,    0,       0,
+  "good",  2,         0.98,      0.97,    0,       0,
+  "good",  3,         1,         1,       0,       0,
+  "bad",   1,         0.96,      0.94,    0,       0,
+  "bad",   2,         0.98,      0.97,    0,       0,
+  "bad",   3,         1,         1,       0,       0,
+  "bad",   4,         1,         1,       0,       0
+)
 
 test_that("gathering of quality control data works", {
   
@@ -64,7 +96,8 @@ test_that("gathering of quality control data works", {
     rmsdAllStandards = rmsdAll,
     pooledSD = pooledSD,
     deviationsFromTrue = list(
-      good = deviationsFromTrue1, bad = deviationsFromTrue2)
+      good = deviationsFromTrue1, bad = deviationsFromTrue2),
+    memoryCoefficients = memCoeff
   )
 
   actual <- gatherQualityControlInfo(processedData)

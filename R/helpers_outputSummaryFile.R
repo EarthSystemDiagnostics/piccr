@@ -97,12 +97,32 @@ gatherQualityControlInfo <- function(datasets) {
       dplyr::select(Sample, `Identifier 1`, block, d18ODeviation, dDDeviation)
   })
 
+  memCoeffDatasets <- purrr::map_dfr(datasets, function(x) {
+    tibble::tibble(dataset = x$name,
+                   `Inj Nr` = x$memoryCoefficients$`Inj Nr`,
+                   meanD18O = x$memoryCoefficients$`memoryCoeffD18O`,
+                   meanDD = x$memoryCoefficients$`memoryCoeffDD`,
+                   sdD18O = x$memoryCoefficients$`sdMemoryCoeffD18O`,
+                   sdDD = x$memoryCoefficients$`sdMemoryCoeffDD`)})
+
+  memCoeffMean <- memCoeffDatasets %>%
+    dplyr::group_by(`Inj Nr`) %>%
+    dplyr::summarise(dataset = "mean",
+                     meanD18O = mean(meanD18O),
+                     meanDD = mean(meanDD),
+                     sdD18O = sqrt(sum(sdD18O^2)) / dplyr::n(),
+                     sdDD = sqrt(sum(sdDD^2)) / dplyr::n()) %>%
+    dplyr::relocate(dataset, .before = `Inj Nr`)
+
+  memoryCoefficients <- dplyr::bind_rows(memCoeffMean, memCoeffDatasets)
+
   return(
     list(
       rmsdQualityControl = rmsdQualityControl,
       rmsdAllStandards = rmsdAllStandards,
       pooledSD = pooledSD,
-      deviationsFromTrue = deviationsFromTrue
+      deviationsFromTrue = deviationsFromTrue,
+      memoryCoefficients = memoryCoefficients
     )
   )
 }
