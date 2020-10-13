@@ -40,7 +40,9 @@ test_that("test getCalibInterceptAndSlope", {
   o18SlopeExpected <- 0.9
   H2InterceptExpected <- 0
   H2SlopeExpected <- 1
-  
+
+  expect_error(doCalibrationModel(dataset1, species = "unknown"))
+
   actual <- getCalibInterceptAndSlope(dataset1, config = config, useBlock = 1)
   
   expect_equal(actual$d18O$intercept, o18InterceptExpected)

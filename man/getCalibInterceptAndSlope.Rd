@@ -26,17 +26,14 @@ is to be used for estimating the calibration parameters.}
 }
 \value{
 A named list with elements \code{d18O} and \code{dD} where each
-element is again a list with two elements:
-\describe{
-\item{\code{intercept}:}{numeric; the estimated intercept of the
-  calibration.}
-\item{\code{slope}:}{numeric; the estimated slope of the calibration.}
-}
+element is again a list containing the output of
+  \code{\link{runCalibrationModel}}.
 }
 \description{
-Obtain calibration slope and intercept values as estimated from standards in
-a particular standard block of the measurement sequence from regressing the
-expected standard values against their measured values.
+Obtain the calibration parameters as estimated from standards in a particular
+standard block of the measurement sequence from regressing the expected
+standard values against their measured values; for this, a simple linear
+regression is currently implemented.
 }
 \details{
 If memory correction was applied to the data, all injections are used from
@@ -47,5 +44,6 @@ standards are actually set in the dataset.
 }
 \seealso{
 \code{\link{groupStandardsInBlocks}},
-  \code{\link{associateStandardsWithConfigInfo}}
+  \code{\link{associateStandardsWithConfigInfo}},
+  \code{\link{runCalibrationModel}}
 }
