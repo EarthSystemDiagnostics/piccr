@@ -4,8 +4,17 @@
 \alias{buildOutputList}
 \title{Build output list}
 \usage{
-buildOutputList(name, config, dataset, memoryCorrected, memoryCoefficients,
-  calibrated, calibratedAndDriftCorrected, accumulated, qualityControlInfo)
+buildOutputList(
+  name,
+  config,
+  dataset,
+  memoryCorrected,
+  memoryCoefficients,
+  calibrated,
+  calibratedAndDriftCorrected,
+  accumulated,
+  qualityControlInfo
+)
 }
 \arguments{
 \item{name}{the file name of the data set.}

@@ -4,8 +4,13 @@
 \alias{printQualityControl}
 \title{Print quality control information}
 \usage{
-printQualityControl(datasets, printDeviations = FALSE, n = 3,
-  printMemoryCoefficients = TRUE, whichMemoryCoefficients = "mean")
+printQualityControl(
+  datasets,
+  printDeviations = FALSE,
+  n = 3,
+  printMemoryCoefficients = TRUE,
+  whichMemoryCoefficients = "mean"
+)
 }
 \arguments{
 \item{datasets}{the processed measurement data as output by
