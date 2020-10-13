@@ -34,7 +34,7 @@ expected1 <- tibble::tribble(
 
 config <- list(use_memory_correction = TRUE, use_three_point_calibration = TRUE)
 
-test_that("test getCalibInterceptAndSlope", {
+test_that("test getCalibration", {
   
   o18InterceptExpected <- -2.
   o18SlopeExpected <- 0.9
@@ -43,7 +43,7 @@ test_that("test getCalibInterceptAndSlope", {
 
   expect_error(doCalibrationModel(dataset1, species = "unknown"))
 
-  actual <- getCalibInterceptAndSlope(dataset1, config = config, useBlock = 1)
+  actual <- getCalibration(dataset1, config = config, useBlock = 1)
   
   expect_equal(actual$d18O$intercept, o18InterceptExpected)
   expect_equal(actual$d18O$slope, o18SlopeExpected)
@@ -52,7 +52,7 @@ test_that("test getCalibInterceptAndSlope", {
   expect_equal(actual$dD$slope, H2SlopeExpected)
 })
 
-test_that("test getCalibInterceptAndSlope for dataset with rows that should be excluded", {
+test_that("test getCalibration for dataset with rows that should be excluded", {
   
   # In this dataset only the first two rows should be used to determine calibration intercept and slope.
   dataset2 <- tibble::tribble(
@@ -66,7 +66,7 @@ test_that("test getCalibInterceptAndSlope for dataset with rows that should be e
     50,            100,          NA,     1,         2,        TRUE
   )
   
-  actual <- getCalibInterceptAndSlope(dataset2, config = config, useBlock = 1)
+  actual <- getCalibration(dataset2, config = config, useBlock = 1)
   
   expect_equal(actual$d18O$intercept, 0)
   expect_equal(actual$d18O$slope, 1)
@@ -141,7 +141,7 @@ test_that("test use only last three injections if memory correction is not used"
   
   config <- list(use_memory_correction = FALSE, use_three_point_calibration = TRUE)
   
-  actual <- getCalibInterceptAndSlope(dataset3, config = config, useBlock = 1)
+  actual <- getCalibration(dataset3, config = config, useBlock = 1)
   
   expect_equal(actual$d18O$intercept, 0)
   expect_equal(actual$d18O$slope, 1)
@@ -171,7 +171,7 @@ test_that("test two point calibration", {
   
   config <- list(use_memory_correction = FALSE, use_three_point_calibration = FALSE)
   
-  actual <- getCalibInterceptAndSlope(dataset4, config = config, useBlock = 1)
+  actual <- getCalibration(dataset4, config = config, useBlock = 1)
   
   expect_equal(actual$d18O$intercept, 0)
   expect_equal(actual$d18O$slope, 1)

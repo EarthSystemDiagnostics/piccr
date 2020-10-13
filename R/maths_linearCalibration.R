@@ -23,7 +23,7 @@
 #' 
 linearCalibration <- function(dataset, config, block = 1){
   
-  calibrationParams <- getCalibInterceptAndSlope(dataset, config, block)
+  calibrationParams <- getCalibration(dataset, config, block)
   calibratedDataset <- applyCalibration(dataset, calibrationParams)
   
   return(calibratedDataset)
@@ -53,7 +53,7 @@ linearCalibration <- function(dataset, config, block = 1){
 #'   \code{\link{associateStandardsWithConfigInfo}},
 #'   \code{\link{runCalibrationModel}}
 #' 
-getCalibInterceptAndSlope <- function(dataset, config, useBlock){
+getCalibration <- function(dataset, config, useBlock){
   
   trainingData <- getTrainingData(dataset, config, useBlock)
 

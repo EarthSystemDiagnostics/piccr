@@ -26,8 +26,8 @@ calibrateUsingDoubleCalibration <- function(dataset, config){
 
   finalBlock <- max(dataset$block, na.rm = TRUE)
 
-  calibParamsBlock1 <- getCalibInterceptAndSlope(dataset, config, useBlock = 1)
-  calibParamsBlockN <- getCalibInterceptAndSlope(dataset, config, useBlock = finalBlock)
+  calibParamsBlock1 <- getCalibration(dataset, config, useBlock = 1)
+  calibParamsBlockN <- getCalibration(dataset, config, useBlock = finalBlock)
   calibTimes <- getCalibTimes(dataset, useBlocks = c(1, finalBlock))
   
   calibSlopes <- getCalibrationSlopes(calibParamsBlock1, calibParamsBlockN, calibTimes)
@@ -106,7 +106,7 @@ getCalibrationSlopes <- function(paramsBlock1, paramsBlockN, calibTimes){
 #' calibration parameters.
 #' @param dataset a data frame with measurement data of a specific data set.
 #' @param calibParamsBlock1 a set of calibration parameters (slope and
-#' intercept) for d18O and dD (see \code{\link{getCalibInterceptAndSlope}} for
+#' intercept) for d18O and dD (see \code{\link{getCalibration}} for
 #' details) as estimated from the first standard block in the measurement
 #' sequence.
 #' @param calibSlopes slope estimates for d18O and dD for a linear change of the
