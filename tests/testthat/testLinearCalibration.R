@@ -39,7 +39,7 @@ test_that("running the calibration model", {
   # should throw an error
   expect_error(runCalibrationModel(dataset1, species = "unknown"))
 
-  expectedD18O <- list(
+  expectedD18O <- tibble::tibble(
     species = "d18O",
     block = 1,
     timeStamp = 1,
@@ -50,7 +50,7 @@ test_that("running the calibration model", {
     rSquared = 1
   )
 
-  expectedDD <- list(
+  expectedDD <- tibble::tibble(
     species = "dD",
     block = 1,
     timeStamp = 1,

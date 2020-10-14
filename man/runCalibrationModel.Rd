@@ -19,7 +19,7 @@ and time stamp of the used measurement subset, passed on to the function
 output.}
 }
 \value{
-A list with at least six elements:
+A tibble with one row and at least six variables:
 \describe{
 \item{\code{species}:}{character; the name of the isotope \code{species}
   used;}

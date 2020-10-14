@@ -79,7 +79,7 @@ getCalibration <- function(dataset, config, useBlock){
 #' @param ... optional meta information on the calibration, such as block number
 #'   and time stamp of the used measurement subset, passed on to the function
 #'   output.
-#' @return A list with at least six elements:
+#' @return A tibble with one row and at least six variables:
 #' \describe{
 #' \item{\code{species}:}{character; the name of the isotope \code{species}
 #'   used;}
@@ -107,13 +107,15 @@ runCalibrationModel <- function(trainingData, species = "d18O", ...) {
   modelSummary <- suppressWarnings(summary(model))
   coeffs <- stats::coef(modelSummary)
 
-  list(species = species,
-       ...,
-       intercept = -1 * coeffs[1, 1] / coeffs[2, 1],
-       slope = 1 / coeffs[2, 1],
-       pValueIntercept = signif(coeffs[1, 4], 2),
-       pValueSlope = signif(coeffs[2, 4], 2),
-       rSquared = signif(modelSummary$r.squared, 2))
+  tibble::as_tibble(
+    list(species = species,
+         ...,
+         intercept = -1 * coeffs[1, 1] / coeffs[2, 1],
+         slope = 1 / coeffs[2, 1],
+         pValueIntercept = signif(coeffs[1, 4], 2),
+         pValueSlope = signif(coeffs[2, 4], 2),
+         rSquared = signif(modelSummary$r.squared, 2))
+  )
 }
 
 #' Get calibration training data
