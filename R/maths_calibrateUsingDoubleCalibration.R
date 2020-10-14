@@ -28,9 +28,8 @@ calibrateUsingDoubleCalibration <- function(dataset, config){
 
   calibParamsBlock1 <- getCalibration(dataset, config, useBlock = 1)
   calibParamsBlockN <- getCalibration(dataset, config, useBlock = finalBlock)
-  calibTimes <- getCalibTimes(dataset, useBlocks = c(1, finalBlock))
   
-  calibSlopes <- getCalibrationSlopes(calibParamsBlock1, calibParamsBlockN, calibTimes)
+  calibSlopes <- getCalibrationSlopes(calibParamsBlock1, calibParamsBlockN)
   
   applyDoubleCalibration(dataset, calibParamsBlock1, calibSlopes)
 }
@@ -71,8 +70,6 @@ getCalibTimes <- function(dataset, useBlocks){
 #' standard block.
 #' @param paramsBlockN the calibration parameters estimated from the final
 #' standard block.
-#' @param calibTimes numeric vector with the average measurement times elapsed
-#' for the first and the final standard block, respectively.
 #' 
 #' @return A named list with elements \code{d18O} and \code{dD} where each
 #' element is again a list with two elements:
@@ -83,9 +80,9 @@ getCalibTimes <- function(dataset, useBlocks){
 #'   calibration slope across the measurement sequence.}
 #' }
 #' 
-getCalibrationSlopes <- function(paramsBlock1, paramsBlockN, calibTimes){
+getCalibrationSlopes <- function(paramsBlock1, paramsBlockN){
   
-  timeDiffBetweenBlocks <- calibTimes[[2]] - calibTimes[[1]]
+  timeDiffBetweenBlocks <- paramsBlockN$d18O$timeStamp - paramsBlock1$d18O$timeStamp
   
   # TODO: clean this
   list(

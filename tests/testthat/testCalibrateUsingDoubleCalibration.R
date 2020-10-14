@@ -39,16 +39,15 @@ test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and
 test_that("test getCalibrationSlopes (case slopes are zero)", {
   
   params1 <- list(
-    d18O = list(slope = 2, intercept = 4),
-    dD = list(slope = 2, intercept = 4)
+    d18O = list(slope = 2, intercept = 4, timeStamp = 1),
+    dD = list(slope = 2, intercept = 4, timeStamp = 1)
   )
   params3 <- list(
-    d18O = list(slope = 2, intercept = 4),
-    dD = list(slope = 2, intercept = 4)
+    d18O = list(slope = 2, intercept = 4, timeStamp = 10),
+    dD = list(slope = 2, intercept = 4, timeStamp = 10)
   )
-  times = c(1, 10)
   
-  actual <- getCalibrationSlopes(params1, params3, times)
+  actual <- getCalibrationSlopes(params1, params3)
   
   expect_length(actual, 2)
   expect_equal(actual$d18O$alpha, 0)
@@ -60,16 +59,15 @@ test_that("test getCalibrationSlopes (case slopes are zero)", {
 test_that("test getCalibrationSlopes (case slopes are not zero)", {
   
   params1 <- list(
-    d18O = list(slope = 1, intercept = -3),
-    dD = list(slope = 4, intercept = 0)
+    d18O = list(slope = 1, intercept = -3, timeStamp = 4),
+    dD = list(slope = 4, intercept = 0, timeStamp = 4)
   )
   params3 <- list(
-    d18O = list(slope = 11, intercept = -5),
-    dD = list(slope = -16, intercept = 60)
+    d18O = list(slope = 11, intercept = -5, timeStamp = 24),
+    dD = list(slope = -16, intercept = 60, timeStamp = 24)
   )
-  times = c(4, 24)
   
-  actual <- getCalibrationSlopes(params1, params3, times)
+  actual <- getCalibrationSlopes(params1, params3)
   
   expect_length(actual, 2)
   expect_equal(actual$d18O$beta, 0.5)
