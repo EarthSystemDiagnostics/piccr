@@ -4,7 +4,7 @@
 \alias{runCalibrationModel}
 \title{Run calibration model}
 \usage{
-runCalibrationModel(trainingData, species = "d18O")
+runCalibrationModel(trainingData, species = "d18O", ...)
 }
 \arguments{
 \item{trainingData}{An input measurement dataset filtered by the standard
@@ -13,14 +13,25 @@ block and the isotope standards which are to be used for the calibration.}
 \item{species}{character string with the name of the isotope species for
 which the calibration model shall be calculated; valid names are "d18O" for
 oxygen isotopes and "dD" for hydrogen isotopes.}
+
+\item{...}{optional meta information on the calibration, such as block number
+and time stamp of the used measurement subset, passed on to the function
+output.}
 }
 \value{
-A list with two elements:
+A list with at least six elements:
 \describe{
-\item{\code{intercept}:}{numeric; the estimated intercept of the
-  calibration.}
-\item{\code{slope}:}{numeric; the estimated slope of the calibration.}
+\item{\code{species}:}{character; the name of the isotope \code{species}
+  used;}
+\item{\code{intercept}:}{numeric; the estimated calibration intercept;}
+\item{\code{slope}:}{numeric; the estimated calibration slope;}
+\item{\code{pValueIntercept}:}{numeric; the p-value of the calibration
+  intercept;}
+\item{\code{pValueSlope}:}{numeric; the p-value of the calibration slope;}
+\item{\code{rSquared}:}{numeric; the r-squared value of the calibration
+  regression;}
 }
+plus the elements passed in \code{...}.
 }
 \description{
 Run the calibration model of measured standard values against their true

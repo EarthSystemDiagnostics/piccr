@@ -56,10 +56,13 @@ linearCalibration <- function(dataset, config, block = 1){
 getCalibration <- function(dataset, config, useBlock){
   
   trainingData <- getTrainingData(dataset, config, useBlock)
+  calibTime    <- getCalibTimes(dataset, useBlocks = useBlock)
 
   list(
-    d18O = runCalibrationModel(trainingData, species = "d18O"),
-    dD   = runCalibrationModel(trainingData, species = "dD")
+    d18O = runCalibrationModel(trainingData, species = "d18O",
+                               block = useBlock, timeStamp = calibTime),
+    dD   = runCalibrationModel(trainingData, species = "dD",
+                               block = useBlock, timeStamp = calibTime)
   )
 }
 
@@ -73,13 +76,23 @@ getCalibration <- function(dataset, config, useBlock){
 #' @param species character string with the name of the isotope species for
 #'   which the calibration model shall be calculated; valid names are "d18O" for
 #'   oxygen isotopes and "dD" for hydrogen isotopes.
-#' @return A list with two elements:
+#' @param ... optional meta information on the calibration, such as block number
+#'   and time stamp of the used measurement subset, passed on to the function
+#'   output.
+#' @return A list with at least six elements:
 #' \describe{
-#' \item{\code{intercept}:}{numeric; the estimated intercept of the
-#'   calibration.}
-#' \item{\code{slope}:}{numeric; the estimated slope of the calibration.}
+#' \item{\code{species}:}{character; the name of the isotope \code{species}
+#'   used;}
+#' \item{\code{intercept}:}{numeric; the estimated calibration intercept;}
+#' \item{\code{slope}:}{numeric; the estimated calibration slope;}
+#' \item{\code{pValueIntercept}:}{numeric; the p-value of the calibration
+#'   intercept;}
+#' \item{\code{pValueSlope}:}{numeric; the p-value of the calibration slope;}
+#' \item{\code{rSquared}:}{numeric; the r-squared value of the calibration
+#'   regression;}
 #' }
-runCalibrationModel <- function(trainingData, species = "d18O") {
+#' plus the elements passed in \code{...}.
+runCalibrationModel <- function(trainingData, species = "d18O", ...) {
 
   # params from inverse regression to have least noise on predictor variable
 
@@ -94,8 +107,13 @@ runCalibrationModel <- function(trainingData, species = "d18O") {
   modelSummary <- suppressWarnings(summary(model))
   coeffs <- stats::coef(modelSummary)
 
-  list(intercept = -1 * coeffs[1, 1] / coeffs[2, 1],
-       slope = 1 / coeffs[2, 1])
+  list(species = species,
+       ...,
+       intercept = -1 * coeffs[1, 1] / coeffs[2, 1],
+       slope = 1 / coeffs[2, 1],
+       pValueIntercept = signif(coeffs[1, 4], 2),
+       pValueSlope = signif(coeffs[2, 4], 2),
+       rSquared = signif(modelSummary$r.squared, 2))
 }
 
 #' Get calibration training data
