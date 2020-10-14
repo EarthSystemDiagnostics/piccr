@@ -10,7 +10,7 @@ applyDoubleCalibration(dataset, calibParamsBlock1, calibSlopes)
 \item{dataset}{a data frame with measurement data of a specific data set.}
 
 \item{calibParamsBlock1}{a set of calibration parameters (slope and
-intercept) for d18O and dD (see \code{\link{getCalibInterceptAndSlope}} for
+intercept) for d18O and dD (see \code{\link{getCalibration}} for
 details) as estimated from the first standard block in the measurement
 sequence.}
 
