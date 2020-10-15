@@ -26,7 +26,7 @@ linearCalibration <- function(dataset, config, block = 1){
   calibrationParams <- getCalibration(dataset, config, block)
   calibratedDataset <- applyCalibration(dataset, calibrationParams)
   
-  return(calibratedDataset)
+  return(list(dataset = calibratedDataset, parameter = calibrationParams))
 }
 
 #' Get calibration parameters

@@ -32,6 +32,28 @@ expected1 <- tibble::tribble(
   9,    "2020/10/1400:00:09", "B",      3,         0.7,              1,      7,             0.7,       7,        TRUE
 )
 
+expected1ParamsD18O <- tibble::tibble(
+  species = "d18O",
+  block = 1,
+  timeStamp = 4,
+  intercept = -2.,
+  slope = 0.9,
+  pValueIntercept = 0,
+  pValueSlope = 0,
+  rSquared = 1
+)
+
+expected1ParamsDD <- tibble::tibble(
+  species = "dD",
+  block = 1,
+  timeStamp = 4,
+  intercept = 0.,
+  slope = 1.,
+  pValueIntercept = 0.26,
+  pValueSlope = 0,
+  rSquared = 1
+)
+
 config <- list(use_memory_correction = TRUE, use_three_point_calibration = TRUE)
 
 test_that("running the calibration model", {
@@ -141,20 +163,26 @@ test_that("test applyCalibration", {
   expect_equal(actual, expected)
 })
 
-test_that("test calibrateNoDriftSingleDataset", {
-  
-  actual <- linearCalibration(dataset1, config = config, block = 1)
-  actual <- dplyr::mutate(actual, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
-  
-  expect_equal(actual, expected1)
-})
+test_that("test simple linear calibration", {
 
-test_that("test calibrateWithoutDriftCorrection", {
+  expected <- list(
+    dataset = expected1,
+    parameter = list(d18O = expected1ParamsD18O, dD = expected1ParamsDD)
+  )
+
+  actual <- linearCalibration(dataset1, config = config, block = 1)
+
+  expect_type(actual, "list")
+  expect_length(actual, 2)
+
+  actual$dataset <- dplyr::mutate(actual$dataset, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
   
+  expect_equal(actual, expected)
+
   actual <- linearCalibration(dataset1, config = config)
-  actual <- dplyr::mutate(actual, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
+  actual$dataset <- dplyr::mutate(actual$dataset, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
   
-  expect_equal(actual, expected1)
+  expect_equal(actual, expected)
 })
 
 test_that("test use only last three injections if memory correction is not used", {
