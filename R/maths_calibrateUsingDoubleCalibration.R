@@ -31,7 +31,14 @@ calibrateUsingDoubleCalibration <- function(dataset, config){
   
   calibSlopes <- getCalibrationSlopes(calibParamsBlock1, calibParamsBlockN)
   
-  applyDoubleCalibration(dataset, calibParamsBlock1, calibSlopes)
+  calibratedDataset <- applyDoubleCalibration(dataset, calibParamsBlock1,
+                                              calibSlopes)
+  calibrationParams <- list(
+    d18O = dplyr::bind_rows(calibParamsBlock1$d18O, calibParamsBlockN$d18O),
+    dD   = dplyr::bind_rows(calibParamsBlock1$dD, calibParamsBlockN$dD)
+  )
+
+  return(list(dataset = calibratedDataset, parameter = calibrationParams))
 }
 
 #' Average measurement time of blocks

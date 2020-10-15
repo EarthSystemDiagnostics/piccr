@@ -26,14 +26,43 @@ test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and
     "Std_B",         4,      "2019/11/2506:36:59",    2,               3,             2,         3,        TRUE,
     "Std_B",         4,      "2019/11/2506:45:31",    2,               3,             2,         3,        TRUE
     )
-  
+
+  expectedParameter <- list(
+    d18O = tibble::tibble(
+      species = c("d18O", "d18O"),
+      block = c(1, 4),
+      timeStamp = c(672., 6366.),
+      intercept = c(0., 0.),
+      slope = c(1., 1.),
+      pValueIntercept = c(0.13, 0.13),
+      pValueSlope = c(0., 0.),
+      rSquared = c(1, 1)),
+    dD = tibble::tibble(
+      species = c("dD", "dD"),
+      block = c(1, 4),
+      timeStamp = c(672., 6366.),
+      intercept = c(0., 0.),
+      slope = c(1., 1.),
+      pValueIntercept = c(0.26, 0.26),
+      pValueSlope = c(0., 0.),
+      rSquared = c(1, 1))
+    )
+
+  expected <- list(dataset = dataset, parameter = expectedParameter)
+
   config <- list(use_memory_correction = TRUE, use_three_point_calibration = TRUE)
   
   actual <- calibrateUsingDoubleCalibration(dataset, config)
-  actual <- dplyr::mutate(actual, `d(18_16)Mean` = round(actual$`d(18_16)Mean`, 10), 
-                          `d(D_H)Mean` = round(actual$`d(D_H)Mean`, 10))
+
+  expect_type(actual, "list")
+  expect_length(actual, 2)
+
+  actual$dataset <- dplyr::mutate(actual$dataset, `d(18_16)Mean` = round(`d(18_16)Mean`, 10),
+                                  `d(D_H)Mean` = round(`d(D_H)Mean`, 10))
+  actual$parameter$d18O$timeStamp <- round(actual$parameter$d18O$timeStamp, 0)
+  actual$parameter$dD$timeStamp <- round(actual$parameter$dD$timeStamp, 0)
   
-  expect_equal(actual, dataset)
+  expect_equal(actual, expected)
 })
 
 test_that("test getCalibrationSlopes (case slopes are zero)", {

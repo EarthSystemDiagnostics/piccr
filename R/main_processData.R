@@ -111,7 +111,9 @@ processSingleDataset <- function(name, datasets, config){
     calibrationParameter        <- temp$parameter
   } 
   else if (config$calibration_method == 2) {
-    calibratedAndDriftCorrected <- calibrateUsingDoubleCalibration(memoryCorrected, config)
+    temp <- calibrateUsingDoubleCalibration(memoryCorrected, config)
+    calibratedAndDriftCorrected <- temp$dataset
+    calibrationParameter        <- temp$parameter
   }
   
   # calculate the d-excess values for all samples
