@@ -25,9 +25,9 @@ included in the raw Picarro output.}
 is to be used for estimating the calibration parameters.}
 }
 \value{
-A named list with elements \code{d18O} and \code{dD} where each
-element is again a list containing the output of
-  \code{\link{runCalibrationModel}}.
+A tibble with two rows and at least six variables where the first row
+  is the output of \code{\link{runCalibrationModel}} for \code{d18O} and the
+  second row the respective output for \code{dD}.
 }
 \description{
 Obtain the calibration parameters as estimated from standards in a particular

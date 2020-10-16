@@ -46,9 +46,9 @@ linearCalibration <- function(dataset, config, block = 1){
 #'   is to be used for estimating the calibration parameters.
 #' @inheritParams linearCalibration
 #'
-#' @return A named list with elements \code{d18O} and \code{dD} where each
-#' element is again a list containing the output of
-#'   \code{\link{runCalibrationModel}}.
+#' @return A tibble with two rows and at least six variables where the first row
+#'   is the output of \code{\link{runCalibrationModel}} for \code{d18O} and the
+#'   second row the respective output for \code{dD}.
 #' @seealso \code{\link{groupStandardsInBlocks}},
 #'   \code{\link{associateStandardsWithConfigInfo}},
 #'   \code{\link{runCalibrationModel}}
@@ -58,11 +58,11 @@ getCalibration <- function(dataset, config, useBlock){
   trainingData <- getTrainingData(dataset, config, useBlock)
   calibTime    <- getCalibTimes(dataset, useBlocks = useBlock)
 
-  list(
-    d18O = runCalibrationModel(trainingData, species = "d18O",
-                               block = useBlock, timeStamp = calibTime),
-    dD   = runCalibrationModel(trainingData, species = "dD",
-                               block = useBlock, timeStamp = calibTime)
+  dplyr::bind_rows(
+    runCalibrationModel(trainingData, species = "d18O",
+                        block = useBlock, timeStamp = calibTime),
+    runCalibrationModel(trainingData, species = "dD",
+                        block = useBlock, timeStamp = calibTime)
   )
 }
 
@@ -194,11 +194,13 @@ selectStandardsForTwoPointCalib <- function(dataset){
 #' intercept values.
 #' 
 #' @param dataset a data frame with measurement data of a specific data set.
-#' @param calibrationParams a named list with elements \code{d18O} and \code{dD}
-#'   where each element is again a list with two elements:
+#' @param calibrationParams the calibration parameters in a tibble with two rows
+#'   and three mandatory variables:
 #'   \describe{
-#'   \item{\code{intercept}:}{numeric; calibration intercept.}
-#'   \item{\code{slope}:}{numeric; calibration slope.}
+#'   \item{\code{species}: character; must be \code{d18O} for one row and
+#'     \code{dD} for the other.}
+#'   \item{\code{intercept}:}{numeric; the respective calibration intercept.}
+#'   \item{\code{slope}:}{numeric; the respective calibration slope.}
 #' }
 #' @import dplyr
 #'
@@ -207,14 +209,12 @@ selectStandardsForTwoPointCalib <- function(dataset){
 #' 
 applyCalibration <- function(dataset, calibrationParams){
   
-  d18OIntercept <- calibrationParams$d18O$intercept
-  d18OSlope <- calibrationParams$d18O$slope
-  dDIntercept <- calibrationParams$dD$intercept
-  dDSlope <- calibrationParams$dD$slope
+  d18O <- calibrationParams %>% filter(species == "d18O")
+  dD   <- calibrationParams %>% filter(species == "dD")
   
   calibratedDataset <- dataset %>%
-    mutate(`d(18_16)Mean` = `d(18_16)Mean` * d18OSlope + d18OIntercept) %>%
-    mutate(`d(D_H)Mean` = `d(D_H)Mean` * dDSlope + dDIntercept)
+    mutate(`d(18_16)Mean` = `d(18_16)Mean` * d18O$slope + d18O$intercept) %>%
+    mutate(`d(D_H)Mean` = `d(D_H)Mean` * dD$slope + dD$intercept)
   
   return(calibratedDataset)
 }

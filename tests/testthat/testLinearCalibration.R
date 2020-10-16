@@ -32,26 +32,15 @@ expected1 <- tibble::tribble(
   9,    "2020/10/1400:00:09", "B",      3,         0.7,              1,      7,             0.7,       7,        TRUE
 )
 
-expected1ParamsD18O <- tibble::tibble(
-  species = "d18O",
-  block = 1,
-  timeStamp = 4,
-  intercept = -2.,
-  slope = 0.9,
-  pValueIntercept = 0,
-  pValueSlope = 0,
-  rSquared = 1
-)
-
-expected1ParamsDD <- tibble::tibble(
-  species = "dD",
-  block = 1,
-  timeStamp = 4,
-  intercept = 0.,
-  slope = 1.,
-  pValueIntercept = 0.26,
-  pValueSlope = 0,
-  rSquared = 1
+expected1Params <- tibble::tibble(
+  species = c("d18O", "dD"),
+  block = c(1, 1),
+  timeStamp = c(4, 4),
+  intercept = c(-2., 0.),
+  slope = c(0.9, 1.),
+  pValueIntercept = c(0, 0.26),
+  pValueSlope = c(0, 0),
+  rSquared = c(1, 1)
 )
 
 config <- list(use_memory_correction = TRUE, use_three_point_calibration = TRUE)
@@ -103,12 +92,15 @@ test_that("test getCalibration", {
   H2SlopeExpected <- 1
 
   actual <- getCalibration(dataset1, config = config, useBlock = 1)
+
+  actual1 <- actual %>% dplyr::filter(species == "d18O")
+  actual2 <- actual %>% dplyr::filter(species == "dD")
   
-  expect_equal(actual$d18O$intercept, o18InterceptExpected)
-  expect_equal(actual$d18O$slope, o18SlopeExpected)
+  expect_equal(actual1$intercept, o18InterceptExpected)
+  expect_equal(actual1$slope, o18SlopeExpected)
   
-  expect_equal(actual$dD$intercept, H2InterceptExpected)
-  expect_equal(actual$dD$slope, H2SlopeExpected)
+  expect_equal(actual2$intercept, H2InterceptExpected)
+  expect_equal(actual2$slope, H2SlopeExpected)
 })
 
 test_that("test getCalibration for dataset with rows that should be excluded", {
@@ -126,19 +118,23 @@ test_that("test getCalibration for dataset with rows that should be excluded", {
   )
   
   actual <- getCalibration(dataset2, config = config, useBlock = 1)
+
+  actual1 <- actual %>% dplyr::filter(species == "d18O")
+  actual2 <- actual %>% dplyr::filter(species == "dD")
   
-  expect_equal(actual$d18O$intercept, 0)
-  expect_equal(actual$d18O$slope, 1)
+  expect_equal(actual1$intercept, 0)
+  expect_equal(actual1$slope, 1)
   
-  expect_equal(actual$dD$intercept, 0)
-  expect_equal(actual$dD$slope, 1)
+  expect_equal(actual2$intercept, 0)
+  expect_equal(actual2$slope, 1)
 })
 
 test_that("test applyCalibration", {
   
-  calibrationParams <- list(
-    d18O = list(intercept = 5, slope = 0.9),
-    dD = list(intercept = -2, slope = 1.3)
+  calibrationParams <- tibble::tibble(
+    species = c("d18O", "dD"),
+    intercept = c(5, -2),
+    slope = c(0.9, 1.3)
   )
   data <- tibble::tribble(
     ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~otherCol,
@@ -167,7 +163,7 @@ test_that("test simple linear calibration", {
 
   expected <- list(
     dataset = expected1,
-    parameter = list(d18O = expected1ParamsD18O, dD = expected1ParamsDD)
+    parameter = expected1Params
   )
 
   actual <- linearCalibration(dataset1, config = config, block = 1)
@@ -208,11 +204,11 @@ test_that("test use only last three injections if memory correction is not used"
   
   actual <- getCalibration(dataset3, config = config, useBlock = 1)
   
-  expect_equal(actual$d18O$intercept, 0)
-  expect_equal(actual$d18O$slope, 1)
+  expect_equal(actual$intercept[1], 0)
+  expect_equal(actual$slope[1], 1)
   
-  expect_equal(actual$dD$intercept, 0)
-  expect_equal(actual$dD$slope, 1)
+  expect_equal(actual$intercept[2], 0)
+  expect_equal(actual$slope[2], 1)
 })
 
 test_that("test two point calibration", {
@@ -238,11 +234,11 @@ test_that("test two point calibration", {
   
   actual <- getCalibration(dataset4, config = config, useBlock = 1)
   
-  expect_equal(actual$d18O$intercept, 0)
-  expect_equal(actual$d18O$slope, 1)
+  expect_equal(actual$intercept[1], 0)
+  expect_equal(actual$slope[1], 1)
   
-  expect_equal(actual$dD$intercept, 0)
-  expect_equal(actual$dD$slope, 1)
+  expect_equal(actual$intercept[2], 0)
+  expect_equal(actual$slope[2], 1)
 })
 
 test_that("test training data for grouped vials", {

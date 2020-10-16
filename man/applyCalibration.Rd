@@ -9,11 +9,13 @@ applyCalibration(dataset, calibrationParams)
 \arguments{
 \item{dataset}{a data frame with measurement data of a specific data set.}
 
-\item{calibrationParams}{a named list with elements \code{d18O} and \code{dD}
-  where each element is again a list with two elements:
+\item{calibrationParams}{the calibration parameters in a tibble with two rows
+  and three mandatory variables:
   \describe{
-  \item{\code{intercept}:}{numeric; calibration intercept.}
-  \item{\code{slope}:}{numeric; calibration slope.}
+  \item{\code{species}: character; must be \code{d18O} for one row and
+    \code{dD} for the other.}
+  \item{\code{intercept}:}{numeric; the respective calibration intercept.}
+  \item{\code{slope}:}{numeric; the respective calibration slope.}
 }}
 }
 \value{

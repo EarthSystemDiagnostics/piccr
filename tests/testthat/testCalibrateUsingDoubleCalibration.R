@@ -27,26 +27,16 @@ test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and
     "Std_B",         4,      "2019/11/2506:45:31",    2,               3,             2,         3,        TRUE
     )
 
-  expectedParameter <- list(
-    d18O = tibble::tibble(
-      species = c("d18O", "d18O"),
-      block = c(1, 4),
-      timeStamp = c(672., 6366.),
-      intercept = c(0., 0.),
-      slope = c(1., 1.),
-      pValueIntercept = c(0.13, 0.13),
-      pValueSlope = c(0., 0.),
-      rSquared = c(1, 1)),
-    dD = tibble::tibble(
-      species = c("dD", "dD"),
-      block = c(1, 4),
-      timeStamp = c(672., 6366.),
-      intercept = c(0., 0.),
-      slope = c(1., 1.),
-      pValueIntercept = c(0.26, 0.26),
-      pValueSlope = c(0., 0.),
-      rSquared = c(1, 1))
-    )
+  expectedParameter <- tibble::tibble(
+    species = c("d18O", "dD", "d18O", "dD"),
+    block = c(1, 1, 4, 4),
+    timeStamp = c(672., 672., 6366., 6366.),
+    intercept = rep(0., 4),
+    slope = rep(1., 4),
+    pValueIntercept = c(0.13, 0.26, 0.13, 0.26),
+    pValueSlope = rep(0., 4),
+    rSquared = rep(1, 4)
+  )
 
   expected <- list(dataset = dataset, parameter = expectedParameter)
 
@@ -59,24 +49,22 @@ test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and
 
   actual$dataset <- dplyr::mutate(actual$dataset, `d(18_16)Mean` = round(`d(18_16)Mean`, 10),
                                   `d(D_H)Mean` = round(`d(D_H)Mean`, 10))
-  actual$parameter$d18O$timeStamp <- round(actual$parameter$d18O$timeStamp, 0)
-  actual$parameter$dD$timeStamp <- round(actual$parameter$dD$timeStamp, 0)
+  actual$parameter$timeStamp <- round(actual$parameter$timeStamp, 0)
   
   expect_equal(actual, expected)
 })
 
 test_that("test getCalibrationSlopes (case slopes are zero)", {
   
-  params1 <- list(
-    d18O = list(slope = 2, intercept = 4, timeStamp = 1),
-    dD = list(slope = 2, intercept = 4, timeStamp = 1)
-  )
-  params3 <- list(
-    d18O = list(slope = 2, intercept = 4, timeStamp = 10),
-    dD = list(slope = 2, intercept = 4, timeStamp = 10)
+  params <- tibble::tibble(
+    species = c("d18O", "dD", "d18O", "dD"),
+    block = c(1, 1, 56, 56),
+    slope = rep(2, 4),
+    intercept = rep(4, 4),
+    timeStamp = c(1, 1, 10, 10)
   )
   
-  actual <- getCalibrationSlopes(params1, params3)
+  actual <- getCalibrationSlopes(params)
   
   expect_length(actual, 2)
   expect_equal(actual$d18O$alpha, 0)
@@ -86,17 +74,16 @@ test_that("test getCalibrationSlopes (case slopes are zero)", {
 })
 
 test_that("test getCalibrationSlopes (case slopes are not zero)", {
-  
-  params1 <- list(
-    d18O = list(slope = 1, intercept = -3, timeStamp = 4),
-    dD = list(slope = 4, intercept = 0, timeStamp = 4)
+
+  params <- tibble::tibble(
+    species = c("d18O", "dD", "d18O", "dD"),
+    block = c(1, 1, 3, 3),
+    slope = c(1, 4, 11, -16),
+    intercept = c(-3, 0, -5, 60),
+    timeStamp = c(4, 4, 24, 24)
   )
-  params3 <- list(
-    d18O = list(slope = 11, intercept = -5, timeStamp = 24),
-    dD = list(slope = -16, intercept = 60, timeStamp = 24)
-  )
   
-  actual <- getCalibrationSlopes(params1, params3)
+  actual <- getCalibrationSlopes(params)
   
   expect_length(actual, 2)
   expect_equal(actual$d18O$beta, 0.5)
@@ -124,13 +111,12 @@ test_that("test applyDoubleCalibration", {
     "Std_B",         3,      "2019/11/2506:13:28",    1,               2,
     "Std_B",         3,      "2019/11/2506:20:59",    1,               2
   )
-  params1 <- list(
-    d18O = list(slope = 1, intercept = -3),
-    dD = list(slope = 4, intercept = 0)
-  )
-  calibSlopes = list(
-    d18O = list(alpha = 1, beta = 0.5),
-    dD = list(alpha = -0.5, beta = 0)
+  params <- tibble::tibble(
+    species = c("d18O", "dD", "d18O", "dD"),
+    block = c(1, 1, 3, 3),
+    slope = c(1, 4, 2164, 4),
+    intercept = c(-3, 0, 4323, -2163),
+    timeStamp = c(672.5, 672.5, 4998.5, 4998.5)
   )
   
   expected <- tibble::tribble(
@@ -151,7 +137,7 @@ test_that("test applyDoubleCalibration", {
     "Std_B",         3,      "2019/11/2506:20:59",    8448,            -2808
   )
   
-  actual <- applyDoubleCalibration(dataset, params1, calibSlopes)
+  actual <- applyDoubleCalibration(dataset, params)
   actual <- dplyr::mutate(actual, `d(18_16)Mean` = round(actual$`d(18_16)Mean`), `d(D_H)Mean` = round(actual$`d(D_H)Mean`))
   
   expect_equal(actual, expected)

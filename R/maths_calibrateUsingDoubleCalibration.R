@@ -26,17 +26,12 @@ calibrateUsingDoubleCalibration <- function(dataset, config){
 
   finalBlock <- max(dataset$block, na.rm = TRUE)
 
-  calibParamsBlock1 <- getCalibration(dataset, config, useBlock = 1)
-  calibParamsBlockN <- getCalibration(dataset, config, useBlock = finalBlock)
-  
-  calibSlopes <- getCalibrationSlopes(calibParamsBlock1, calibParamsBlockN)
-  
-  calibratedDataset <- applyDoubleCalibration(dataset, calibParamsBlock1,
-                                              calibSlopes)
-  calibrationParams <- list(
-    d18O = dplyr::bind_rows(calibParamsBlock1$d18O, calibParamsBlockN$d18O),
-    dD   = dplyr::bind_rows(calibParamsBlock1$dD, calibParamsBlockN$dD)
+  calibrationParams <- dplyr::bind_rows(
+    getCalibration(dataset, config, useBlock = 1),
+    getCalibration(dataset, config, useBlock = finalBlock)
   )
+
+  calibratedDataset <- applyDoubleCalibration(dataset, calibrationParams)
 
   return(list(dataset = calibratedDataset, parameter = calibrationParams))
 }
@@ -73,10 +68,12 @@ getCalibTimes <- function(dataset, useBlocks){
 #' Estimate the change in calibration parameters between the beginning and the
 #' end of the measurement sequence based on a simple linear regression of the
 #' calibration parameters against the elapsed measurement time.
-#' @param paramsBlock1 the calibration parameters estimated from the first
-#' standard block.
-#' @param paramsBlockN the calibration parameters estimated from the final
-#' standard block.
+#'
+#' @param params a tibble with the calibration parameters for d18O and dD (see
+#'   \code{\link{getCalibration}} for details on the tibble structure) as
+#'   estimated from the first and the final standard block in the measurement
+#'   sequence.
+#' @import dplyr
 #' 
 #' @return A named list with elements \code{d18O} and \code{dD} where each
 #' element is again a list with two elements:
@@ -87,46 +84,57 @@ getCalibTimes <- function(dataset, useBlocks){
 #'   calibration slope across the measurement sequence.}
 #' }
 #' 
-getCalibrationSlopes <- function(paramsBlock1, paramsBlockN){
-  
-  timeDiffBetweenBlocks <- paramsBlockN$d18O$timeStamp - paramsBlock1$d18O$timeStamp
-  
-  # TODO: clean this
-  list(
-    d18O = list(
-      alpha = (paramsBlockN$d18O$intercept - paramsBlock1$d18O$intercept) / timeDiffBetweenBlocks,
-      beta = (paramsBlockN$d18O$slope - paramsBlock1$d18O$slope) / timeDiffBetweenBlocks
-    ),
-    dD = list(
-      alpha = (paramsBlockN$dD$intercept - paramsBlock1$dD$intercept) / timeDiffBetweenBlocks,
-      beta = (paramsBlockN$dD$slope - paramsBlock1$dD$slope) / timeDiffBetweenBlocks
-    )
-  )
+getCalibrationSlopes <- function(params){
+
+  getDifference <- function(data, species, var) {
+    data %>%
+      filter(species == {{species}}) %>%
+      summarise(across({{var}}, diff)) %>%
+      pull(1)
+  }
+  getSlopes <- function(species, data, timeDiff) {
+    list(
+      alpha = getDifference(data, {{species}}, "intercept") / timeDiff,
+      beta = getDifference(data, {{species}}, "slope") / timeDiff)
+  }
+
+  timeDiffBetweenBlocks <- getDifference(params, "d18O", "timeStamp")
+
+  species <- c("d18O", "dD")
+  species %>%
+    lapply(getSlopes, params, timeDiffBetweenBlocks) %>%
+    stats::setNames(species)
 }
 
 #' Apply double-block calibration
 #'
 #' Apply a double-block calibration to a specific data set using provided
-#' calibration parameters.
+#' calibration parameters from the first and last standard block in the
+#' measurement sequence, which are linearly interpolated in between.
+#'
 #' @param dataset a data frame with measurement data of a specific data set.
-#' @param calibParamsBlock1 a set of calibration parameters (slope and
-#' intercept) for d18O and dD (see \code{\link{getCalibration}} for
-#' details) as estimated from the first standard block in the measurement
-#' sequence.
-#' @param calibSlopes slope estimates for d18O and dD for a linear change of the
-#' calibration parameters in \code{calibParamsBlock1} across the mesasurement
-#' sequence (see \code{\link{getCalibrationSlopes}} for details).
+#' @param calibParams a tibble with the calibration parameters (slope and
+#'   intercept) for d18O and dD (see \code{\link{getCalibration}} for details on
+#'   the tibble structure) as estimated from the first standard block in the
+#'   measurement sequence as well as from the last standard block.
 #' @import dplyr
 #' 
 #' @return The input \code{dataset} with the d18O and dD values calibrated
-#'   according to a time-varying calibration slope and intercept.
+#'   according to the time-varying calibration slope and intercept.
 #' 
-applyDoubleCalibration <- function(dataset, calibParamsBlock1, calibSlopes){
-  
-  d18OCalibSlope     <- calibParamsBlock1$d18O$slope
-  d18OCalibIntercept <- calibParamsBlock1$d18O$intercept
-  dDCalibSlope       <- calibParamsBlock1$dD$slope
-  dDCalibIntercept   <- calibParamsBlock1$dD$intercept
+applyDoubleCalibration <- function(dataset, calibParams){
+
+  getVar <- function(data, species, var) {
+    (data %>% filter(species == {{species}}, block == 1))[[var]]
+  }
+
+  d18OCalibSlope     <- getVar(calibParams, "d18O", "slope")
+  d18OCalibIntercept <- getVar(calibParams, "d18O", "intercept")
+  dDCalibSlope       <- getVar(calibParams, "dD", "slope")
+  dDCalibIntercept   <- getVar(calibParams, "dD", "intercept")
+
+  calibSlopes <- getCalibrationSlopes(calibParams)
+
   d18OAlpha          <- calibSlopes$d18O$alpha
   d18OBeta           <- calibSlopes$d18O$beta
   dDAlpha            <- calibSlopes$dD$alpha
