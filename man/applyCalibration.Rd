@@ -12,7 +12,7 @@ applyCalibration(dataset, calibrationParams)
 \item{calibrationParams}{the calibration parameters in a tibble with two rows
   and three mandatory variables:
   \describe{
-  \item{\code{species}: character; must be \code{d18O} for one row and
+  \item{\code{species}:}{character; must be \code{d18O} for one row and
     \code{dD} for the other.}
   \item{\code{intercept}:}{numeric; the respective calibration intercept.}
   \item{\code{slope}:}{numeric; the respective calibration slope.}

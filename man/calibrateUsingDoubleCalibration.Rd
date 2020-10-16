@@ -22,8 +22,15 @@ included in the raw Picarro output.}
 }}
 }
 \value{
-The input \code{dataset} with the d18O and dD values calibrated
-  according to the double-block calibration.
+A named list with two elements:
+\describe{
+\item{dataset:}{the input \code{dataset} with the d18O and dD values
+  calibrated according to the double-block calibration.}
+\item{parameter:}{a tibble with the applied calibration parameters, and their
+  associated quality control information; i.e. the output from
+  \code{\link{getCalibration}} for the first and the final standard block of
+  the measurement sequence bound together in a single tibble.}
+}
 }
 \description{
 Calibrate a given data set using calibration slope and intercept values which

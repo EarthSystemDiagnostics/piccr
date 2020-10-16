@@ -17,8 +17,15 @@
 #'     used as calibration standards (\code{TRUE}) or only two (\code{FALSE})?}
 #' }
 #'
-#' @return The input \code{dataset} with the d18O and dD values calibrated
-#'   according to the double-block calibration.
+#' @return A named list with two elements:
+#' \describe{
+#' \item{dataset:}{the input \code{dataset} with the d18O and dD values
+#'   calibrated according to the double-block calibration.}
+#' \item{parameter:}{a tibble with the applied calibration parameters, and their
+#'   associated quality control information; i.e. the output from
+#'   \code{\link{getCalibration}} for the first and the final standard block of
+#'   the measurement sequence bound together in a single tibble.}
+#' }
 #' @seealso \code{\link{groupStandardsInBlocks}},
 #'   \code{\link{associateStandardsWithConfigInfo}}
 #' 
