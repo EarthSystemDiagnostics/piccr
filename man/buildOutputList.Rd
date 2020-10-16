@@ -13,6 +13,7 @@ buildOutputList(
   calibrated,
   calibratedAndDriftCorrected,
   accumulated,
+  calibrationParams,
   qualityControlInfo
 )
 }
@@ -38,6 +39,10 @@ calibrated and drift-corrected measurement data.}
 
 \item{accumulated}{a data frame with the corrected and calibrated data
 averaged over a specified number of injections.}
+
+\item{calibrationParams}{a tibble with the estimated calibration
+parameters, together with quality control assessment, which were applied
+for calibrating the measurement data.}
 
 \item{qualityControlInfo}{the output of \code{\link{getQualityControlInfo}}.}
 }
@@ -71,8 +76,9 @@ A named list with 13 components:
   \item{\code{pooledSD}:}{a list with the two elements \code{d18O}
     and \code{dD} of the pooled standard deviations across all measured
     vials.}
-  \item{\code{calibrationParams}:}{calibration parameters; not yet
-    implemented.}
+  \item{\code{calibrationParams}:}{a tibble with the estimated calibration
+  parameters for the first standard block (and, if double calibration was
+  active, the final block) of the measurement sequence.}
   \item{\code{driftParams}:}{estimated drift parameters; not yet
     implemented.}
 }

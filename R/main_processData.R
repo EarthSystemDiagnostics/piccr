@@ -126,8 +126,11 @@ processSingleDataset <- function(name, datasets, config){
   qualityControlInfo <- getQualityControlInfo(calibratedWithDExcess, accumulated)
 
   # synthesize output list for this dataset and return it  
-  output <- buildOutputList(name, config, dataset, memoryCorrected, memoryCoefficients, 
-                            calibrated, calibratedAndDriftCorrected, accumulated, qualityControlInfo)
+  output <- buildOutputList(name, config, dataset,
+                            memoryCorrected, memoryCoefficients,
+                            calibrated, calibratedAndDriftCorrected,
+                            accumulated, calibrationParameter,
+                            qualityControlInfo)
   return(output)
   
 }

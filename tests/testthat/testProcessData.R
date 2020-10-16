@@ -53,6 +53,11 @@ test_that("check general output structure", {
   expect_true(is.list(actual[[1]]$rmsdDeviationsFromTrue))
   expect_true(is.list(actual[[1]]$deviationOfControlStandard))
 
+  expect_type(actual[[1]]$calibrationParams, "list")
+  expect_equal(dim(actual[[1]]$calibrationParams), c(2, 8))
+  expect_equal(actual[[1]]$calibrationParams$species, c("d18O", "dD"))
+  expect_equal(actual[[1]]$calibrationParams$block, rep(1, 2))
+
   actual <- processData(datasets, config)
 
   expect_length(actual, 3)
@@ -78,6 +83,10 @@ test_that("check that calibration method 2 runs", {
   expect_is(actual[[1]]$calibratedAndDriftCorrected, "data.frame")
   expect_equal(dim(actual[[1]]$memoryCorrected),
                dim(actual[[1]]$calibratedAndDriftCorrected))
+
+  expect_equal(dim(actual[[1]]$calibrationParams), c(4, 8))
+  expect_equal(actual[[1]]$calibrationParams$species, rep(c("d18O", "dD"), 2))
+  expect_equal(actual[[1]]$calibrationParams$block, c(1, 1, 3, 3))
 
 })
 
