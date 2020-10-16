@@ -35,6 +35,7 @@ test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and
     slope = rep(1., 4),
     pValueIntercept = c(0.13, 0.26, 0.13, 0.26),
     pValueSlope = rep(0., 4),
+    residualRMSD = rep(0., 4),
     rSquared = rep(1, 4)
   )
 

@@ -19,7 +19,7 @@ and time stamp of the used measurement subset, passed on to the function
 output.}
 }
 \value{
-A tibble with one row and at least six variables:
+A tibble with one row and at least seven variables:
 \describe{
 \item{\code{species}:}{character; the name of the isotope \code{species}
   used;}
@@ -28,6 +28,8 @@ A tibble with one row and at least six variables:
 \item{\code{pValueIntercept}:}{numeric; the p-value of the calibration
   intercept;}
 \item{\code{pValueSlope}:}{numeric; the p-value of the calibration slope;}
+\item{\code{residualRMSD}:}{numeric; the root mean square deviation of the
+  calibration regression residuals;}
 \item{\code{rSquared}:}{numeric; the r-squared value of the calibration
   regression;}
 }

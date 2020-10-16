@@ -40,6 +40,7 @@ expected1Params <- tibble::tibble(
   slope = c(0.9, 1.),
   pValueIntercept = c(0, 0.26),
   pValueSlope = c(0, 0),
+  residualRMSD = c(0, 0),
   rSquared = c(1, 1)
 )
 
@@ -58,6 +59,7 @@ test_that("running the calibration model", {
     slope = 0.9,
     pValueIntercept = 0,
     pValueSlope = 0,
+    residualRMSD = 0,
     rSquared = 1
   )
 
@@ -70,6 +72,7 @@ test_that("running the calibration model", {
     slope = 1.,
     pValueIntercept = 0.26,
     pValueSlope = 0,
+    residualRMSD = 0,
     rSquared = 1
   )
 

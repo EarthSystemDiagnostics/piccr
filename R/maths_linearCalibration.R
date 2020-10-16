@@ -52,9 +52,9 @@ linearCalibration <- function(dataset, config, block = 1){
 #'   is to be used for estimating the calibration parameters.
 #' @inheritParams linearCalibration
 #'
-#' @return A tibble with two rows and at least six variables where the first row
-#'   is the output of \code{\link{runCalibrationModel}} for \code{d18O} and the
-#'   second row the respective output for \code{dD}.
+#' @return A tibble with two rows and at least seven variables where the first
+#'   row is the output of \code{\link{runCalibrationModel}} for \code{d18O} and
+#'   the second row the respective output for \code{dD}.
 #' @seealso \code{\link{groupStandardsInBlocks}},
 #'   \code{\link{associateStandardsWithConfigInfo}},
 #'   \code{\link{runCalibrationModel}}
@@ -85,7 +85,7 @@ getCalibration <- function(dataset, config, useBlock){
 #' @param ... optional meta information on the calibration, such as block number
 #'   and time stamp of the used measurement subset, passed on to the function
 #'   output.
-#' @return A tibble with one row and at least six variables:
+#' @return A tibble with one row and at least seven variables:
 #' \describe{
 #' \item{\code{species}:}{character; the name of the isotope \code{species}
 #'   used;}
@@ -94,6 +94,8 @@ getCalibration <- function(dataset, config, useBlock){
 #' \item{\code{pValueIntercept}:}{numeric; the p-value of the calibration
 #'   intercept;}
 #' \item{\code{pValueSlope}:}{numeric; the p-value of the calibration slope;}
+#' \item{\code{residualRMSD}:}{numeric; the root mean square deviation of the
+#'   calibration regression residuals;}
 #' \item{\code{rSquared}:}{numeric; the r-squared value of the calibration
 #'   regression;}
 #' }
@@ -120,6 +122,7 @@ runCalibrationModel <- function(trainingData, species = "d18O", ...) {
          slope = 1 / coeffs[2, 1],
          pValueIntercept = signif(coeffs[1, 4], 2),
          pValueSlope = signif(coeffs[2, 4], 2),
+         residualRMSD = signif(calculateRMSD(modelSummary$residuals), 2),
          rSquared = signif(modelSummary$r.squared, 2))
   )
 }
