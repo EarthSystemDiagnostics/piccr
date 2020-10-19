@@ -11,7 +11,7 @@ gatherQualityControlInfo(datasets)
 \code{\link{processFiles}} (or by \code{\link{processData}} directly).}
 }
 \value{
-A named list with five elements:
+A named list with six elements:
 \describe{
   \item{\code{rmsdQualityControl}:}{a tibble for the root-mean-square
   deviation (rmsd) of the quality control standard for each measurement file,
@@ -31,6 +31,12 @@ A named list with five elements:
   average memory coefficients depending on the injection number per each
   processed measurement file and of the mean and the SD of the overall
   average memory coefficients.}
+  \item{\code{calibrationParameter}:}{a tibble with information on the
+  applied calibration regression, including calibration slope and intercept,
+  p-values, r-squared value, and the root mean square deviation of the
+  calibration residuals. The information are included for each estimated
+  calibration, i.e., for each processed measurement file, and per file for
+  each used calibration block and each isotope species.}
 }
 }
 \description{

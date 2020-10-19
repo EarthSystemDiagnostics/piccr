@@ -5,7 +5,7 @@
 #' processing run. Note that if the data is processed again, the summary file is
 #' silently overwritten.
 #'
-#' The summary file consists of three sections:
+#' The summary file consists of five sections:
 #' \itemize{
 #'   \item the first section gives the overall values for the entire processing
 #'         run of the root-mean-square deviation (rmsd) of the quality control
@@ -13,7 +13,13 @@
 #'         pooled standard deviation per sample;
 #'   \item the second section contains tables with the above values for each
 #'         processed measurement file;
-#'   \item the third section contains a table which lists for each processed
+#'   \item the third section contains the estimated memory coefficients and
+#'         their standard deviation, as a function of the injection number, for
+#'         each processed measurement file as well as for the average across all
+#'         processed files.
+#'   \item the fourth section contains information on the applied calibration
+#'         regressions for each processed measurement file.
+#'   \item the fifth section contains a table which lists for each processed
 #'         measurement file the individual deviations of each used standard from
 #'         its true value.
 #' }
@@ -42,7 +48,8 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL) {
     paste(collapse = "\n")
 
   qualityControl <- utils::capture.output(
-    printQualityControl(processedData, printDeviations = TRUE, n = NA,
+    printQualityControl(processedData, printCalibrationParameter = TRUE,
+                        printDeviations = TRUE, n = NA,
                         whichMemoryCoefficients = "all")) %>%
     paste(collapse = "\n")
 
@@ -59,7 +66,7 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL) {
 #'   \code{\link{processFiles}} (or by \code{\link{processData}} directly).
 #' @import dplyr
 #'
-#' @return A named list with five elements:
+#' @return A named list with six elements:
 #' \describe{
 #'   \item{\code{rmsdQualityControl}:}{a tibble for the root-mean-square
 #'   deviation (rmsd) of the quality control standard for each measurement file,
@@ -79,6 +86,12 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL) {
 #'   average memory coefficients depending on the injection number per each
 #'   processed measurement file and of the mean and the SD of the overall
 #'   average memory coefficients.}
+#'   \item{\code{calibrationParameter}:}{a tibble with information on the
+#'   applied calibration regression, including calibration slope and intercept,
+#'   p-values, r-squared value, and the root mean square deviation of the
+#'   calibration residuals. The information are included for each estimated
+#'   calibration, i.e., for each processed measurement file, and per file for
+#'   each used calibration block and each isotope species.}
 #' }
 gatherQualityControlInfo <- function(datasets) {
 
@@ -114,13 +127,18 @@ gatherQualityControlInfo <- function(datasets) {
   memCoeffMean <- memCoeffDatasets %>%
     group_by(`Inj Nr`) %>%
     summarise(dataset = "mean",
-                     meanD18O = mean(meanD18O),
-                     meanDD = mean(meanDD),
-                     sdD18O = sqrt(sum(sdD18O^2)) / n(),
-                     sdDD = sqrt(sum(sdDD^2)) / n()) %>%
-    relocate(dataset, .before = `Inj Nr`)
+              meanD18O = mean(meanD18O),
+              meanDD = mean(meanDD),
+              sdD18O = sqrt(sum(sdD18O^2)) / n(),
+              sdDD = sqrt(sum(sdDD^2)) / n()) %>%
+    relocate("dataset", .before = `Inj Nr`)
 
   memoryCoefficients <- bind_rows(memCoeffMean, memCoeffDatasets)
+
+  calibrationParameter <- purrr::map_dfr(datasets, function(x) {
+    x$calibrationParams %>%
+      dplyr::mutate(dataset = x$name) %>%
+      dplyr::relocate("dataset", .before = "species")})
 
   return(
     list(
@@ -128,7 +146,8 @@ gatherQualityControlInfo <- function(datasets) {
       rmsdAllStandards = rmsdAllStandards,
       pooledSD = pooledSD,
       deviationsFromTrue = deviationsFromTrue,
-      memoryCoefficients = memoryCoefficients
+      memoryCoefficients = memoryCoefficients,
+      calibrationParameter = calibrationParameter
     )
   )
 }
@@ -138,7 +157,7 @@ gatherQualityControlInfo <- function(datasets) {
 #' Print a summary of the quality control information for a piccr processing run
 #' of several measurement files.
 #'
-#' Per default, the functions prints the following three sections:
+#' Per default, the function prints the following three sections:
 #' \itemize{
 #'   \item the first section gives the overall values for the entire processing
 #'         run of the root-mean-square deviation (rmsd) of the quality control
@@ -152,7 +171,7 @@ gatherQualityControlInfo <- function(datasets) {
 #' }
 #' Additional information can be switched on via the respective function
 #' parameters, such as the deviations of all measured standards from their true
-#' values.
+#' values and information on the calibration regressions.
 #'
 #' @param datasets the processed measurement data as output by
 #'   \code{\link{processFiles}} (or by \code{\link{processData}} directly).
@@ -170,6 +189,9 @@ gatherQualityControlInfo <- function(datasets) {
 #'   for the overall average memory coefficients or "all" to also print the
 #'   values for the average memory coefficients per each processed measurement
 #'   data set.
+#' @param printCalibrationParameter logical to control whether information on
+#'   the applied calibration regression shall be printed; defaults to
+#'   \code{FALSE}.
 #' @import dplyr
 #'
 #' @return The input \code{datasets} are returned invisibly.
@@ -186,7 +208,11 @@ gatherQualityControlInfo <- function(datasets) {
 #'
 printQualityControl <- function(datasets, printDeviations = FALSE, n = 3,
                                 printMemoryCoefficients = TRUE,
-                                whichMemoryCoefficients = "mean") {
+                                whichMemoryCoefficients = "mean",
+                                printCalibrationParameter = FALSE) {
+
+  oldOpt <- options(width = 200)
+  on.exit(options(width = oldOpt$width))
 
   qualityControlInfo <- gatherQualityControlInfo(datasets)
 
@@ -248,6 +274,15 @@ printQualityControl <- function(datasets, printDeviations = FALSE, n = 3,
               "select either 'all' or only the 'mean' memory coefficients.",
               call. = FALSE)
     }
+  }
+
+  if (printCalibrationParameter) {
+
+    x <- qualityControlInfo$calibrationParameter
+
+    cat("\n# --- Calibration parameter for each measurement file ---\n\n")
+    print(x, n = nrow(x), width = Inf)
+
   }
 
   if (printDeviations) {

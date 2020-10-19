@@ -29,7 +29,7 @@ processing run. Note that if the data is processed again, the summary file is
 silently overwritten.
 }
 \details{
-The summary file consists of three sections:
+The summary file consists of five sections:
 \itemize{
   \item the first section gives the overall values for the entire processing
         run of the root-mean-square deviation (rmsd) of the quality control
@@ -37,7 +37,13 @@ The summary file consists of three sections:
         pooled standard deviation per sample;
   \item the second section contains tables with the above values for each
         processed measurement file;
-  \item the third section contains a table which lists for each processed
+  \item the third section contains the estimated memory coefficients and
+        their standard deviation, as a function of the injection number, for
+        each processed measurement file as well as for the average across all
+        processed files.
+  \item the fourth section contains information on the applied calibration
+        regressions for each processed measurement file.
+  \item the fifth section contains a table which lists for each processed
         measurement file the individual deviations of each used standard from
         its true value.
 }

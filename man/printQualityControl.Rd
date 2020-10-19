@@ -9,7 +9,8 @@ printQualityControl(
   printDeviations = FALSE,
   n = 3,
   printMemoryCoefficients = TRUE,
-  whichMemoryCoefficients = "mean"
+  whichMemoryCoefficients = "mean",
+  printCalibrationParameter = FALSE
 )
 }
 \arguments{
@@ -33,6 +34,10 @@ estimated memory coefficients are printed if \code{printMemoryCoefficients
 for the overall average memory coefficients or "all" to also print the
 values for the average memory coefficients per each processed measurement
 data set.}
+
+\item{printCalibrationParameter}{logical to control whether information on
+the applied calibration regression shall be printed; defaults to
+\code{FALSE}.}
 }
 \value{
 The input \code{datasets} are returned invisibly.
@@ -42,7 +47,7 @@ Print a summary of the quality control information for a piccr processing run
 of several measurement files.
 }
 \details{
-Per default, the functions prints the following three sections:
+Per default, the function prints the following three sections:
 \itemize{
   \item the first section gives the overall values for the entire processing
         run of the root-mean-square deviation (rmsd) of the quality control
@@ -56,7 +61,7 @@ Per default, the functions prints the following three sections:
 }
 Additional information can be switched on via the respective function
 parameters, such as the deviations of all measured standards from their true
-values.
+values and information on the calibration regressions.
 }
 \examples{
 # Most conveniently, this function is combined with the processing function
