@@ -96,18 +96,18 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL) {
 gatherQualityControlInfo <- function(datasets) {
 
   rmsdQualityControl <- purrr::map_dfr(datasets, function(x) {
-    tibble::tibble(file = x$name,
+    tibble::tibble(dataset = x$name,
                    name = paste(x$deviationOfControlStandard$name, sep = ", "),
                    d18O = calculateRMSD(x$deviationOfControlStandard$d18O),
                    dD = calculateRMSD(x$deviationOfControlStandard$dD))})
 
   rmsdAllStandards <- purrr::map_dfr(datasets, function(x) {
-    tibble::tibble(file = x$name,
+    tibble::tibble(dataset = x$name,
                    d18O = x$rmsdDeviationsFromTrue$d18O,
                    dD = x$rmsdDeviationsFromTrue$dD)})
 
   pooledSD <- purrr::map_dfr(datasets, function(x) {
-    tibble::tibble(file = x$name,
+    tibble::tibble(dataset = x$name,
                    d18O = x$pooledSD$d18O,
                    dD = x$pooledSD$dD)})
 

@@ -70,22 +70,22 @@ processedData <- list(
   )
 )
 qc <- tibble::tribble(
-  ~file,  ~name, ~d18O, ~dD,
-  # -- /  ---- / ---- / -- /
-  "good", "QC",  0.01,  0.1,
-  "bad",  "QC",  0.1,   1
+  ~dataset, ~name, ~d18O, ~dD,
+  # ----- / ---- / ---- / -- /
+  "good",    "QC",  0.01,  0.1,
+  "bad",     "QC",  0.1,   1
 )
 rmsdAll <- tibble::tribble(
-  ~file,  ~d18O, ~dD,
-  # -- /  ---- / -- /
-  "good", 0.05,  0.5,
-  "bad",  0.5,   5
+  ~dataset, ~d18O, ~dD,
+  # ----- / ---- / -- /
+  "good",   0.05,  0.5,
+  "bad",    0.5,   5
 )
 pooledSD <- tibble::tribble(
-  ~file,  ~d18O, ~dD,
-  # -- /  ---- / -- /
-  "good", 0.03,  0.3,
-  "bad",  0.3,   3
+  ~dataset, ~d18O, ~dD,
+  # ----- / ---- / -- /
+  "good",   0.03,  0.3,
+  "bad",    0.3,   3
 )
 memCoeff <- tibble::tribble(
   ~dataset, ~`Inj Nr`, ~meanD18O, ~meanDD, ~sdD18O, ~sdDD,
