@@ -29,7 +29,7 @@ processing run. Note that if the data is processed again, the summary file is
 silently overwritten.
 }
 \details{
-The summary file consists of five sections:
+The summary file consists of up to six sections:
 \itemize{
   \item the first section gives the overall values for the entire processing
         run of the root-mean-square deviation (rmsd) of the quality control
@@ -43,7 +43,10 @@ The summary file consists of five sections:
         processed files.
   \item the fourth section contains information on the applied calibration
         regressions for each processed measurement file.
-  \item the fifth section contains a table which lists for each processed
+  \item the fifth section contains information on an applied linear drift
+        correction for each measurement file. This is only printed if such a
+        drift correction was actually applied to the measurement data.
+  \item the sixth section contains a table which lists for each processed
         measurement file the individual deviations of each used standard from
         its true value.
 }
