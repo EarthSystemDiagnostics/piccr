@@ -108,7 +108,8 @@ processSingleDataset <- function(name, datasets, config){
   else if (config$calibration_method == 1) {
     temp <- calibrateUsingSimpleDriftCorrection(memoryCorrected, config)
     calibratedAndDriftCorrected <- temp$dataset
-    calibrationParameter        <- temp$parameter
+    calibrationParameter        <- temp$calibrationParameter
+    driftParameter              <- temp$driftParameter
   } 
   else if (config$calibration_method == 2) {
     temp <- calibrateUsingDoubleCalibration(memoryCorrected, config)
@@ -129,7 +130,7 @@ processSingleDataset <- function(name, datasets, config){
   output <- buildOutputList(name, config, dataset,
                             memoryCorrected, memoryCoefficients,
                             calibrated, calibratedAndDriftCorrected,
-                            accumulated, calibrationParameter,
+                            accumulated, calibrationParameter, driftParameter,
                             qualityControlInfo)
   return(output)
   

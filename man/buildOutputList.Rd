@@ -14,6 +14,7 @@ buildOutputList(
   calibratedAndDriftCorrected,
   accumulated,
   calibrationParams,
+  driftParams,
   qualityControlInfo
 )
 }
@@ -21,8 +22,9 @@ buildOutputList(
 \item{name}{the file name of the data set.}
 
 \item{config}{a named list containing the logical component
-\code{use_memory_correction} which specifies if memory correction was used
-in the processing.}
+\code{use_memory_correction}, which specifies if memory correction was used
+in the processing, and the component \code{calibration_method}, which
+signals the type of the calibration method that was used.}
 
 \item{dataset}{a data frame with the raw measurement data.}
 
@@ -44,6 +46,10 @@ averaged over a specified number of injections.}
 parameters, together with quality control assessment, which were applied
 for calibrating the measurement data.}
 
+\item{driftParams}{a tibble with the estimated drift parameters, together
+with quality control assessment, which were applied for drift-correcting
+the measurement data.}
+
 \item{qualityControlInfo}{the output of \code{\link{getQualityControlInfo}}.}
 }
 \value{
@@ -62,7 +68,7 @@ A named list with 13 components:
     measurement data averaged over a specified number of injections.}
 
   \item{\code{memoryCoefficients}:}{a data frame with the estimated memory
-    coefficients.}
+    coefficients, or \code{NULL} if no memory correction was applied.}
   \item{\code{deviationsFromTrue}:}{data frame with the measured (and
     processsed) value (d18O and dH), the expected value, and the deviation of
     the measured from the expected value for each analysed standard.}
@@ -77,10 +83,11 @@ A named list with 13 components:
     and \code{dD} of the pooled standard deviations across all measured
     vials.}
   \item{\code{calibrationParams}:}{a tibble with the estimated calibration
-  parameters for the first standard block (and, if double calibration was
-  active, the final block) of the measurement sequence.}
-  \item{\code{driftParams}:}{estimated drift parameters; not yet
-    implemented.}
+    parameters for the first standard block (and, if double calibration was
+    active, the final block) of the measurement sequence.}
+  \item{\code{driftParams}:}{a tibble with the estimated drift correction
+    parameters for a simple linear drift correction, or \code{NULL} if no
+    simple drift correction was applied.}
 }
 }
 \description{

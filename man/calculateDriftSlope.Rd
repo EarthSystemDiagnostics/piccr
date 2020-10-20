@@ -16,8 +16,9 @@ needs to contain the additional columns \code{useForDriftCorr} and
 applied to the input data.}
 }
 \value{
-A named list with elements \code{d18O} and \code{dD} which contain
-  the average drift slope in permil per seconds for d18O and dD.
+A tibble with at least four rows and with six variables, where the
+  first half of the rows is the output of \code{\link{runDriftModel}} for
+  \code{d18O} and the second half the respective output for \code{dD}.
 }
 \description{
 Calculate a linear drift slope for each isotope species from the average
@@ -28,5 +29,6 @@ last three injections.
 }
 \seealso{
 \code{\link{associateStandardsWithConfigInfo}},
-  \code{\link{assignVialsToGroups}}
+  \code{\link{assignVialsToGroups}},
+  \code{\link{runDriftModel}}
 }
