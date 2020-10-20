@@ -212,8 +212,9 @@ isStandard <- function(id1, config){
 #'
 #' @param name the file name of the data set.
 #' @param config a named list containing the logical component
-#'   \code{use_memory_correction} which specifies if memory correction was used
-#'   in the processing.
+#'   \code{use_memory_correction}, which specifies if memory correction was used
+#'   in the processing, and the component \code{calibration_method}, which
+#'   signals the type of the calibration method that was used.
 #' @param dataset a data frame with the raw measurement data.
 #' @param memoryCorrected a data frame with the memory-corrected measurement
 #'   data.
@@ -227,6 +228,9 @@ isStandard <- function(id1, config){
 #' @param calibrationParams a tibble with the estimated calibration
 #'   parameters, together with quality control assessment, which were applied
 #'   for calibrating the measurement data.
+#' @param driftParams a tibble with the estimated drift parameters, together
+#'   with quality control assessment, which were applied for drift-correcting
+#'   the measurement data.
 #' @param qualityControlInfo the output of \code{\link{getQualityControlInfo}}.
 #' @inherit piccr_output return
 #' @seealso \code{\link{processData}},
@@ -241,7 +245,8 @@ isStandard <- function(id1, config){
 buildOutputList <- function(name, config, dataset,
                             memoryCorrected, memoryCoefficients,
                             calibrated, calibratedAndDriftCorrected,
-                            accumulated, calibrationParams, qualityControlInfo){
+                            accumulated, calibrationParams, driftParams,
+                            qualityControlInfo){
   
   list(
     name = name,
@@ -259,8 +264,7 @@ buildOutputList <- function(name, config, dataset,
     pooledSD = qualityControlInfo$pooledSD,
     
     calibrationParams = calibrationParams,
-    # TODO
-    driftParams = NA
+    driftParams = if (config$calibration_method == 1) driftParams
   )
 }
 

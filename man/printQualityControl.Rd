@@ -10,7 +10,8 @@ printQualityControl(
   n = 3,
   printMemoryCoefficients = TRUE,
   whichMemoryCoefficients = "mean",
-  printCalibrationParameter = FALSE
+  printCalibrationParameter = FALSE,
+  printDriftParameter = FALSE
 )
 }
 \arguments{
@@ -38,6 +39,10 @@ data set.}
 \item{printCalibrationParameter}{logical to control whether information on
 the applied calibration regression shall be printed; defaults to
 \code{FALSE}.}
+
+\item{printDriftParameter}{logical to control whether information on
+an applied drift correction shall be printed; defaults to \code{FALSE},
+and only prints when a drift correction was actually applied.}
 }
 \value{
 The input \code{datasets} are returned invisibly.
@@ -61,7 +66,8 @@ Per default, the function prints the following three sections:
 }
 Additional information can be switched on via the respective function
 parameters, such as the deviations of all measured standards from their true
-values and information on the calibration regressions.
+values, information on the calibration regressions, and information on the
+drift correction, if applicable.
 }
 \examples{
 # Most conveniently, this function is combined with the processing function

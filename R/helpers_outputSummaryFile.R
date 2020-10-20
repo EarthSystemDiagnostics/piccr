@@ -5,7 +5,7 @@
 #' processing run. Note that if the data is processed again, the summary file is
 #' silently overwritten.
 #'
-#' The summary file consists of five sections:
+#' The summary file consists of up to six sections:
 #' \itemize{
 #'   \item the first section gives the overall values for the entire processing
 #'         run of the root-mean-square deviation (rmsd) of the quality control
@@ -19,7 +19,10 @@
 #'         processed files.
 #'   \item the fourth section contains information on the applied calibration
 #'         regressions for each processed measurement file.
-#'   \item the fifth section contains a table which lists for each processed
+#'   \item the fifth section contains information on an applied linear drift
+#'         correction for each measurement file. This is only printed if such a
+#'         drift correction was actually applied to the measurement data.
+#'   \item the sixth section contains a table which lists for each processed
 #'         measurement file the individual deviations of each used standard from
 #'         its true value.
 #' }
@@ -49,6 +52,7 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL) {
 
   qualityControl <- utils::capture.output(
     printQualityControl(processedData, printCalibrationParameter = TRUE,
+                        printDriftParameter = TRUE,
                         printDeviations = TRUE, n = NA,
                         whichMemoryCoefficients = "all")) %>%
     paste(collapse = "\n")
@@ -66,7 +70,7 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL) {
 #'   \code{\link{processFiles}} (or by \code{\link{processData}} directly).
 #' @import dplyr
 #'
-#' @return A named list with six elements:
+#' @return A named list with seven elements:
 #' \describe{
 #'   \item{\code{rmsdQualityControl}:}{a tibble for the root-mean-square
 #'   deviation (rmsd) of the quality control standard for each measurement file,
@@ -92,6 +96,15 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL) {
 #'   calibration residuals. The information are included for each estimated
 #'   calibration, i.e., for each processed measurement file, and per file for
 #'   each used calibration block and each isotope species.}
+#'   \item{\code{driftParameter}:}{a tibble with information on an applied
+#'   simple drift correction, or \code{NULL} if no such correction was applied
+#'   to the measurement data. The drift correction information include the drift
+#'   correction slope, its p-value, the r-squared value of the linear
+#'   regression, and the root mean square deviation of the regression
+#'   residuals. The information are included for each estimated drift
+#'   correction, i.e., for each processed measurement file, and per file for
+#'   each isotope species and each used drift monitoring standard as well as the
+#'   average across those standards.}
 #' }
 gatherQualityControlInfo <- function(datasets) {
 
@@ -140,6 +153,15 @@ gatherQualityControlInfo <- function(datasets) {
       dplyr::mutate(dataset = x$name) %>%
       dplyr::relocate("dataset", .before = "species")})
 
+  driftParameter <- NULL
+  if (!is.null(datasets[[1]]$driftParams)) {
+
+    driftParameter <- purrr::map_dfr(datasets, function(x) {
+      x$driftParams %>%
+        dplyr::mutate(dataset = x$name) %>%
+        dplyr::relocate("dataset", .before = "species")})
+  }
+
   return(
     list(
       rmsdQualityControl = rmsdQualityControl,
@@ -147,7 +169,8 @@ gatherQualityControlInfo <- function(datasets) {
       pooledSD = pooledSD,
       deviationsFromTrue = deviationsFromTrue,
       memoryCoefficients = memoryCoefficients,
-      calibrationParameter = calibrationParameter
+      calibrationParameter = calibrationParameter,
+      driftParameter = driftParameter
     )
   )
 }
@@ -171,7 +194,8 @@ gatherQualityControlInfo <- function(datasets) {
 #' }
 #' Additional information can be switched on via the respective function
 #' parameters, such as the deviations of all measured standards from their true
-#' values and information on the calibration regressions.
+#' values, information on the calibration regressions, and information on the
+#' drift correction, if applicable.
 #'
 #' @param datasets the processed measurement data as output by
 #'   \code{\link{processFiles}} (or by \code{\link{processData}} directly).
@@ -192,6 +216,9 @@ gatherQualityControlInfo <- function(datasets) {
 #' @param printCalibrationParameter logical to control whether information on
 #'   the applied calibration regression shall be printed; defaults to
 #'   \code{FALSE}.
+#' @param printDriftParameter logical to control whether information on
+#'   an applied drift correction shall be printed; defaults to \code{FALSE},
+#'   and only prints when a drift correction was actually applied.
 #' @import dplyr
 #'
 #' @return The input \code{datasets} are returned invisibly.
@@ -209,7 +236,8 @@ gatherQualityControlInfo <- function(datasets) {
 printQualityControl <- function(datasets, printDeviations = FALSE, n = 3,
                                 printMemoryCoefficients = TRUE,
                                 whichMemoryCoefficients = "mean",
-                                printCalibrationParameter = FALSE) {
+                                printCalibrationParameter = FALSE,
+                                printDriftParameter = FALSE) {
 
   oldOpt <- options(width = 200)
   on.exit(options(width = oldOpt$width))
@@ -281,8 +309,13 @@ printQualityControl <- function(datasets, printDeviations = FALSE, n = 3,
     x <- qualityControlInfo$calibrationParameter
 
     cat("\n# --- Calibration parameter for each measurement file ---\n\n")
-    print(x, n = nrow(x), width = Inf)
+    print(x, n = nrow(x))
+  }
 
+  if (printDriftParameter & !is.null(x <- qualityControlInfo$driftParameter)) {
+
+    cat("\n# --- Drift correction parameter for each measurement file ---\n\n")
+    print(x, n = nrow(x))
   }
 
   if (printDeviations) {

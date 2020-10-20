@@ -49,6 +49,26 @@ calibrationParameter2 <- tibble::tribble(
   "d18O",   1,      500.,       10.,        2.7,    "foo",
   "dD",     1,      500.,       100.,       9.3,    "foo"
 )
+driftParameter1 <- tibble::tribble(
+  ~species, ~sample, ~slope, ~other_cols,
+  # ----- / ------ / ----- / -----------
+  "d18O",   "StdA",  0,      "foo",
+  "d18O",   "StdB",  0,      "foo",
+  "d18O",   "mean",  0,      "foo",
+  "dD",     "StdA",  0,      "foo",
+  "dD",     "StdB",  0,      "foo",
+  "dD",     "mean",  0,      "foo"
+)
+driftParameter2 <- tibble::tribble(
+  ~species, ~sample, ~slope, ~other_cols,
+  # ----- / ------ / ----- / -----------
+  "d18O",   "StdA",  1,      "foo",
+  "d18O",   "StdB",  5,      "foo",
+  "d18O",   "mean",  3,      "foo",
+  "dD",     "StdA",  -10,    "foo",
+  "dD",     "StdB",  -70,    "foo",
+  "dD",     "mean",  -40,    "foo"
+)
 processedData <- list(
   good = list(
     name = "good",
@@ -57,7 +77,8 @@ processedData <- list(
     pooledSD = list(d18O = 0.03, dD = 0.3),
     deviationsFromTrue = deviationsFromTrue1,
     memoryCoefficients = memoryCoefficients1,
-    calibrationParams = calibrationParameter1
+    calibrationParams = calibrationParameter1,
+    driftParams = driftParameter1
   ),
   bad = list(
     name = "bad",
@@ -66,9 +87,14 @@ processedData <- list(
     pooledSD = list(d18O = 0.3, dD = 3),
     deviationsFromTrue = deviationsFromTrue2,
     memoryCoefficients = memoryCoefficients2,
-    calibrationParams = calibrationParameter2
+    calibrationParams = calibrationParameter2,
+    driftParams = driftParameter2
   )
 )
+processedDataNoDrift <- lapply(processedData, function(x) {
+  x$driftParams <- NULL
+  c(x, list(driftParams = NULL))
+})
 qc <- tibble::tribble(
   ~dataset, ~name, ~d18O, ~dD,
   # ----- / ---- / ---- / -- /
@@ -110,6 +136,22 @@ calibrationParameter <- tibble::tribble(
   "bad",    "d18O",   1,      500.,       10.,        2.7,    "foo",
   "bad",    "dD",     1,      500.,       100.,       9.3,    "foo"
 )
+driftParameter <- tibble::tribble(
+  ~dataset, ~species, ~sample, ~slope, ~other_cols,
+  # ----- / ------- / ------ / ----- / -----------
+  "good",   "d18O",   "StdA",  0,      "foo",
+  "good",   "d18O",   "StdB",  0,      "foo",
+  "good",   "d18O",   "mean",  0,      "foo",
+  "good",   "dD",     "StdA",  0,      "foo",
+  "good",   "dD",     "StdB",  0,      "foo",
+  "good",   "dD",     "mean",  0,      "foo",
+  "bad",    "d18O",   "StdA",  1,      "foo",
+  "bad",    "d18O",   "StdB",  5,      "foo",
+  "bad",    "d18O",   "mean",  3,      "foo",
+  "bad",    "dD",     "StdA",  -10,    "foo",
+  "bad",    "dD",     "StdB",  -70,    "foo",
+  "bad",    "dD",     "mean",  -40,    "foo"
+)
 
 test_that("gathering of quality control data works", {
   
@@ -120,13 +162,21 @@ test_that("gathering of quality control data works", {
     deviationsFromTrue = list(
       good = deviationsFromTrue1, bad = deviationsFromTrue2),
     memoryCoefficients = memCoeff,
-    calibrationParameter = calibrationParameter
+    calibrationParameter = calibrationParameter,
+    driftParameter = driftParameter
   )
 
   actual <- gatherQualityControlInfo(processedData)
 
   expect_equal(actual, expected)
 
+  expectedNoDrift <- expected
+  expectedNoDrift$driftParameter <- NULL
+  expectedNoDrift <- c(expectedNoDrift, list(driftParameter = NULL))
+
+  actual <- gatherQualityControlInfo(processedDataNoDrift)
+
+  expect_equal(actual, expectedNoDrift)
 })
 
 test_that("writing of quality control data works", {
@@ -175,7 +225,12 @@ test_that("writing of quality control data works", {
     capture.output(print(calibrationParameter)) %>% paste(collapse = "\n")
   )
 
-  expected5a <- stringr::str_c(
+  expected5 <- stringr::str_c(
+    "\n\n# --- Drift correction parameter for each measurement file ---\n\n",
+    capture.output(print(driftParameter)) %>% paste(collapse = "\n")
+  )
+
+  expected6a <- stringr::str_c(
     "\n\n# --- Specific deviations from true standard values ---\n\n",
     "# ... displaying output for first 1 (of 2) measurement files;\n",
     "# adjust function parameter 'n' to display a different number.\n\n",
@@ -183,7 +238,7 @@ test_that("writing of quality control data works", {
     capture.output(print(deviationsFromTrue1)) %>% paste(collapse = "\n")
   )
 
-  expected5b <- stringr::str_c(
+  expected6b <- stringr::str_c(
     "\n\n# --- Specific deviations from true standard values ---\n\n",
     "Dataset: good\n",
     capture.output(print(deviationsFromTrue1)) %>% paste(collapse = "\n"),
@@ -194,7 +249,8 @@ test_that("writing of quality control data works", {
   # ----------------------------------------------------------------------------
   # test printing function
 
-  expected <- stringr::str_c(expected2, expected3a, expected5a)
+  # mean memory coefficients and specific deviations for one file
+  expected <- stringr::str_c(expected2, expected3a, expected6a)
 
   actual <- capture.output(
     printQualityControl(processedData, printDeviations = TRUE, n = 1)) %>%
@@ -202,7 +258,8 @@ test_that("writing of quality control data works", {
 
   expect_equal(actual, expected)
 
-  expected <- stringr::str_c(expected2, expected3b, expected5a)
+  # all memory coefficients and specific deviations for one file
+  expected <- stringr::str_c(expected2, expected3b, expected6a)
 
   actual <- capture.output(
     printQualityControl(processedData, printDeviations = TRUE, n = 1,
@@ -211,6 +268,7 @@ test_that("writing of quality control data works", {
 
   expect_equal(actual, expected)
 
+  # mean memory coefficients and calibration parameters
   expected <- stringr::str_c(expected2, expected3a, expected4)
 
   actual <- capture.output(
@@ -220,6 +278,7 @@ test_that("writing of quality control data works", {
 
   expect_equal(actual, expected)
 
+  # only calibration parameters
   expected <- stringr::str_c(expected2, expected4)
 
   actual <- capture.output(
@@ -229,9 +288,43 @@ test_that("writing of quality control data works", {
 
   expect_equal(actual, expected)
 
+  # warning due to invalid string for memory coefficients
   expect_warning(capture.output(printQualityControl(
     processedData, printDeviations = TRUE, n = 1,
     whichMemoryCoefficients = "wrong string")))
+
+  # only drift parameters
+  expected <- stringr::str_c(expected2, expected5)
+
+  actual <- capture.output(
+    printQualityControl(processedData, printMemoryCoefficients = FALSE,
+                        printDriftParameter = TRUE)) %>%
+    paste(collapse = "\n")
+
+  expect_equal(actual, expected)
+
+  # mean memory coefficients, calibration parameters, drift parameters, and
+  # specific deviations for one file
+  expected <- stringr::str_c(expected2, expected3a, expected4,
+                             expected5, expected6a)
+
+  actual <- capture.output(
+    printQualityControl(processedData,
+                        printCalibrationParameter = TRUE,
+                        printDriftParameter = TRUE,
+                        printDeviations = TRUE, n = 1)) %>%
+    paste(collapse = "\n")
+
+  expect_equal(actual, expected)
+
+  # drift parameters shouldn't print
+  expected <- stringr::str_c(expected2, expected3a)
+
+  actual <- capture.output(
+    printQualityControl(processedDataNoDrift, printDriftParameter = TRUE)) %>%
+    paste(collapse = "\n")
+
+  expect_equal(actual, expected)
 
   # ----------------------------------------------------------------------------
   # test writing to output file
@@ -242,7 +335,7 @@ test_that("writing of quality control data works", {
   outputSummaryFile(processedData, config, tmpfile)
 
   expected <- stringr::str_c(expected1, expected2, expected3b,
-                             expected4, expected5b)
+                             expected4, expected5, expected6b)
 
   actual <- readr::read_file(tmpfile)
 

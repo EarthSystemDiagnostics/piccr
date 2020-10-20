@@ -11,7 +11,7 @@ gatherQualityControlInfo(datasets)
 \code{\link{processFiles}} (or by \code{\link{processData}} directly).}
 }
 \value{
-A named list with six elements:
+A named list with seven elements:
 \describe{
   \item{\code{rmsdQualityControl}:}{a tibble for the root-mean-square
   deviation (rmsd) of the quality control standard for each measurement file,
@@ -37,6 +37,15 @@ A named list with six elements:
   calibration residuals. The information are included for each estimated
   calibration, i.e., for each processed measurement file, and per file for
   each used calibration block and each isotope species.}
+  \item{\code{driftParameter}:}{a tibble with information on an applied
+  simple drift correction, or \code{NULL} if no such correction was applied
+  to the measurement data. The drift correction information include the drift
+  correction slope, its p-value, the r-squared value of the linear
+  regression, and the root mean square deviation of the regression
+  residuals. The information are included for each estimated drift
+  correction, i.e., for each processed measurement file, and per file for
+  each isotope species and each used drift monitoring standard as well as the
+  average across those standards.}
 }
 }
 \description{
