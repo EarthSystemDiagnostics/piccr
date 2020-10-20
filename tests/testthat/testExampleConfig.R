@@ -40,6 +40,8 @@ test_that("test return value and outputs", {
     expect_is(dataset$rmsdDeviationsFromTrue, "list")
     expect_is(dataset$pooledSD, "list")
     expect_is(dataset$memoryCoefficients, "data.frame")
+    expect_is(dataset$calibrationParams, "data.frame")
+    expect_is(dataset$driftParams, "data.frame")
   }
 
   # check saved files
@@ -48,6 +50,24 @@ test_that("test return value and outputs", {
                               "HIDS2041_IsoWater_20151126_115726.csv", 
                               "HIDS2041_IsoWater_20151127_143940.csv",
                               "run.info"))
+
+  # --------- CHECK OTHER PROCESSING OPTIONS -------
+
+  configContents$use_memory_correction <- FALSE
+  rlist::list.save(configContents, newConfigPath)
+
+  expect_error(processFiles(config = newConfigPath), NA)
+
+  configContents$calibration_method <- 0
+  rlist::list.save(configContents, newConfigPath)
+
+  expect_error(processFiles(config = newConfigPath), NA)
+
+  configContents$use_memory_correction <- TRUE
+  configContents$calibration_method <- 2
+  rlist::list.save(configContents, newConfigPath)
+
+  expect_error(processFiles(config = newConfigPath), NA)
 })
 
 test_that("test example file with differently grouped vials", {

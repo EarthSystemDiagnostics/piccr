@@ -95,6 +95,10 @@ processedDataNoDrift <- lapply(processedData, function(x) {
   x$driftParams <- NULL
   c(x, list(driftParams = NULL))
 })
+processedDataNoMemory <- lapply(processedData, function(x) {
+  x$memoryCoefficients <- NULL
+  c(x, list(memoryCoefficients = NULL))
+})
 qc <- tibble::tribble(
   ~dataset, ~name, ~d18O, ~dD,
   # ----- / ---- / ---- / -- /
@@ -177,6 +181,15 @@ test_that("gathering of quality control data works", {
   actual <- gatherQualityControlInfo(processedDataNoDrift)
 
   expect_equal(actual, expectedNoDrift)
+
+  expectedNoMemory <- expected
+  expectedNoMemory$memoryCoefficients <- NULL
+  expectedNoMemory <- c(expectedNoMemory,
+                        list(memoryCoefficients = NULL))[c(1 : 4, 7, 5, 6)]
+
+  actual <- gatherQualityControlInfo(processedDataNoMemory)
+
+  expect_equal(actual, expectedNoMemory)
 })
 
 test_that("writing of quality control data works", {
@@ -322,6 +335,15 @@ test_that("writing of quality control data works", {
 
   actual <- capture.output(
     printQualityControl(processedDataNoDrift, printDriftParameter = TRUE)) %>%
+    paste(collapse = "\n")
+
+  expect_equal(actual, expected)
+
+  # memory coefficients shouldn't print
+  expected <- stringr::str_c(expected2)
+
+  actual <- capture.output(
+    printQualityControl(processedDataNoMemory)) %>%
     paste(collapse = "\n")
 
   expect_equal(actual, expected)
