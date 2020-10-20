@@ -30,7 +30,8 @@ A named list with seven elements:
   \item{\code{memoryCoefficients}:}{a tibble of the mean and the SD of the
   average memory coefficients depending on the injection number per each
   processed measurement file and of the mean and the SD of the overall
-  average memory coefficients.}
+  average memory coefficients; or \code{NULL} if no memory correction was
+  applied to the measurement data.}
   \item{\code{calibrationParameter}:}{a tibble with information on the
   applied calibration regression, including calibration slope and intercept,
   p-values, r-squared value, and the root mean square deviation of the

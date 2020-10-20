@@ -40,7 +40,8 @@ The summary file consists of up to six sections:
   \item the third section contains the estimated memory coefficients and
         their standard deviation, as a function of the injection number, for
         each processed measurement file as well as for the average across all
-        processed files.
+        processed files. This is only printed if a memory correction was
+        actually applied to the measurement data.
   \item the fourth section contains information on the applied calibration
         regressions for each processed measurement file.
   \item the fifth section contains information on an applied linear drift

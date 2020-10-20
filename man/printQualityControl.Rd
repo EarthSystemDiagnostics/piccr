@@ -27,7 +27,8 @@ measurement datasets (defaults to \code{FALSE}).}
 processed datasets, set to \code{NA} to print all of them.}
 
 \item{printMemoryCoefficients}{logical to control whether the estimated
-memory coefficients shall be printed; defaults to \code{TRUE}.}
+memory coefficients shall be printed; defaults to \code{TRUE}, and only
+prints when a memory correction was actually applied.}
 
 \item{whichMemoryCoefficients}{character string to signal which part of the
 estimated memory coefficients are printed if \code{printMemoryCoefficients
@@ -62,7 +63,9 @@ Per default, the function prints the following three sections:
         processed measurement file.
   \item the third section contains a table of the overall memory
         coefficients depending on the injection number averaged across the
-        processing run together with their estimated standard deviations.
+        processing run together with their estimated standard
+        deviations. This is only printed if a memory correction was actually
+        applied to the measurement data.
 }
 Additional information can be switched on via the respective function
 parameters, such as the deviations of all measured standards from their true

@@ -16,7 +16,8 @@
 #'   \item the third section contains the estimated memory coefficients and
 #'         their standard deviation, as a function of the injection number, for
 #'         each processed measurement file as well as for the average across all
-#'         processed files.
+#'         processed files. This is only printed if a memory correction was
+#'         actually applied to the measurement data.
 #'   \item the fourth section contains information on the applied calibration
 #'         regressions for each processed measurement file.
 #'   \item the fifth section contains information on an applied linear drift
@@ -89,7 +90,8 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL) {
 #'   \item{\code{memoryCoefficients}:}{a tibble of the mean and the SD of the
 #'   average memory coefficients depending on the injection number per each
 #'   processed measurement file and of the mean and the SD of the overall
-#'   average memory coefficients.}
+#'   average memory coefficients; or \code{NULL} if no memory correction was
+#'   applied to the measurement data.}
 #'   \item{\code{calibrationParameter}:}{a tibble with information on the
 #'   applied calibration regression, including calibration slope and intercept,
 #'   p-values, r-squared value, and the root mean square deviation of the
@@ -129,24 +131,27 @@ gatherQualityControlInfo <- function(datasets) {
       select(Sample, `Identifier 1`, block, d18ODeviation, dDDeviation)
   })
 
-  memCoeffDatasets <- purrr::map_dfr(datasets, function(x) {
-    tibble::tibble(dataset = x$name,
-                   `Inj Nr` = x$memoryCoefficients$`Inj Nr`,
-                   meanD18O = x$memoryCoefficients$`memoryCoeffD18O`,
-                   meanDD = x$memoryCoefficients$`memoryCoeffDD`,
-                   sdD18O = x$memoryCoefficients$`sdMemoryCoeffD18O`,
-                   sdDD = x$memoryCoefficients$`sdMemoryCoeffDD`)})
+  memoryCoefficients <- NULL
+  if (!is.null(datasets[[1]]$memoryCoefficients)) {
+    memCoeffDatasets <- purrr::map_dfr(datasets, function(x) {
+      tibble::tibble(dataset = x$name,
+                     `Inj Nr` = x$memoryCoefficients$`Inj Nr`,
+                     meanD18O = x$memoryCoefficients$`memoryCoeffD18O`,
+                     meanDD = x$memoryCoefficients$`memoryCoeffDD`,
+                     sdD18O = x$memoryCoefficients$`sdMemoryCoeffD18O`,
+                     sdDD = x$memoryCoefficients$`sdMemoryCoeffDD`)})
 
-  memCoeffMean <- memCoeffDatasets %>%
-    group_by(`Inj Nr`) %>%
-    summarise(dataset = "mean",
-              meanD18O = mean(meanD18O),
-              meanDD = mean(meanDD),
-              sdD18O = sqrt(sum(sdD18O^2)) / n(),
-              sdDD = sqrt(sum(sdDD^2)) / n()) %>%
-    relocate("dataset", .before = `Inj Nr`)
+    memCoeffMean <- memCoeffDatasets %>%
+      group_by(`Inj Nr`) %>%
+      summarise(dataset = "mean",
+                meanD18O = mean(meanD18O),
+                meanDD = mean(meanDD),
+                sdD18O = sqrt(sum(sdD18O^2)) / n(),
+                sdDD = sqrt(sum(sdDD^2)) / n()) %>%
+      relocate("dataset", .before = `Inj Nr`)
 
-  memoryCoefficients <- bind_rows(memCoeffMean, memCoeffDatasets)
+    memoryCoefficients <- bind_rows(memCoeffMean, memCoeffDatasets)
+  }
 
   calibrationParameter <- purrr::map_dfr(datasets, function(x) {
     x$calibrationParams %>%
@@ -190,7 +195,9 @@ gatherQualityControlInfo <- function(datasets) {
 #'         processed measurement file.
 #'   \item the third section contains a table of the overall memory
 #'         coefficients depending on the injection number averaged across the
-#'         processing run together with their estimated standard deviations.
+#'         processing run together with their estimated standard
+#'         deviations. This is only printed if a memory correction was actually
+#'         applied to the measurement data.
 #' }
 #' Additional information can be switched on via the respective function
 #' parameters, such as the deviations of all measured standards from their true
@@ -206,7 +213,8 @@ gatherQualityControlInfo <- function(datasets) {
 #'   \code{printDeviations = TRUE}; default is to print the first three
 #'   processed datasets, set to \code{NA} to print all of them.
 #' @param printMemoryCoefficients logical to control whether the estimated
-#'   memory coefficients shall be printed; defaults to \code{TRUE}.
+#'   memory coefficients shall be printed; defaults to \code{TRUE}, and only
+#'   prints when a memory correction was actually applied.
 #' @param whichMemoryCoefficients character string to signal which part of the
 #'   estimated memory coefficients are printed if \code{printMemoryCoefficients
 #'   = TRUE}. Possible options are "mean" (the default) to print only the values
@@ -277,11 +285,12 @@ printQualityControl <- function(datasets, printDeviations = FALSE, n = 3,
   cat("\n# Pooled standard deviation:\n")
   print(qualityControlInfo$pooledSD)
 
-  if (printMemoryCoefficients) {
+  if (printMemoryCoefficients &
+      !is.null(x <- qualityControlInfo$memoryCoefficients)) {
 
     if (whichMemoryCoefficients == "mean") {
 
-      x <- qualityControlInfo$memoryCoefficients %>%
+      x <- x %>%
         filter(dataset == "mean") %>%
         select(-dataset)
 
@@ -289,8 +298,6 @@ printQualityControl <- function(datasets, printDeviations = FALSE, n = 3,
       print(x, n = nrow(x))
 
     } else if (whichMemoryCoefficients == "all") {
-
-      x <- qualityControlInfo$memoryCoefficients
 
       cat("\n# --- Overall mean and file means of memory coefficients ---\n\n")
       print(x, n = nrow(x))
