@@ -39,7 +39,7 @@ test_that("check general output structure", {
 
   expect_true(is.data.frame(actual[[1]]$memoryCorrected))
   expect_true(is.data.frame(actual[[1]]$memoryCoefficients))
-  expect_equal(ncol(actual[[1]]$memoryCoefficients), 11)
+  expect_equal(ncol(actual[[1]]$memoryCoefficients), 13)
 
   expect_true(is.data.frame(actual[[1]]$calibrated))
   expect_true(is.data.frame(actual[[1]]$calibratedAndDriftCorrected))
@@ -52,6 +52,17 @@ test_that("check general output structure", {
   expect_true(is.data.frame(actual[[1]]$deviationsFromTrue))
   expect_true(is.list(actual[[1]]$rmsdDeviationsFromTrue))
   expect_true(is.list(actual[[1]]$deviationOfControlStandard))
+
+  expect_type(actual[[1]]$calibrationParams, "list")
+  expect_equal(dim(actual[[1]]$calibrationParams), c(2, 9))
+  expect_equal(actual[[1]]$calibrationParams$species, c("d18O", "dD"))
+  expect_equal(actual[[1]]$calibrationParams$block, rep(1, 2))
+
+  expect_type(actual[[1]]$driftParams, "list")
+  expect_equal(dim(actual[[1]]$driftParams), c(8, 6))
+  expect_equal(actual[[1]]$driftParams$species, c(rep("d18O", 4), rep("dD", 4)))
+  expect_equal(actual[[1]]$driftParams$sample,
+               rep(c("DML", "JASE", "TD1", "mean"), 2))
 
   actual <- processData(datasets, config)
 
@@ -78,6 +89,28 @@ test_that("check that calibration method 2 runs", {
   expect_is(actual[[1]]$calibratedAndDriftCorrected, "data.frame")
   expect_equal(dim(actual[[1]]$memoryCorrected),
                dim(actual[[1]]$calibratedAndDriftCorrected))
+
+  expect_equal(dim(actual[[1]]$calibrationParams), c(4, 9))
+  expect_equal(actual[[1]]$calibrationParams$species, rep(c("d18O", "dD"), 2))
+  expect_equal(actual[[1]]$calibrationParams$block, c(1, 1, 3, 3))
+
+})
+
+test_that("check that calibration method 0 runs w/o memory correction", {
+
+  config$calibration_method <- 0
+  config$use_memory_correction <- FALSE
+
+  actual <- processData(datasets[1], config)
+
+  expect_length(actual[[1]]$memoryCorrected, 0)
+  expect_length(actual[[1]]$memoryCoefficients, 0)
+  expect_length(actual[[1]]$calibratedAndDriftCorrected, 0)
+  expect_length(actual[[1]]$driftParams, 0)
+
+  expect_equal(dim(actual[[1]]$calibrationParams), c(2, 9))
+  expect_equal(actual[[1]]$calibrationParams$species, c("d18O", "dD"))
+  expect_equal(actual[[1]]$calibrationParams$block, rep(1, 2))
 
 })
 

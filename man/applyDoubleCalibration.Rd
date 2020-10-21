@@ -4,25 +4,22 @@
 \alias{applyDoubleCalibration}
 \title{Apply double-block calibration}
 \usage{
-applyDoubleCalibration(dataset, calibParamsBlock1, calibSlopes)
+applyDoubleCalibration(dataset, calibParams)
 }
 \arguments{
 \item{dataset}{a data frame with measurement data of a specific data set.}
 
-\item{calibParamsBlock1}{a set of calibration parameters (slope and
-intercept) for d18O and dD (see \code{\link{getCalibInterceptAndSlope}} for
-details) as estimated from the first standard block in the measurement
-sequence.}
-
-\item{calibSlopes}{slope estimates for d18O and dD for a linear change of the
-calibration parameters in \code{calibParamsBlock1} across the mesasurement
-sequence (see \code{\link{getCalibrationSlopes}} for details).}
+\item{calibParams}{a tibble with the calibration parameters (slope and
+intercept) for d18O and dD (see \code{\link{getCalibration}} for details on
+the tibble structure) as estimated from the first standard block in the
+measurement sequence as well as from the last standard block.}
 }
 \value{
 The input \code{dataset} with the d18O and dD values calibrated
-  according to a time-varying calibration slope and intercept.
+  according to the time-varying calibration slope and intercept.
 }
 \description{
 Apply a double-block calibration to a specific data set using provided
-calibration parameters.
+calibration parameters from the first and last standard block in the
+measurement sequence, which are linearly interpolated in between.
 }

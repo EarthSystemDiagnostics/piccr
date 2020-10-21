@@ -4,17 +4,13 @@
 \alias{getCalibrationSlopes}
 \title{Temporal change of calibration parameters}
 \usage{
-getCalibrationSlopes(paramsBlock1, paramsBlockN, calibTimes)
+getCalibrationSlopes(params)
 }
 \arguments{
-\item{paramsBlock1}{the calibration parameters estimated from the first
-standard block.}
-
-\item{paramsBlockN}{the calibration parameters estimated from the final
-standard block.}
-
-\item{calibTimes}{numeric vector with the average measurement times elapsed
-for the first and the final standard block, respectively.}
+\item{params}{a tibble with the calibration parameters for d18O and dD (see
+\code{\link{getCalibration}} for details on the tibble structure) as
+estimated from the first and the final standard block in the measurement
+sequence.}
 }
 \value{
 A named list with elements \code{d18O} and \code{dD} where each

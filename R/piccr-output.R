@@ -14,7 +14,7 @@
 #'     measurement data averaged over a specified number of injections.}
 #' 
 #'   \item{\code{memoryCoefficients}:}{a data frame with the estimated memory
-#'     coefficients.}
+#'     coefficients, or \code{NULL} if no memory correction was applied.}
 #'   \item{\code{deviationsFromTrue}:}{data frame with the measured (and
 #'     processsed) value (d18O and dH), the expected value, and the deviation of
 #'     the measured from the expected value for each analysed standard.}
@@ -28,10 +28,12 @@
 #'   \item{\code{pooledSD}:}{a list with the two elements \code{d18O}
 #'     and \code{dD} of the pooled standard deviations across all measured
 #'     vials.}
-#'   \item{\code{calibrationParams}:}{calibration parameters; not yet
-#'     implemented.}
-#'   \item{\code{driftParams}:}{estimated drift parameters; not yet
-#'     implemented.}
+#'   \item{\code{calibrationParams}:}{a tibble with the estimated calibration
+#'     parameters for the first standard block (and, if double calibration was
+#'     active, the final block) of the measurement sequence.}
+#'   \item{\code{driftParams}:}{a tibble with the estimated drift correction
+#'     parameters for a simple linear drift correction, or \code{NULL} if no
+#'     simple drift correction was applied.}
 #' }
 #' @name piccr_output
 NULL

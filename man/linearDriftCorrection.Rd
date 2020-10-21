@@ -16,8 +16,14 @@ needs to contain the additional columns \code{useForDriftCorr} and
 applied to the input data.}
 }
 \value{
-The input \code{dataset} with the d18O and dD values corrected for a
-  constant linear drift.
+A named list with two elements:
+\describe{
+\item{dataset:}{the input \code{dataset} with the d18O and dD values
+  corrected for a constant linear drift.}
+\item{parameter:}{a tibble with the applied drift correction parameters, and
+  their associated quality control information, output from
+  \code{\link{calculateDriftSlope}}.}
+}
 }
 \description{
 Correct a given data set for an assumed constant linear drift of the isotope
@@ -25,5 +31,6 @@ values with measurement time.
 }
 \seealso{
 \code{\link{associateStandardsWithConfigInfo}},
-  \code{\link{assignVialsToGroups}}
+  \code{\link{assignVialsToGroups}},
+  \code{\link{calculateDriftSlope}}
 }

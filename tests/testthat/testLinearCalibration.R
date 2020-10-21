@@ -6,78 +6,138 @@ context("Test simple calibration without drift correction")
 # In this data set, o18_True is calculated from d(18_16)Mean applying
 # a slope = 0.9 and an intercept = -2.
 dataset1 <- tibble::tribble(
-  ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
-  # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
-   1,    "A",             1,         1,               1,      -5,            -1.1,      -5,       TRUE,
-   2,    "A",             2,         1,               1,      -5,            -1.1,      -5,       TRUE,
-   3,    "A",             3,         1,               1,      -5,            -1.1,      -5,       TRUE,
-   4,    "C",             1,         2,               1,      4,             -0.2,      4,        TRUE,
-   5,    "C",             2,         2,               1,      4,             -0.2,      4,        TRUE,
-   6,    "C",             3,         2,               1,      4,             -0.2,      4,        TRUE,
-   7,    "B",             1,         3,               1,      7,             0.7,       7,        TRUE,
-   8,    "B",             2,         3,               1,      7,             0.7,       7,        TRUE,
-   9,    "B",             3,         3,               1,      7,             0.7,       7,        TRUE
+  ~Line, ~`Time Code`, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
+  # -- / ----------- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
+   1,    "2020/10/1400:00:01", "A",     1,         1,               1,      -5,            -1.1,      -5,       TRUE,
+   2,    "2020/10/1400:00:02", "A",     2,         1,               1,      -5,            -1.1,      -5,       TRUE,
+   3,    "2020/10/1400:00:03", "A",     3,         1,               1,      -5,            -1.1,      -5,       TRUE,
+   4,    "2020/10/1400:00:04", "C",     1,         2,               1,      4,             -0.2,      4,        TRUE,
+   5,    "2020/10/1400:00:05", "C",     2,         2,               1,      4,             -0.2,      4,        TRUE,
+   6,    "2020/10/1400:00:06", "C",     3,         2,               1,      4,             -0.2,      4,        TRUE,
+   7,    "2020/10/1400:00:07", "B",     1,         3,               1,      7,             0.7,       7,        TRUE,
+   8,    "2020/10/1400:00:08", "B",     2,         3,               1,      7,             0.7,       7,        TRUE,
+   9,    "2020/10/1400:00:09", "B",     3,         3,               1,      7,             0.7,       7,        TRUE
 )
 expected1 <- tibble::tribble(
-  ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
-  # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
-  1,    "A",             1,         -1.1,             1,      -5,            -1.1,      -5,       TRUE,
-  2,    "A",             2,         -1.1,             1,      -5,            -1.1,      -5,       TRUE,
-  3,    "A",             3,         -1.1,             1,      -5,            -1.1,      -5,       TRUE,
-  4,    "C",             1,         -0.2,             1,      4,             -0.2,      4,        TRUE,
-  5,    "C",             2,         -0.2,             1,      4,             -0.2,      4,        TRUE,
-  6,    "C",             3,         -0.2,             1,      4,             -0.2,      4,        TRUE,
-  7,    "B",             1,         0.7,              1,      7,             0.7,       7,        TRUE,
-  8,    "B",             2,         0.7,              1,      7,             0.7,       7,        TRUE,
-  9,    "B",             3,         0.7,              1,      7,             0.7,       7,        TRUE
+  ~Line, ~`Time Code`, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
+  # -- / ----------- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ---------------
+  1,    "2020/10/1400:00:01", "A",      1,         -1.1,             1,      -5,            -1.1,      -5,       TRUE,
+  2,    "2020/10/1400:00:02", "A",      2,         -1.1,             1,      -5,            -1.1,      -5,       TRUE,
+  3,    "2020/10/1400:00:03", "A",      3,         -1.1,             1,      -5,            -1.1,      -5,       TRUE,
+  4,    "2020/10/1400:00:04", "C",      1,         -0.2,             1,      4,             -0.2,      4,        TRUE,
+  5,    "2020/10/1400:00:05", "C",      2,         -0.2,             1,      4,             -0.2,      4,        TRUE,
+  6,    "2020/10/1400:00:06", "C",      3,         -0.2,             1,      4,             -0.2,      4,        TRUE,
+  7,    "2020/10/1400:00:07", "B",      1,         0.7,              1,      7,             0.7,       7,        TRUE,
+  8,    "2020/10/1400:00:08", "B",      2,         0.7,              1,      7,             0.7,       7,        TRUE,
+  9,    "2020/10/1400:00:09", "B",      3,         0.7,              1,      7,             0.7,       7,        TRUE
+)
+
+expected1Params <- tibble::tibble(
+  species = c("d18O", "dD"),
+  block = c(1, 1),
+  timeStamp = c(4, 4),
+  intercept = c(-2., 0.),
+  slope = c(0.9, 1.),
+  pValueIntercept = c(0, 0.26),
+  pValueSlope = c(0, 0),
+  residualRMSD = c(0, 0),
+  rSquared = c(1, 1)
 )
 
 config <- list(use_memory_correction = TRUE, use_three_point_calibration = TRUE)
 
-test_that("test getCalibInterceptAndSlope", {
+test_that("running the calibration model", {
+
+  # should throw an error
+  expect_error(runCalibrationModel(dataset1, species = "unknown"))
+
+  expectedD18O <- tibble::tibble(
+    species = "d18O",
+    block = 1,
+    timeStamp = 1,
+    intercept = -2.,
+    slope = 0.9,
+    pValueIntercept = 0,
+    pValueSlope = 0,
+    residualRMSD = 0,
+    rSquared = 1
+  )
+
+  expectedDD <- tibble::tibble(
+    species = "dD",
+    block = 1,
+    timeStamp = 1,
+    foo = "bla",
+    intercept = 0.,
+    slope = 1.,
+    pValueIntercept = 0.26,
+    pValueSlope = 0,
+    residualRMSD = 0,
+    rSquared = 1
+  )
+
+  actualD18O <- runCalibrationModel(dataset1, species = "d18O",
+                                    block = 1, timeStamp = 1)
+
+  actualDD   <- runCalibrationModel(dataset1, species = "dD",
+                                    block = 1, timeStamp = 1, foo = "bla")
+
+  expect_equal(actualD18O, expectedD18O)
+  expect_equal(actualDD, expectedDD)
+
+})
+
+test_that("test getCalibration", {
   
   o18InterceptExpected <- -2.
   o18SlopeExpected <- 0.9
   H2InterceptExpected <- 0
   H2SlopeExpected <- 1
+
+  actual <- getCalibration(dataset1, config = config, useBlock = 1)
+
+  actual1 <- actual %>% dplyr::filter(species == "d18O")
+  actual2 <- actual %>% dplyr::filter(species == "dD")
   
-  actual <- getCalibInterceptAndSlope(dataset1, config = config, useBlock = 1)
+  expect_equal(actual1$intercept, o18InterceptExpected)
+  expect_equal(actual1$slope, o18SlopeExpected)
   
-  expect_equal(actual$d18O$intercept, o18InterceptExpected)
-  expect_equal(actual$d18O$slope, o18SlopeExpected)
-  
-  expect_equal(actual$dD$intercept, H2InterceptExpected)
-  expect_equal(actual$dD$slope, H2SlopeExpected)
+  expect_equal(actual2$intercept, H2InterceptExpected)
+  expect_equal(actual2$slope, H2SlopeExpected)
 })
 
-test_that("test getCalibInterceptAndSlope for dataset with rows that should be excluded", {
+test_that("test getCalibration for dataset with rows that should be excluded", {
   
   # In this dataset only the first two rows should be used to determine calibration intercept and slope.
   dataset2 <- tibble::tribble(
-    ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~block, ~o18_True, ~H2_True, ~useForCalibration,
-    # ------------ / ----------- / ----- / -------- / ------- / ---------------
-    1,             2,            1,      1,         2,        TRUE,
-    5,             3,            1,      5,         3,        TRUE,
-    50,            100,          2,      1,         2,        TRUE,
-    50,            100,          1,      1,         2,        FALSE,
-    50,            100,          2,      1,         2,        FALSE,
-    50,            100,          NA,     1,         2,        TRUE
+    ~`Time Code`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~block, ~o18_True, ~H2_True, ~useForCalibration,
+    # --------- / ------------ / ----------- / ----- / -------- / ------- / ---------------
+    "2020/10/1400:00:01", 1,     2,            1,      1,         2,        TRUE,
+    "2020/10/1400:00:02", 5,     3,            1,      5,         3,        TRUE,
+    "2020/10/1400:00:03", 50,    100,          2,      1,         2,        TRUE,
+    "2020/10/1400:00:04", 50,    100,          1,      1,         2,        FALSE,
+    "2020/10/1400:00:05", 50,    100,          2,      1,         2,        FALSE,
+    "2020/10/1400:00:06", 50,    100,          NA,     1,         2,        TRUE
   )
   
-  actual <- getCalibInterceptAndSlope(dataset2, config = config, useBlock = 1)
+  actual <- getCalibration(dataset2, config = config, useBlock = 1)
+
+  actual1 <- actual %>% dplyr::filter(species == "d18O")
+  actual2 <- actual %>% dplyr::filter(species == "dD")
   
-  expect_equal(actual$d18O$intercept, 0)
-  expect_equal(actual$d18O$slope, 1)
+  expect_equal(actual1$intercept, 0)
+  expect_equal(actual1$slope, 1)
   
-  expect_equal(actual$dD$intercept, 0)
-  expect_equal(actual$dD$slope, 1)
+  expect_equal(actual2$intercept, 0)
+  expect_equal(actual2$slope, 1)
 })
 
 test_that("test applyCalibration", {
   
-  calibrationParams <- list(
-    d18O = list(intercept = 5, slope = 0.9),
-    dD = list(intercept = -2, slope = 1.3)
+  calibrationParams <- tibble::tibble(
+    species = c("d18O", "dD"),
+    intercept = c(5, -2),
+    slope = c(0.9, 1.3)
   )
   data <- tibble::tribble(
     ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~otherCol,
@@ -102,80 +162,86 @@ test_that("test applyCalibration", {
   expect_equal(actual, expected)
 })
 
-test_that("test calibrateNoDriftSingleDataset", {
-  
-  actual <- linearCalibration(dataset1, config = config, block = 1)
-  actual <- dplyr::mutate(actual, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
-  
-  expect_equal(actual, expected1)
-})
+test_that("test simple linear calibration", {
 
-test_that("test calibrateWithoutDriftCorrection", {
+  expected <- list(
+    dataset = expected1,
+    parameter = expected1Params
+  )
+
+  actual <- linearCalibration(dataset1, config = config, block = 1)
+
+  expect_type(actual, "list")
+  expect_length(actual, 2)
+
+  actual$dataset <- dplyr::mutate(actual$dataset, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
   
+  expect_equal(actual, expected)
+
   actual <- linearCalibration(dataset1, config = config)
-  actual <- dplyr::mutate(actual, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
+  actual$dataset <- dplyr::mutate(actual$dataset, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
   
-  expect_equal(actual, expected1)
+  expect_equal(actual, expected)
 })
 
 test_that("test use only last three injections if memory correction is not used", {
   
   dataset3 <- tibble::tribble(
-    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration, ~vial_group,
-    # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ----------------- / -----------
-    1,    "A",             1,         100,              1,      100,           2,        -5,        TRUE,               1,
-    2,    "A",             2,         2,                1,      -5,            2,        -5,        TRUE,               1,
-    3,    "A",             3,         2,                1,      -5,            2,        -5,        TRUE,               1,
-    3,    "A",             4,         2,                1,      -5,            2,        -5,        TRUE,               1,
-    4,    "C",             1,         100,              1,      100,           5,         4,        TRUE,               1,
-    5,    "C",             2,         100,              1,      100,           5,         4,        TRUE,               1,
-    6,    "C",             3,         5,                1,      4,             5,         4,        TRUE,               1,
-    6,    "C",             4,         5,                1,      4,             5,         4,        TRUE,               1,
-    6,    "C",             5,         5,                1,      4,             5,         4,        TRUE,               1,
-    7,    "B",             1,         -2,               1,      7,             -2,        7,        TRUE,               1,
-    8,    "B",             2,         -2,               1,      7,             -2,        7,        TRUE,               1,
-    9,    "B",             3,         -2,               1,      7,             -2,        7,        TRUE,               1,
+    ~Line, ~`Time Code`, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration, ~vial_group,
+    # -- / ----------- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ----------------- / -----------
+    1,    "2020/10/1400:00:01", "A",      1,         100,              1,      100,           2,        -5,        TRUE,               1,
+    2,    "2020/10/1400:00:02", "A",      2,         2,                1,      -5,            2,        -5,        TRUE,               1,
+    3,    "2020/10/1400:00:03", "A",      3,         2,                1,      -5,            2,        -5,        TRUE,               1,
+    3,    "2020/10/1400:00:04", "A",      4,         2,                1,      -5,            2,        -5,        TRUE,               1,
+    4,    "2020/10/1400:00:05", "C",      1,         100,              1,      100,           5,         4,        TRUE,               1,
+    5,    "2020/10/1400:00:06", "C",      2,         100,              1,      100,           5,         4,        TRUE,               1,
+    6,    "2020/10/1400:00:07", "C",      3,         5,                1,      4,             5,         4,        TRUE,               1,
+    6,    "2020/10/1400:00:08", "C",      4,         5,                1,      4,             5,         4,        TRUE,               1,
+    6,    "2020/10/1400:00:09", "C",      5,         5,                1,      4,             5,         4,        TRUE,               1,
+    7,    "2020/10/1400:00:10", "B",      1,         -2,               1,      7,             -2,        7,        TRUE,               1,
+    8,    "2020/10/1400:00:11", "B",      2,         -2,               1,      7,             -2,        7,        TRUE,               1,
+    9,    "2020/10/1400:00:12", "B",      3,         -2,               1,      7,             -2,        7,        TRUE,               1,
   )
   
   config <- list(use_memory_correction = FALSE, use_three_point_calibration = TRUE)
   
-  actual <- getCalibInterceptAndSlope(dataset3, config = config, useBlock = 1)
+  actual <- getCalibration(dataset3, config = config, useBlock = 1)
   
-  expect_equal(actual$d18O$intercept, 0)
-  expect_equal(actual$d18O$slope, 1)
+  expect_equal(actual$intercept[1], 0)
+  expect_equal(actual$slope[1], 1)
   
-  expect_equal(actual$dD$intercept, 0)
-  expect_equal(actual$dD$slope, 1)
+  expect_equal(actual$intercept[2], 0)
+  expect_equal(actual$slope[2], 1)
 })
 
 test_that("test two point calibration", {
   
   dataset4 <- tibble::tribble(
-    ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration, ~vial_group,
-    # -- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ----------------- / -----------
-    1,    "C",             1,         0,                1,      100,           5,         4,        TRUE,               1,
-    2,    "C",             2,         0,                1,      100,           5,         4,        TRUE,               1,
-    3,    "C",             3,         0,                1,      4,             5,         4,        TRUE,               1,
-    4,    "C",             4,         0,                1,      4,             5,         4,        TRUE,               1,
-    5,    "C",             5,         0,                1,      4,             5,         4,        TRUE,               1,
-    6,    "A",             1,         100,              1,      100,           2,        -5,        TRUE,               1,
-    7,    "A",             2,         2,                1,      -5,            2,        -5,        TRUE,               1,
-    8,    "A",             3,         2,                1,      -5,            2,        -5,        TRUE,               1,
-    9,    "A",             4,         2,                1,      -5,            2,        -5,        TRUE,               1,
-    10,   "B",             1,         -2,               1,      7,             -2,        7,        TRUE,               1,
-    11,   "B",             2,         -2,               1,      7,             -2,        7,        TRUE,               1,
-    12,   "B",             3,         -2,               1,      7,             -2,        7,        TRUE,               1
+    ~Line, ~`Time Code`, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration, ~vial_group,
+    # -- / ----------- / -------------- / -------- / -------------- / ----- / ------------ / -------- / ------- / ----------------- / -----------
+    1,    "2020/10/1400:00:01", "C",      1,         0,                1,      100,           5,         4,        TRUE,               1,
+    2,    "2020/10/1400:00:02", "C",      2,         0,                1,      100,           5,         4,        TRUE,               1,
+    3,    "2020/10/1400:00:03", "C",      3,         0,                1,      4,             5,         4,        TRUE,               1,
+    4,    "2020/10/1400:00:04", "C",      4,         0,                1,      4,             5,         4,        TRUE,               1,
+    5,    "2020/10/1400:00:05", "C",      5,         0,                1,      4,             5,         4,        TRUE,               1,
+    6,    "2020/10/1400:00:06", "A",      1,         100,              1,      100,           2,        -5,        TRUE,               1,
+    7,    "2020/10/1400:00:07", "A",      2,         2,                1,      -5,            2,        -5,        TRUE,               1,
+    8,    "2020/10/1400:00:08", "A",      3,         2,                1,      -5,            2,        -5,        TRUE,               1,
+    9,    "2020/10/1400:00:09", "A",      4,         2,                1,      -5,            2,        -5,        TRUE,               1,
+    10,   "2020/10/1400:00:10", "B",      1,         -2,               1,      7,             -2,        7,        TRUE,               1,
+    11,   "2020/10/1400:00:11", "B",      2,         -2,               1,      7,             -2,        7,        TRUE,               1,
+    12,   "2020/10/1400:00:12", "B",      3,         -2,               1,      7,             -2,        7,        TRUE,               1
   )
   
   config <- list(use_memory_correction = FALSE, use_three_point_calibration = FALSE)
   
-  actual <- getCalibInterceptAndSlope(dataset4, config = config, useBlock = 1)
+  actual <- getCalibration(dataset4, config = config, useBlock = 1)
   
-  expect_equal(actual$d18O$intercept, 0)
-  expect_equal(actual$d18O$slope, 1)
+  expect_equal(actual$intercept[1], 0)
+  expect_equal(actual$slope[1], 1)
   
-  expect_equal(actual$dD$intercept, 0)
-  expect_equal(actual$dD$slope, 1)
+  expect_equal(actual$intercept[2], 0)
+  expect_equal(actual$slope[2], 1)
 })
 
 test_that("test training data for grouped vials", {

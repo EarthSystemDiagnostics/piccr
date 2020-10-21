@@ -97,17 +97,24 @@ processSingleDataset <- function(name, datasets, config){
   }
   
   # calibrate the memory corrected data. Only used for output.
-  calibrated <- linearCalibration(memoryCorrected, config, block = 1)
+  temp <- linearCalibration(memoryCorrected, config, block = 1)
+  calibrated <- temp$dataset
+  calibrationParameter <- temp$parameter
   
   # apply calibration and drift correction based on the requested calibration method
   if (config$calibration_method == 0){
     calibratedAndDriftCorrected <- calibrated
   }
   else if (config$calibration_method == 1) {
-    calibratedAndDriftCorrected <- calibrateUsingSimpleDriftCorrection(memoryCorrected, config)
+    temp <- calibrateUsingSimpleDriftCorrection(memoryCorrected, config)
+    calibratedAndDriftCorrected <- temp$dataset
+    calibrationParameter        <- temp$calibrationParameter
+    driftParameter              <- temp$driftParameter
   } 
   else if (config$calibration_method == 2) {
-    calibratedAndDriftCorrected <- calibrateUsingDoubleCalibration(memoryCorrected, config)
+    temp <- calibrateUsingDoubleCalibration(memoryCorrected, config)
+    calibratedAndDriftCorrected <- temp$dataset
+    calibrationParameter        <- temp$parameter
   }
   
   # calculate the d-excess values for all samples
@@ -120,8 +127,11 @@ processSingleDataset <- function(name, datasets, config){
   qualityControlInfo <- getQualityControlInfo(calibratedWithDExcess, accumulated)
 
   # synthesize output list for this dataset and return it  
-  output <- buildOutputList(name, config, dataset, memoryCorrected, memoryCoefficients, 
-                            calibrated, calibratedAndDriftCorrected, accumulated, qualityControlInfo)
+  output <- buildOutputList(name, config, dataset,
+                            memoryCorrected, memoryCoefficients,
+                            calibrated, calibratedAndDriftCorrected,
+                            accumulated, calibrationParameter, driftParameter,
+                            qualityControlInfo)
   return(output)
   
 }

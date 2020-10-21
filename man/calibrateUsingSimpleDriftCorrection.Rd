@@ -22,8 +22,17 @@ needs to contain the additional columns \code{block},
 }}
 }
 \value{
-The input \code{dataset} with the d18O and dD values calibrated
-  according to drift correction and single calibration.
+A named list with three elements:
+\describe{
+\item{dataset:}{the input \code{dataset} with the d18O and dD values
+  calibrated according to linear drift correction and single calibration.}
+\item{calibrationParameter:}{a tibble with the applied calibration
+  parameters, and their associated quality control information, output from
+  \code{\link{getCalibration}}.}
+\item{driftParameter:}{a tibble with the applied drift correction parameters,
+  and their associated quality control information, output from
+  \code{\link{calculateDriftSlope}}.}
+}
 }
 \description{
 Calibrate a given data set using calibration slope and intercept values
@@ -32,5 +41,9 @@ following a linear drift correction against measurement time.
 }
 \seealso{
 \code{\link{groupStandardsInBlocks}},
-  \code{\link{associateStandardsWithConfigInfo}}
+  \code{\link{associateStandardsWithConfigInfo}},
+  \code{\link{linearCalibration}},
+  \code{\link{linearDriftCorrection}},
+  \code{\link{getCalibration}},
+  \code{\link{calculateDriftSlope}}
 }

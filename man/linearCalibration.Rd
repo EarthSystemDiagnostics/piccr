@@ -26,8 +26,14 @@ is to be used for estimating the calibration parameters; defaults to
 \code{1} (first block in the measurement sequence).}
 }
 \value{
-The input \code{dataset} with the d18O and dD values calibrated
-  according to the single-block calibration.
+A named list with two elements:
+\describe{
+\item{dataset:}{the input \code{dataset} with the d18O and dD values
+  calibrated according to the single-block calibration.}
+\item{parameter:}{a tibble with the applied calibration parameters, and their
+  associated quality control information, output from
+  \code{\link{getCalibration}}.}
+}
 }
 \description{
 Calibrate a given data set using calibration slope and intercept values

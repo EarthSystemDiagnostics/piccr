@@ -212,8 +212,9 @@ isStandard <- function(id1, config){
 #'
 #' @param name the file name of the data set.
 #' @param config a named list containing the logical component
-#'   \code{use_memory_correction} which specifies if memory correction was used
-#'   in the processing.
+#'   \code{use_memory_correction}, which specifies if memory correction was used
+#'   in the processing, and the component \code{calibration_method}, which
+#'   signals the type of the calibration method that was used.
 #' @param dataset a data frame with the raw measurement data.
 #' @param memoryCorrected a data frame with the memory-corrected measurement
 #'   data.
@@ -224,6 +225,12 @@ isStandard <- function(id1, config){
 #'   calibrated and drift-corrected measurement data.
 #' @param accumulated a data frame with the corrected and calibrated data
 #'   averaged over a specified number of injections.
+#' @param calibrationParams a tibble with the estimated calibration
+#'   parameters, together with quality control assessment, which were applied
+#'   for calibrating the measurement data.
+#' @param driftParams a tibble with the estimated drift parameters, together
+#'   with quality control assessment, which were applied for drift-correcting
+#'   the measurement data.
 #' @param qualityControlInfo the output of \code{\link{getQualityControlInfo}}.
 #' @inherit piccr_output return
 #' @seealso \code{\link{processData}},
@@ -235,8 +242,11 @@ isStandard <- function(id1, config){
 #'   \code{\link{accumulateMeasurements}},
 #'   \code{\link{getQualityControlInfo}}.
 #' 
-buildOutputList <- function(name, config, dataset, memoryCorrected, memoryCoefficients, 
-                            calibrated, calibratedAndDriftCorrected, accumulated, qualityControlInfo){
+buildOutputList <- function(name, config, dataset,
+                            memoryCorrected, memoryCoefficients,
+                            calibrated, calibratedAndDriftCorrected,
+                            accumulated, calibrationParams, driftParams,
+                            qualityControlInfo){
   
   list(
     name = name,
@@ -253,9 +263,8 @@ buildOutputList <- function(name, config, dataset, memoryCorrected, memoryCoeffi
     deviationOfControlStandard = qualityControlInfo$deviationOfControlStandard,
     pooledSD = qualityControlInfo$pooledSD,
     
-    # TODO
-    calibrationParams = NA,
-    driftParams = NA
+    calibrationParams = calibrationParams,
+    driftParams = if (config$calibration_method == 1) driftParams
   )
 }
 

@@ -113,13 +113,28 @@ dataset4 <- tibble::tribble(
   "Std_B",         3,      "2019/11/2512:10:00", 6700,            -3445,         TRUE,             1
 )
 
+expectedParams <- tibble::tibble(
+  species = c(rep("d18O", 3), rep("dD", 3)),
+  sample = c("Std_A", "Std_B", "mean", "Std_A", "Std_B", "mean"),
+  slope = rep(0, 6),
+  pValue = c(0.26, 0.29, NA, 0.26, 0.29, NA),
+  residualRMSD = c(0, 0, NA, 0, 0, NA),
+  rSquared = c(0.48, 0.47, NA, 0.48, 0.47, NA)
+)
+
 config <- list(use_memory_correction = TRUE)
+
+test_that("running the calibration model", {
+
+  # should throw an error
+  expect_error(runDriftModel(dataset1, species = "unknown"))
+})
 
 test_that("test linearDriftCorrection", {
   
-  actual1 <- linearDriftCorrection(dataset1, config)
-  actual2 <- linearDriftCorrection(dataset2, config)
-  actual3 <- linearDriftCorrection(dataset3, config)
+  actual1 <- linearDriftCorrection(dataset1, config)$dataset
+  actual2 <- linearDriftCorrection(dataset2, config)$dataset
+  actual3 <- linearDriftCorrection(dataset3, config)$dataset
   
   expect_equal(dplyr::mutate_if(actual1, is.numeric, round), dataset1)
   expect_equal(dplyr::mutate_if(actual2, is.numeric, round), expected2)
@@ -131,8 +146,7 @@ test_that("test calculate drift slope alpha (dataset1)", {
   dataset1 <- addColumnSecondsSinceStart(dataset1)
   actual <- calculateDriftSlope(dataset1, config)
   
-  expect_equal(actual$d18O, 0)
-  expect_equal(actual$dD, 0)
+  expect_equal(actual, expectedParams)
 })
 
 test_that("test calculate drift slope alpha (dataset2)", {
@@ -140,8 +154,7 @@ test_that("test calculate drift slope alpha (dataset2)", {
   dataset2 <- addColumnSecondsSinceStart(dataset2)
   actual <- calculateDriftSlope(dataset2, config)
   
-  expect_equal(actual$d18O, 1)
-  expect_equal(actual$dD, -0.5)
+  expect_equal(actual$slope, c(rep(1, 3), rep(-0.5, 3)))
 })
 
 test_that("test calculate drift slope alpha (dataset3)", {
@@ -149,8 +162,7 @@ test_that("test calculate drift slope alpha (dataset3)", {
   dataset3 <- addColumnSecondsSinceStart(dataset3)
   actual <- calculateDriftSlope(dataset3, config)
   
-  expect_equal(actual$d18O, 1.5)
-  expect_equal(actual$dD, 0)
+  expect_equal(actual$slope, c(1, 2, 1.5, -0.5, 0.5, 0))
 })
 
 test_that("test use only standards specified in config", {
@@ -174,10 +186,8 @@ test_that("test use only standards specified in config", {
   
   dataset3 <- addColumnSecondsSinceStart(dataset3)
   actual <- calculateDriftSlope(dataset3, config)
-  
-  expect_equal(actual$d18O, 1)
-  expect_equal(actual$dD, -0.5)
-  
+
+  expect_equal(actual$slope, c(1, 1, -0.5, -0.5))
 })
 
 test_that("test correct drift slopes when memory correction is off", {
@@ -187,6 +197,5 @@ test_that("test correct drift slopes when memory correction is off", {
   dataset4 <- addColumnSecondsSinceStart(dataset4)
   actual <- calculateDriftSlope(dataset4, config)
 
-  expect_equal(actual$d18O, 1)
-  expect_equal(actual$dD, -0.5)
+  expect_equal(actual$slope, c(rep(1, 3), rep(-0.5, 3)))
 })

@@ -4,16 +4,28 @@
 \alias{applyDriftCorrection}
 \title{Apply drift correction}
 \usage{
-applyDriftCorrection(dataset, alpha)
+applyDriftCorrection(dataset, driftParams)
 }
 \arguments{
 \item{dataset}{a data frame with measurement data of a specific data set.}
 
-\item{alpha}{numeric; a constant drift slope in permil per seconds.}
+\item{driftParams}{the drift correction parameters in a tibble with a
+  mandatory two rows and three variables:
+  \describe{
+  \item{\code{species}:}{character; must be \code{d18O} for one row and
+    \code{dD} for the other.}
+  \item{\code{sample}:}{character; must be \code{"mean"} once for
+    \code{species = "d18O"} and \code{species = "dD"}, respectively,
+    corresponding to the mean drift slopes which are applied for the drift
+    correction.}
+  \item{\code{slope}:}{numeric; the respective drift correction slopes in
+    permil per second.}
+}}
 }
 \value{
 The input \code{dataset} with the d18O and dD values corrected
-  against a linear drift with slope \code{alpha}.
+  against linear drift according to the estimated drift slopes in
+  \code{driftParams}.
 }
 \description{
 Apply a linear drift correction to a specific data set given a constant

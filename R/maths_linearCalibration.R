@@ -16,24 +16,31 @@
 #'   is to be used for estimating the calibration parameters; defaults to
 #'   \code{1} (first block in the measurement sequence).
 #'
-#' @return The input \code{dataset} with the d18O and dD values calibrated
-#'   according to the single-block calibration.
+#' @return A named list with two elements:
+#' \describe{
+#' \item{dataset:}{the input \code{dataset} with the d18O and dD values
+#'   calibrated according to the single-block calibration.}
+#' \item{parameter:}{a tibble with the applied calibration parameters, and their
+#'   associated quality control information, output from
+#'   \code{\link{getCalibration}}.}
+#' }
 #' @seealso \code{\link{groupStandardsInBlocks}},
 #'   \code{\link{associateStandardsWithConfigInfo}}
 #' 
 linearCalibration <- function(dataset, config, block = 1){
   
-  calibrationParams <- getCalibInterceptAndSlope(dataset, config, block)
+  calibrationParams <- getCalibration(dataset, config, block)
   calibratedDataset <- applyCalibration(dataset, calibrationParams)
   
-  return(calibratedDataset)
+  return(list(dataset = calibratedDataset, parameter = calibrationParams))
 }
 
 #' Get calibration parameters
 #'
-#' Obtain calibration slope and intercept values as estimated from standards in
-#' a particular standard block of the measurement sequence from regressing the
-#' expected standard values against their measured values.
+#' Obtain the calibration parameters as estimated from standards in a particular
+#' standard block of the measurement sequence from regressing the expected
+#' standard values against their measured values; for this, a simple linear
+#' regression is currently implemented.
 #'
 #' If memory correction was applied to the data, all injections are used from
 #' the standard data, else only the last three injections. If a two-point
@@ -45,33 +52,78 @@ linearCalibration <- function(dataset, config, block = 1){
 #'   is to be used for estimating the calibration parameters.
 #' @inheritParams linearCalibration
 #'
-#' @return A named list with elements \code{d18O} and \code{dD} where each
-#' element is again a list with two elements:
-#' \describe{
-#' \item{\code{intercept}:}{numeric; the estimated intercept of the
-#'   calibration.}
-#' \item{\code{slope}:}{numeric; the estimated slope of the calibration.}
-#' }
+#' @return A tibble with two rows and at least seven variables where the first
+#'   row is the output of \code{\link{runCalibrationModel}} for \code{d18O} and
+#'   the second row the respective output for \code{dD}.
 #' @seealso \code{\link{groupStandardsInBlocks}},
-#'   \code{\link{associateStandardsWithConfigInfo}}
+#'   \code{\link{associateStandardsWithConfigInfo}},
+#'   \code{\link{runCalibrationModel}}
 #' 
-getCalibInterceptAndSlope <- function(dataset, config, useBlock){
+getCalibration <- function(dataset, config, useBlock){
   
   trainingData <- getTrainingData(dataset, config, useBlock)
+  calibTime    <- getCalibTimes(dataset, useBlocks = useBlock)
+
+  dplyr::bind_rows(
+    runCalibrationModel(trainingData, species = "d18O",
+                        block = useBlock, timeStamp = calibTime),
+    runCalibrationModel(trainingData, species = "dD",
+                        block = useBlock, timeStamp = calibTime)
+  )
+}
+
+#' Run calibration model
+#'
+#' Run the calibration model of measured standard values against their true
+#' values. Implemented is a simple linear regression.
+#'
+#' @param trainingData An input measurement dataset filtered by the standard
+#'   block and the isotope standards which are to be used for the calibration.
+#' @param species character string with the name of the isotope species for
+#'   which the calibration model shall be calculated; valid names are "d18O" for
+#'   oxygen isotopes and "dD" for hydrogen isotopes.
+#' @param ... optional meta information on the calibration, such as block number
+#'   and time stamp of the used measurement subset, passed on to the function
+#'   output.
+#' @return A tibble with one row and at least seven variables:
+#' \describe{
+#' \item{\code{species}:}{character; the name of the isotope \code{species}
+#'   used;}
+#' \item{\code{intercept}:}{numeric; the estimated calibration intercept;}
+#' \item{\code{slope}:}{numeric; the estimated calibration slope;}
+#' \item{\code{pValueIntercept}:}{numeric; the p-value of the calibration
+#'   intercept;}
+#' \item{\code{pValueSlope}:}{numeric; the p-value of the calibration slope;}
+#' \item{\code{residualRMSD}:}{numeric; the root mean square deviation of the
+#'   calibration regression residuals;}
+#' \item{\code{rSquared}:}{numeric; the r-squared value of the calibration
+#'   regression;}
+#' }
+#' plus the elements passed in \code{...}.
+runCalibrationModel <- function(trainingData, species = "d18O", ...) {
 
   # params from inverse regression to have least noise on predictor variable
 
-  d18OModel <- stats::lm(`d(18_16)Mean` ~ o18_True, data = trainingData)
-  d18OIntercept <- -1 * stats::coef(d18OModel)[[1]] / stats::coef(d18OModel)[[2]]
-  d18OSlope <- 1 / stats::coef(d18OModel)[[2]]
-  
-  dDModel <- stats::lm(`d(D_H)Mean` ~ H2_True, data = trainingData)
-  dDIntercept <- -1 * stats::coef(dDModel)[[1]] / stats::coef(dDModel)[[2]]
-  dDSlope <- 1 / stats::coef(dDModel)[[2]]
-  
-  list(
-    d18O = list(intercept = d18OIntercept, slope = d18OSlope),
-    dD = list(intercept = dDIntercept, slope = dDSlope)
+  if (species == "d18O") {
+    model <- stats::lm(`d(18_16)Mean` ~ o18_True, data = trainingData)
+  } else if (species == "dD") {
+    model <- stats::lm(`d(D_H)Mean` ~ H2_True, data = trainingData)
+  } else {
+    stop("Unknown isotope species requested for calibration.", call. = FALSE)
+  }
+
+  modelSummary <- suppressWarnings(summary(model))
+  coeffs <- stats::coef(modelSummary)
+
+  tibble::as_tibble(
+    list(species = species,
+         ...,
+         intercept = -1 * coeffs[1, 1] / coeffs[2, 1],
+         slope = 1 / coeffs[2, 1],
+         pValueIntercept = signif(coeffs[1, 4], 2),
+         pValueSlope = signif(coeffs[2, 4], 2),
+         residualRMSD = signif(calculateRMSD(modelSummary$residuals), 2),
+         rSquared = signif(modelSummary$r.squared, 2))
   )
 }
 
@@ -151,11 +203,13 @@ selectStandardsForTwoPointCalib <- function(dataset){
 #' intercept values.
 #' 
 #' @param dataset a data frame with measurement data of a specific data set.
-#' @param calibrationParams a named list with elements \code{d18O} and \code{dD}
-#'   where each element is again a list with two elements:
+#' @param calibrationParams the calibration parameters in a tibble with two rows
+#'   and three mandatory variables:
 #'   \describe{
-#'   \item{\code{intercept}:}{numeric; calibration intercept.}
-#'   \item{\code{slope}:}{numeric; calibration slope.}
+#'   \item{\code{species}:}{character; must be \code{d18O} for one row and
+#'     \code{dD} for the other.}
+#'   \item{\code{intercept}:}{numeric; the respective calibration intercept.}
+#'   \item{\code{slope}:}{numeric; the respective calibration slope.}
 #' }
 #' @import dplyr
 #'
@@ -164,14 +218,12 @@ selectStandardsForTwoPointCalib <- function(dataset){
 #' 
 applyCalibration <- function(dataset, calibrationParams){
   
-  d18OIntercept <- calibrationParams$d18O$intercept
-  d18OSlope <- calibrationParams$d18O$slope
-  dDIntercept <- calibrationParams$dD$intercept
-  dDSlope <- calibrationParams$dD$slope
+  d18O <- calibrationParams %>% filter(species == "d18O")
+  dD   <- calibrationParams %>% filter(species == "dD")
   
   calibratedDataset <- dataset %>%
-    mutate(`d(18_16)Mean` = `d(18_16)Mean` * d18OSlope + d18OIntercept) %>%
-    mutate(`d(D_H)Mean` = `d(D_H)Mean` * dDSlope + dDIntercept)
+    mutate(`d(18_16)Mean` = `d(18_16)Mean` * d18O$slope + d18O$intercept) %>%
+    mutate(`d(D_H)Mean` = `d(D_H)Mean` * dD$slope + dD$intercept)
   
   return(calibratedDataset)
 }
