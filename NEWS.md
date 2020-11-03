@@ -1,3 +1,8 @@
+# piccr 1.3.1.9000
+
+* patch to comply with the new 'readr 1.4.0' function argument naming for
+  `write_*()' functions (stops deprecation warnings).
+
 # piccr 1.3.0.9000
 
 * Major enhancements to the quality control output:

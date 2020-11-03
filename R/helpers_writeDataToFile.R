@@ -63,7 +63,7 @@ writeDatasets <- function(folder, datasets, config){
 writeSingleDataset <- function(dataset, folder, config){
   dataset$processed %>%
     removeStandardsFromDataIfRequested(config) %>%
-    readr::write_csv(path = file.path(folder, dataset$name), na = "")
+    readr::write_csv(file = file.path(folder, dataset$name), na = "")
 }
 
 #' Remove standards from data frame
