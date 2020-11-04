@@ -227,4 +227,16 @@ test_that("general acceptance is fulfilled", {
   } else {
     expect_lte(d, 0)
   }
+
+  # ----------------------------------
+  # BENCHMARK TEST:
+  # current performance should be kept
+  # ----------------------------------
+
+  # best current performance
+  benchmarkD18O <- 0.03
+  benchmarkDD   <- 0.4
+
+  expect_lte(rmsdD18OGood, benchmarkD18O)
+  expect_lte(rmsdDDGood, benchmarkDD)
 })
