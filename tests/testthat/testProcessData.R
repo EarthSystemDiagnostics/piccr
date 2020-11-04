@@ -22,9 +22,17 @@ datasets <- list(
   HIDS2041_IsoWater_20151127_143940.csv = readr::read_csv("test_data/HIDS2041_IsoWater_20151127_143940.csv")
 )
 
-test_that("check general output structure", {
+# ------------------------------------------------
+# Run tests on different processing configurations
+# ------------------------------------------------
 
-  actual <- processData(datasets[1], config)
+# ------------------------------------------------------------------------------
+# memory correction and calibration method 1
+
+actual <- processData(datasets[1], config)
+actualMemoryCalib1 <- processData(datasets, config)
+
+test_that("check general output structure", {
 
   expect_length(actual, 1)
   expect_true(is.list(actual))
@@ -64,37 +72,48 @@ test_that("check general output structure", {
   expect_equal(actual[[1]]$driftParams$sample,
                rep(c("DML", "JASE", "TD1", "mean"), 2))
 
-  actual <- processData(datasets, config)
-
-  expect_length(actual, 3)
+  expect_length(actualMemoryCalib1, 3)
 
 })
   
 test_that("check that no NAs were introduced", {
-    
-  actual <- processData(datasets, config)
   
-  for (dataset in actual) {
+  for (dataset in actualMemoryCalib1) {
     expect_equal(sum(is.na(dataset$processed$`delta.O18`)), 2)
     expect_equal(sum(is.na(dataset$processed$`delta.H2`)), 2)
   }
   
 })
 
-test_that("check that calibration method 2 runs", {
+test_that("check that data set names are preserved", {
 
-  config$calibration_method <- 2
-  actual <- processData(datasets[1], config)
-
-  expect_is(actual[[1]]$calibratedAndDriftCorrected, "data.frame")
-  expect_equal(dim(actual[[1]]$memoryCorrected),
-               dim(actual[[1]]$calibratedAndDriftCorrected))
-
-  expect_equal(dim(actual[[1]]$calibrationParams), c(4, 9))
-  expect_equal(actual[[1]]$calibrationParams$species, rep(c("d18O", "dD"), 2))
-  expect_equal(actual[[1]]$calibrationParams$block, c(1, 1, 3, 3))
+  expect_equal(names(actualMemoryCalib1), names(datasets))
 
 })
+
+# ------------------------------------------------------------------------------
+# memory correction and calibration method 2
+
+config$calibration_method <- 2
+actualMemoryCalib2 <- processData(datasets, config)
+
+test_that("check that calibration method 2 runs", {
+
+  expect_is(actualMemoryCalib2[[1]]$calibratedAndDriftCorrected, "data.frame")
+  expect_equal(dim(actualMemoryCalib2[[1]]$memoryCorrected),
+               dim(actualMemoryCalib2[[1]]$calibratedAndDriftCorrected))
+
+  expect_equal(dim(actualMemoryCalib2[[1]]$calibrationParams),
+               c(4, 9))
+  expect_equal(actualMemoryCalib2[[1]]$calibrationParams$species,
+               rep(c("d18O", "dD"), 2))
+  expect_equal(actualMemoryCalib2[[1]]$calibrationParams$block,
+               c(1, 1, 3, 3))
+
+})
+
+# ------------------------------------------------------------------------------
+# No memory correction and calibration method 0
 
 test_that("check that calibration method 0 runs w/o memory correction", {
 
@@ -114,10 +133,98 @@ test_that("check that calibration method 0 runs w/o memory correction", {
 
 })
 
-test_that("check that data set names are preserved", {
+# ------------------------------------------------------------------------------
+# memory correction and calibration method 0
 
-  actual <- processData(datasets, config)
+config$calibration_method <- 0
+config$use_memory_correction <- TRUE
+actualMemoryCalib0 <- processData(datasets, config)
 
-  expect_equal(names(actual), names(datasets))
+# NO memory correction and calibration method 2; average first three injections
 
+config$calibration_method <- 2
+config$use_memory_correction <- FALSE
+config$average_over_inj <- "1:3"
+actualNoMemoryCalib2 <- processData(datasets, config)
+
+test_that("general acceptance is fulfilled", {
+
+  # --------------------------------------------------------------------------
+  # ACCEPTANCE TEST 1:
+  # new piccr pkg performs as good as old command line version, or even better
+  # --------------------------------------------------------------------------
+
+  qcMemoryCalib2   <- gatherQualityControlInfo(actualMemoryCalib2)
+
+  rmsdD18OGood <- calculateRMSD(qcMemoryCalib2$rmsdQualityControl$d18O)
+  rmsdDDGood   <- calculateRMSD(qcMemoryCalib2$rmsdQualityControl$dD)
+
+  rmsdD18OCLVersion <- calculateRMSD(c(-0.096, -0.014, -0.053))
+  rmsdDDCLVersion   <- calculateRMSD(c(-1.205, -0.486, -0.693))
+
+  expect_lte(rmsdD18OGood, rmsdD18OCLVersion)
+  expect_lte(rmsdDDGood, rmsdDDCLVersion)
+
+  # ----------------------------------------------------------
+  # ACCEPTANCE TEST 2:
+  # no memory correction is worse than using memory correction
+  # ----------------------------------------------------------
+
+  qcNoMemoryCalib2 <- gatherQualityControlInfo(actualNoMemoryCalib2)
+
+  rmsdD18OBad <- calculateRMSD(qcNoMemoryCalib2$rmsdQualityControl$d18O)
+  rmsdDDBad   <- calculateRMSD(qcNoMemoryCalib2$rmsdQualityControl$dD)
+
+  expect_lte(rmsdD18OGood, rmsdD18OBad)
+  expect_lte(rmsdDDGood, rmsdDDBad)
+
+  # ---------------------------------------------------------
+  # ACCEPTANCE TEST 3:
+  # drift correction is as good as without it, or even better
+  # ---------------------------------------------------------
+
+  # set upper tolerance for "equally as good" drift correction
+  toleranceD18O <- 0.01
+  toleranceDD <-   0.1
+
+  qcMemoryCalib0   <- gatherQualityControlInfo(actualMemoryCalib0)
+  qcMemoryCalib1   <- gatherQualityControlInfo(actualMemoryCalib1)
+
+  # calibration method 2 versus method 0
+
+  d <- rmsdD18OGood - calculateRMSD(qcMemoryCalib0$rmsdQualityControl$d18O)
+
+  if (d > 0) {
+    expect_lte(d, toleranceD18O)
+  } else {
+    expect_lte(d, 0)
+  }
+
+  d <- rmsdDDGood - calculateRMSD(qcMemoryCalib0$rmsdQualityControl$dD)
+
+  if (d > 0) {
+    expect_lte(d, toleranceDD)
+  } else {
+    expect_lte(d, 0)
+  }
+
+  # calibration method 1 versus method 0
+
+  d <- calculateRMSD(qcMemoryCalib1$rmsdQualityControl$d18O) -
+    calculateRMSD(qcMemoryCalib0$rmsdQualityControl$d18O)
+
+  if (d > 0) {
+    expect_lte(d, toleranceD18O)
+  } else {
+    expect_lte(d, 0)
+  }
+
+  d <- calculateRMSD(qcMemoryCalib1$rmsdQualityControl$dD) -
+    calculateRMSD(qcMemoryCalib0$rmsdQualityControl$dD)
+
+  if (d > 0) {
+    expect_lte(d, toleranceDD)
+  } else {
+    expect_lte(d, 0)
+  }
 })
