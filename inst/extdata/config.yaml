@@ -10,7 +10,7 @@ include_standards_in_output: yes                  # Format of desired csv-file o
                                                   # flag = yes -> output standard and sample data in original order.
 
 # -------- data processing options --------
-average_over_inj: 2               # Specify number of injections to average for each sample to obtain final d18O, d2H etc. values:
+average_over_inj: 3               # Specify number of injections to average for each sample to obtain final d18O, d2H etc. values:
                                   # Pass single number to use the last n injections;
                                   # Pass x:y to use injections x to y. E.g. 2:4 to use injections 2, 3, and 4;
                                   # Pass "all" or -1 to use all injections.
