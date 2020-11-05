@@ -1,0 +1,95 @@
+library(tibble)
+
+context("Test grouping standards in blocks")
+
+config <- list(standards = list(list(name = "STD_A"), list(name = "STD_B")))
+
+test_that("test for dataframe with single row (contains standard)", {
+  df <- tibble::tibble(
+    `Identifier 1` = "STD_A",
+    val = 3
+  )
+  dfWithGroupedStandardsExpected <- tibble::tibble(
+    `Identifier 1` = "STD_A",
+    val = 3,
+    block = 1L
+  )
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
+  
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
+})
+
+test_that("test for dataframe with single row (does not contain standard)", {
+  df <- tibble::tibble(
+    `Identifier 1` = "Probe",
+    val = 3
+  )
+  dfWithGroupedStandardsExpected <- tibble::tibble(
+    `Identifier 1` = "Probe",
+    val = 3,
+    block = NA_integer_
+  )
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
+  
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
+})
+
+test_that("test for dataframe with mulitple rows (first standard, then probe)", {
+  df <- tibble::tibble(
+    `Identifier 1` = c("STD_A", "Probe"),
+    val = c(3, 7)
+  )
+  dfWithGroupedStandardsExpected <- tibble::tibble(
+    `Identifier 1` = c("STD_A", "Probe"),
+    val = c(3, 7),
+    block = c(1L, NA)
+  )
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
+  
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
+})
+
+test_that("test for dataframe with mulitple rows (probe, standard, probe)", {
+  df <- tibble::tibble(
+    `Identifier 1` = c("Probe", "STD_A", "Probe"),
+    val = c(1, 3, 7)
+  )
+  dfWithGroupedStandardsExpected <- tibble::tibble(
+    `Identifier 1` = c("Probe", "STD_A", "Probe"),
+    val = c(1, 3, 7),
+    block = c(NA, 1L, NA)
+  )
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
+  
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
+})
+
+test_that("test for dataframe with mulitple rows (standard, probe, standard)", {
+  df <- tibble::tibble(
+    `Identifier 1` = c("STD_A", "Probe", "STD_B"),
+    val = c(1, 3, 7)
+  )
+  dfWithGroupedStandardsExpected <- tibble::tibble(
+    `Identifier 1` = c("STD_A", "Probe", "STD_B"),
+    val = c(1, 3, 7),
+    block = c(1L, NA, 2L)
+  )
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
+  
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
+})
+
+test_that("test for mulitple rows (standard, probe, standard, probe, standard)", {
+  df <- tibble::tibble(
+    `Identifier 1` = c("STD_A", "Probe", "Probe", "STD_B", "STD_A", "Probe", "STD_A"),
+    val = 1:7
+  )
+  dfWithGroupedStandardsExpected <- tibble::tibble(
+    `Identifier 1` = c("STD_A", "Probe", "Probe", "STD_B", "STD_A", "Probe", "STD_A"),
+    val = 1:7,
+    block = c(1L, NA, NA, 2L, 2L, NA, 3L)
+  )
+  dfWithGroupedStandardsActual <- groupStandardsInBlocks(df, config)
+  
+  expect_equal(dfWithGroupedStandardsExpected, dfWithGroupedStandardsActual)
+})
