@@ -1,7 +1,3 @@
-library(tibble)
-library(readr)
-library(stringr)
-
 context("Test creating quality control information and writing them to file")
 
 # ------------ INITIALIZE INPUTS -------------

@@ -1,5 +1,3 @@
-library(tibble)
-
 context("Test grouping standards in blocks")
 
 config <- list(standards = list(list(name = "STD_A"), list(name = "STD_B")))

@@ -1,5 +1,3 @@
-library(rlist)
-
 context("Do a full run using example configs")
 
 test_that("test return value and outputs", {

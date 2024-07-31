@@ -1,7 +1,3 @@
-library(readr)
-library(stringr)
-library(yaml)
-
 context("test processData")
 
 configPath <- system.file("extdata", "config.yaml", package = "piccr")

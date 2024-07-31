@@ -1,6 +1,3 @@
-library(tibble)
-library(dplyr)
-
 context("test accumulateMeasurementsForEachSample")
 
 test_that("mean values are correct", {

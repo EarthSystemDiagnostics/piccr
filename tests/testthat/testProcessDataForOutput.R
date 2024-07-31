@@ -1,6 +1,3 @@
-library(tibble)
-library(dplyr)
-
 context("test processing data for output")
 
 test_that("test quality control output structure", {

@@ -1,6 +1,3 @@
-library(readr)
-library(stringr)
-
 context("Test writing data to file (csv output)")
 
 d1Content <- "Identifier 1,a,b\na,1.2,3.1\n"

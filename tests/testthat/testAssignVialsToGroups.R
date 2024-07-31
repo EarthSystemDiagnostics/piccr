@@ -1,5 +1,3 @@
-library(tibble)
-
 context("Test assigning vials into groups")
 
 config <- list(standards = list(list(name = "STD_A"),

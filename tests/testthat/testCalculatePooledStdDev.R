@@ -1,5 +1,3 @@
-library(tibble)
-
 context("test calculatePooledSD")
 
 test_that("test calculatePooledSD", {

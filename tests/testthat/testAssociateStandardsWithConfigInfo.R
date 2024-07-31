@@ -1,5 +1,3 @@
-library(tibble)
-
 context("Test associating standards with their true values")
 
 test_that("associating standards for single row (standard, including usage in phases)", {

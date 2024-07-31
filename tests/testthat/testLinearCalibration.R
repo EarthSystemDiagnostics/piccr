@@ -1,6 +1,3 @@
-library(tibble)
-library(dplyr)
-
 context("Test simple calibration without drift correction")
 
 # In this data set, o18_True is calculated from d(18_16)Mean applying

@@ -1,5 +1,3 @@
-library(tibble)
-
 context("test addColumnDExcess (d_excess = dH - 8 * d18O)")
 
 test_that("test addColumnDExcess", {

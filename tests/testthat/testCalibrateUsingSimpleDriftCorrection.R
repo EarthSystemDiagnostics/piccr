@@ -1,6 +1,3 @@
-library(tibble)
-library(dplyr)
-
 context("test calibrateUsingSimpleDriftCorrection")
 
 # this dataset does not have drift. -> drift slope: 0

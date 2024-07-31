@@ -1,6 +1,3 @@
-library(tibble)
-library(dplyr)
-
 context("Test the memory correction logic")
 
 # -------------- define test data and expected output ------------
