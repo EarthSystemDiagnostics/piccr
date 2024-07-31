@@ -1,3 +1,9 @@
+# piccr 1.3.2.9000
+
+* improved error handling in `parseConfig()`: function now issues an error
+  for when passed config file name does not exist or is not readable only,
+  instead of an error message *and* a warning.
+
 # piccr 1.3.1.9000
 
 * patch to comply with the new 'readr 1.4.0' function argument naming for

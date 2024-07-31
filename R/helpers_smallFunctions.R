@@ -10,12 +10,18 @@
 #' 
 parseConfig <- function(configFile){
   
-  tryCatch({
-    config <- yaml::read_yaml(configFile)
-  }, error = function(e) {
-    stop("Error reading config file. Make sure that you specified the 
-         correct path and that read permissions are given.")
+  config <- tryCatch(
+    expr = suppressWarnings(yaml::read_yaml(configFile)),
+    error = function(e) {
+
+      m <- paste0("Error reading config file `",
+                  configFile,
+                  "`.\nMake sure that you specified the correct path",
+                  " and that read permissions are given.")
+
+      stop(m, call. = FALSE)
   })
+
   config$config_file_name <- configFile
 
   return(config)
