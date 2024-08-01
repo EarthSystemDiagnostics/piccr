@@ -1,3 +1,8 @@
+# piccr 1.3.3.9000
+
+* fix in internal function `printRunInfo()` when time stamp includes fractional
+  seconds (see dff5d34).
+
 # piccr 1.3.2.9000
 
 * improved error handling in `parseConfig()`: function now issues an error
