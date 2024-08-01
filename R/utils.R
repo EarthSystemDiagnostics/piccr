@@ -1,61 +1,3 @@
-#' Read the YAML configuration file
-#' 
-#' Read in the specified YAML configuration file for the \code{piccr}
-#' processing.
-#'
-#' @param configFile a character string with the file path of the configuration
-#' file.
-#' 
-#' @return A list of the parameters read from the configuration file.
-#' 
-parseConfig <- function(configFile){
-  
-  config <- tryCatch(
-    expr = suppressWarnings(yaml::read_yaml(configFile)),
-    error = function(e) {
-
-      m <- paste0("Error reading config file `",
-                  configFile,
-                  "`.\nMake sure that you specified the correct path",
-                  " and that read permissions are given.")
-
-      stop(m, call. = FALSE)
-  })
-
-  config$config_file_name <- configFile
-
-  return(config)
-}
-
-#' Read in measurement files
-#' 
-#' Read all files from a given input directory that match a given file
-#' extension. Note that only csv files are supported.
-#'
-#' @param config A named list which needs to contain at least the
-#'   components \code{input_directory} (the directory which contains the files
-#'   to be read in) and \code{file_extension} (the file name extension to look
-#'   for).
-#'
-#' @return A named list of data frames where the names of the list elements
-#'   correspond to the file names in the input directory and where each data
-#'   frame contains the data read in from the file.
-#' 
-readFiles <- function(config) {
-  
-  folder <- config$input_directory
-  file_pattern <- stringr::str_c("*", config$file_extension)
-  
-  filenames <- list.files(path = folder, pattern = file_pattern)
-  pathsToFiles <- file.path(folder, filenames)
-  
-  datasets <- purrr::map(pathsToFiles, readr::read_csv,
-                         col_types = readr::cols())
-  names(datasets) <- filenames
-  
-  return(datasets)
-}
-
 #' Re-calculate injection numbers
 #'
 #' Re-calculate the injection numbers to account for probes being measured
@@ -206,74 +148,6 @@ isStandard <- function(id1, config){
   id1 %in% purrr::map(config$standards, ~ .$name)
 }
 
-#' Build output list
-#' 
-#' This function performs the final processing step for a specific dataset after
-#' all corrections are done by collecting the relevant data and information and
-#' returning them in a single output structure.
-#' 
-#' @note
-#' If you change the output of this function, remember to update
-#' the roxygen docstring (section return value) in `piccr_output.R`.
-#'
-#' @param name the file name of the data set.
-#' @param config a named list containing the logical component
-#'   \code{use_memory_correction}, which specifies if memory correction was used
-#'   in the processing, and the component \code{calibration_method}, which
-#'   signals the type of the calibration method that was used.
-#' @param dataset a data frame with the raw measurement data.
-#' @param memoryCorrected a data frame with the memory-corrected measurement
-#'   data.
-#' @param memoryCoefficients a data frame of estimated memory coefficients.
-#' @param calibrated a data frame with the (memory-corrected and) calibrated
-#'   measurement data.
-#' @param calibratedAndDriftCorrected a data frame with the (memory-corrected),
-#'   calibrated and drift-corrected measurement data.
-#' @param accumulated a data frame with the corrected and calibrated data
-#'   averaged over a specified number of injections.
-#' @param calibrationParams a tibble with the estimated calibration
-#'   parameters, together with quality control assessment, which were applied
-#'   for calibrating the measurement data.
-#' @param driftParams a tibble with the estimated drift parameters, together
-#'   with quality control assessment, which were applied for drift-correcting
-#'   the measurement data.
-#' @param qualityControlInfo the output of \code{\link{getQualityControlInfo}}.
-#' @inherit piccr_output return
-#' @seealso \code{\link{processData}},
-#'   \code{\link{calculateMemoryCoefficients}},
-#'   \code{\link{correctForMemoryEffect}},
-#'   \code{\link{linearCalibration}},
-#'   \code{\link{calibrateUsingSimpleDriftCorrection}},
-#'   \code{\link{calibrateUsingDoubleCalibration}},
-#'   \code{\link{accumulateMeasurements}},
-#'   \code{\link{getQualityControlInfo}}.
-#' 
-buildOutputList <- function(name, config, dataset,
-                            memoryCorrected, memoryCoefficients,
-                            calibrated, calibratedAndDriftCorrected,
-                            accumulated, calibrationParams, driftParams,
-                            qualityControlInfo){
-  
-  list(
-    name = name,
-    
-    raw = dataset,
-    memoryCorrected = if (config$use_memory_correction) memoryCorrected,
-    calibrated = calibrated,
-    calibratedAndDriftCorrected = if (config$calibration_method != 0) calibratedAndDriftCorrected,
-    processed = accumulated,
-    
-    memoryCoefficients = if (config$use_memory_correction) memoryCoefficients,
-    deviationsFromTrue = qualityControlInfo$deviationsFromTrue,
-    rmsdDeviationsFromTrue = qualityControlInfo$rmsdDeviationsFromTrue,
-    deviationOfControlStandard = qualityControlInfo$deviationOfControlStandard,
-    pooledSD = qualityControlInfo$pooledSD,
-    
-    calibrationParams = calibrationParams,
-    driftParams = if (config$calibration_method == 1) driftParams
-  )
-}
-
 #' Assign vial groups
 #'
 #' This function adds the additional column \code{vial_group} to the input
@@ -411,4 +285,201 @@ calculateRMSD <- function(v1, v2 = NULL, na.rm = FALSE) {
 
   return(res)
 
+}
+
+#' Accumulate measurements
+#'
+#' Calculate the average across a specified number of injections of the d18O,
+#' dH and d-excess values for each measured sample of a dataset and calculate
+#' the standard deviation of the means.
+#' 
+#' The functions uses the config parameter \code{average_over_inj}, which
+#' specifies the injections to average. If it is -1 or 'all', all injections are
+#' used, if it is set to a single integer `n`, the last `n` injections are used,
+#' else if it is set to a range `n1:n2`, injections `n1:n2` are used.
+#'
+#' @param dataset a data frame with corrected and calibrated measurement data of
+#'   a specific data set.
+#' @param config A named list of configuration parameters (e.g. as read from the
+#' \code{config.yaml} file) containing at least the component
+#' \code{average_over_inj}.
+#' @import dplyr
+#'
+#' @return A data frame with nine columns with the injection-averaged values of
+#'   d18O, dH and d-excess together with their standard deviations as well as
+#'   the respective \code{Identifier 1}, \code{Identifier 2} and \code{block}
+#'   specifiers.
+#' 
+accumulateMeasurements <- function(dataset, config){
+
+  accumulatedData <- dataset %>%
+    filterInjections(config) %>%
+    doAccumulate()
+
+  return(accumulatedData)
+}
+
+#' Filter injection range
+#'
+#' Filter out a specified injection range from a measurement data frame.
+#'
+#' Filtering is done according to the configuration parameter
+#' \code{average_over_inj} (e.g. see the \code{config.yaml} file). If the
+#' parameter is set to \code{all} or -1, all injections are kept, if it is set
+#' to a single integer `n`, the last `n` injections are kept, else if it is set
+#' to a range `n1:n2`, injections `n1:n2` are kept.
+#'
+#' @param dataset a data frame with measurement data of a specific data set.
+#' @param config A named list of configuration parameters (e.g. as read from the
+#' \code{config.yaml} file) containing at least the component
+#' \code{average_over_inj}.
+#' @import dplyr
+#'
+#' @return The input data frame \code{dataset} with only the specified
+#' injections remaining.
+#' 
+filterInjections <- function(dataset, config){
+  
+  n <- config$average_over_inj
+  
+  # exit early if all injections should be kept
+  if (n %in% c(-1, "all")) return(dataset)
+  
+  # Convert n to number or vector of numbers
+  n <- eval(parse(text = n))
+  
+  if (length(n) == 1)
+    # use last n injections
+    dataset %>%
+      group_by(Sample) %>%
+      slice((n() - n + 1):n()) %>%
+      ungroup()
+  else
+    # n gives range of injections to use
+    dataset %>%
+      group_by(Sample) %>%
+      slice(n) %>%
+      ungroup()
+}
+
+#' Average over injections
+#'
+#' This function takes an input data frame and returns the average across all
+#' included injections for each sample and the respective standard deviations.
+#'
+#' @param dataset a data frame with measurement data of a specific data set.
+#' @import dplyr
+#'
+#' @return A data frame with nine columns with the injection-averaged values of
+#'   d18O, dH and d-excess together with their standard deviations as well as
+#'   the respective \code{Identifier 1}, \code{Identifier 2} and \code{block}
+#'   specifiers.
+#' 
+doAccumulate <- function(dataset){
+  
+  dataset %>%
+    group_by(Sample) %>%
+    summarise(`Identifier 1` = `Identifier 1`[[1]],
+              `Identifier 2` = `Identifier 2`[[1]],
+              block = block[[1]],
+              delta.O18 = mean(`d(18_16)Mean`, na.rm = TRUE),
+              delta.H2 = mean(`d(D_H)Mean`, na.rm = TRUE),
+              sd.O18 = stats::sd(`d(18_16)Mean`, na.rm = TRUE),
+              sd.H2 = stats::sd(`d(D_H)Mean`, na.rm = TRUE),
+              d.Excess = mean(dExcess, na.rm = TRUE),
+              sd.d.Excess =
+                sqrt((stats::sd(`d(D_H)Mean`, na.rm = TRUE))^2 + 64 * (stats::sd(`d(18_16)Mean`, na.rm = TRUE)^2)))
+}
+
+#' Number of warm-up standard vials
+#'
+#' Get the number of vials the very first standard in the measurement sequence
+#' (the "warm-up standard") is injected from, i.e. "vial grouping" is accounted
+#' for, so if the first standard is injected from several vials in a row, the
+#' number of the last of these vials is returned.
+#'
+#' @param dataset a data frame with measurement data of a specific data set.
+#' @import dplyr
+#'
+#' @return A single integer with the number of the last vial of the very
+#' first standard in the input \code{dataset}.
+#' 
+getVialCountOfFirstStd <- function(dataset) {
+
+  dataset %>%
+    filter(`Identifier 1` == `Identifier 1`[[1]], vial_group == 1) %>%
+    select(Sample) %>%
+    max()
+}
+
+#' Remove standards from data frame
+#'
+#' Remove those rows from a given data set which contain the data of the
+#' measured standards.
+#' 
+#' @param dataset a data frame with measurement data of a specific data set.
+#' @param config a named list containing the component
+#'   \code{include_standards_in_output} to signal whether the standard data
+#'   shall be removed from \code{dataset}.
+#'
+#' @return The input \code{dataset} with the standard data removed if signalled
+#'   in \code{config}.
+#' 
+removeStandardsFromDataIfRequested <- function(dataset, config){
+  if(!config$include_standards_in_output){
+    return(dplyr::filter(dataset, !isStandard(`Identifier 1`, config)))
+  }
+  return(dataset)
+}
+
+#' Select lowest and highest standard
+#'
+#' From a data set of standards, select the two standards that exhibit the
+#' lowest and highest isotope values.
+#'
+#' @param dataset a data frame with the isotopic data for a set of standards
+#'   from a specific block.
+#' @import dplyr
+#' 
+#' @return A data frame with all injections from the two selected standards.
+#' 
+selectStandardsForTwoPointCalib <- function(dataset){
+
+  groups <- dataset %>%
+    split(.$`Identifier 1`)
+
+  orderedByIsotopeVal <- order(
+    purrr::map_dbl(groups, ~ mean(.$`d(18_16)Mean`, na.rm = TRUE)))
+
+  highestAndLowestStandard <- bind_rows(
+    groups[c(orderedByIsotopeVal[1], utils::tail(orderedByIsotopeVal, 1))])
+
+  return(highestAndLowestStandard)
+}
+
+#' Average measurement time of blocks
+#'
+#' This function calculates the average measurement time that has elapsed for
+#' the specified standard blocks since the start of the measurement sequence.
+#' 
+#' @param dataset a data frame with measurement data of a specific data set. It
+#'   needs to contain the additional column \code{block} which is not included
+#'   in the raw Picarro output.
+#' @param useBlocks an integer vector specifying the numbers of the standard
+#'   blocks for which the average time shall be calculated.
+#' @import dplyr
+#'
+#' @return A numeric vector of the same length as \code{useBlocks} with the
+#'   average measurement time elapsed since start of the measurement for the
+#'   respective blocks.
+#' @seealso \code{\link{groupStandardsInBlocks}}
+#' 
+getCalibTimes <- function(dataset, useBlocks){
+  
+  addColumnSecondsSinceStart(dataset) %>%
+    filter(block %in% useBlocks) %>%
+    group_by(block) %>%
+    summarise(time = mean(SecondsSinceStart)) %>%
+    arrange(block) %>%
+    .$time
 }
