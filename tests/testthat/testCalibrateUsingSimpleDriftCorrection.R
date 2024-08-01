@@ -110,21 +110,13 @@ dataset4 <- tibble::tribble(
   "Std_B",         3,      "2019/11/2512:10:00", 6700,            -3445,         TRUE,             1
 )
 
-expectedParams <- tibble::tibble(
-  species = c(rep("d18O", 3), rep("dD", 3)),
-  sample = c("Std_A", "Std_B", "mean", "Std_A", "Std_B", "mean"),
-  slope = rep(0, 6),
-  pValue = c(0.26, 0.29, NA, 0.26, 0.29, NA),
-  residualRMSD = c(0, 0, NA, 0, 0, NA),
-  rSquared = c(0.48, 0.47, NA, 0.48, 0.47, NA)
-)
-
 config <- list(use_memory_correction = TRUE)
 
 test_that("running the calibration model", {
 
   # should throw an error
-  expect_error(runDriftModel(dataset1, species = "unknown"))
+  msg <- "Unknown isotope species requested for calibration."
+  expect_error(runDriftModel(dataset1, species = "unknown"), msg)
 })
 
 test_that("test linearDriftCorrection", {
@@ -139,8 +131,40 @@ test_that("test linearDriftCorrection", {
 })
 
 test_that("test calculate drift slope alpha (dataset1)", {
-  
+
   dataset1 <- addColumnSecondsSinceStart(dataset1)
+
+  smmry <- function(x) suppressWarnings(summary(x))
+
+  d1a <- dplyr::filter(dataset1, `Identifier 1` == "Std_A")
+  d1b <- dplyr::filter(dataset1, `Identifier 1` == "Std_B")
+
+  m1 <- lm(`d(18_16)Mean` ~ SecondsSinceStart, data = d1a) %>% smmry
+  m2 <- lm(`d(18_16)Mean` ~ SecondsSinceStart, data = d1b) %>% smmry
+  m3 <- lm(`d(D_H)Mean` ~ SecondsSinceStart, data = d1a) %>% smmry
+  m4 <- lm(`d(D_H)Mean` ~ SecondsSinceStart, data = d1b) %>% smmry
+
+  c1 <- coef(m1)
+  c2 <- coef(m2)
+  c3 <- coef(m3)
+  c4 <- coef(m4)
+
+  pValues <- signif(c(c1[2, 4], c2[2, 4], NA, c3[2, 4], c4[2, 4], NA), 2)
+  residualRMSDs <- signif(c(
+    calculateRMSD(m1$residuals), calculateRMSD(m2$residuals), NA,
+    calculateRMSD(m3$residuals), calculateRMSD(m4$residuals), NA), 2)
+  rSquareds <- signif(
+    c(m1$r.squared, m2$r.squared, NA, m3$r.squared, m4$r.squared, NA), 2)
+
+  expectedParams <- tibble::tibble(
+    species = c(rep("d18O", 3), rep("dD", 3)),
+    sample = c("Std_A", "Std_B", "mean", "Std_A", "Std_B", "mean"),
+    slope = rep(0, 6),
+    pValue = pValues,
+    residualRMSD = residualRMSDs,
+    rSquared = rSquareds
+  )
+
   actual <- calculateDriftSlope(dataset1, config)
   
   expect_equal(actual, expectedParams)

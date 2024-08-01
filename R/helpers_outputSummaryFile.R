@@ -369,6 +369,6 @@ printRunInfo <- function(configFile) {
 
   cat(sprintf("piccr; version %s\n", utils::packageVersion("piccr")))
   cat(sprintf("* config file: %s\n", configFile))
-  cat(sprintf("* processing date: %s\n\n", Sys.time()))
+  cat(sprintf("* processing date: %s\n\n", format(Sys.time())))
 
 }

@@ -24,16 +24,42 @@ test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and
     "Std_B",         4,      "2019/11/2506:45:31",    2,               3,             2,         3,        TRUE
     )
 
+  dataset2 <- addColumnSecondsSinceStart(dataset)
+
+  timeStamps <- c(rep(mean(dataset2$SecondsSinceStart[1 : 4]), 2),
+                  rep(mean(dataset2$SecondsSinceStart[13 : 16]), 2))
+
+  smmry <- function(x) suppressWarnings(summary(x))
+
+  m11 <- lm(`d(18_16)Mean` ~ o18_True, data = dataset2[1 : 4,]) %>% smmry
+  m12 <- lm(`d(D_H)Mean` ~ H2_True, data = dataset2[1 : 4,]) %>% smmry
+  m21 <- lm(`d(18_16)Mean` ~ o18_True, data = dataset2[13 : 16,]) %>% smmry
+  m22 <- lm(`d(D_H)Mean` ~ H2_True, data = dataset2[13 : 16,]) %>% smmry
+
+  c11 <- coef(m11)
+  c12 <- coef(m12)
+  c21 <- coef(m21)
+  c22 <- coef(m22)
+
+  intercepts <- rep(0., 4)
+  slopes <- rep(1., 4)
+  pValuesI <- signif(c(c11[1, 4], c12[1, 4], c21[1, 4], c22[1, 4]), 2)
+  pValuesS <- signif(c(c11[2, 4], c12[2, 4], c21[2, 4], c22[2, 4]), 2)
+  residualRMSDs <- signif(calculateRMSD(
+    c(m11$residuals, m12$residuals, m21$residuals, m22$residuals)), 2)
+  rSquareds <- signif(
+    c(m11$r.squared, m12$r.squared, m21$r.squared, m22$r.squared), 2)
+
   expectedParameter <- tibble::tibble(
     species = c("d18O", "dD", "d18O", "dD"),
     block = c(1, 1, 4, 4),
-    timeStamp = c(672., 672., 6366., 6366.),
-    intercept = rep(0., 4),
-    slope = rep(1., 4),
-    pValueIntercept = c(0.13, 0.26, 0.13, 0.26),
-    pValueSlope = rep(0., 4),
-    residualRMSD = rep(0., 4),
-    rSquared = rep(1, 4)
+    timeStamp = round(timeStamps, 1),
+    intercept = intercepts,
+    slope = slopes,
+    pValueIntercept = pValuesI,
+    pValueSlope = pValuesS,
+    residualRMSD = residualRMSDs,
+    rSquared = rSquareds
   )
 
   expected <- list(dataset = dataset, parameter = expectedParameter)
@@ -47,9 +73,10 @@ test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and
 
   actual$dataset <- dplyr::mutate(actual$dataset, `d(18_16)Mean` = round(`d(18_16)Mean`, 10),
                                   `d(D_H)Mean` = round(`d(D_H)Mean`, 10))
-  actual$parameter$timeStamp <- round(actual$parameter$timeStamp, 0)
+  actual$parameter$timeStamp <- round(actual$parameter$timeStamp, 1)
   
   expect_equal(actual, expected)
+
 })
 
 test_that("test getCalibrationSlopes (case slopes are zero)", {

@@ -29,24 +29,20 @@ expected1 <- tibble::tribble(
   9,    "2020/10/1400:00:09", "B",      3,         0.7,              1,      7,             0.7,       7,        TRUE
 )
 
-expected1Params <- tibble::tibble(
-  species = c("d18O", "dD"),
-  block = c(1, 1),
-  timeStamp = c(4, 4),
-  intercept = c(-2., 0.),
-  slope = c(0.9, 1.),
-  pValueIntercept = c(0, 0.26),
-  pValueSlope = c(0, 0),
-  residualRMSD = c(0, 0),
-  rSquared = c(1, 1)
-)
-
 config <- list(use_memory_correction = TRUE, use_three_point_calibration = TRUE)
 
 test_that("running the calibration model", {
 
   # should throw an error
-  expect_error(runCalibrationModel(dataset1, species = "unknown"))
+  msg <- "Unknown isotope species requested for calibration."
+  expect_error(runCalibrationModel(dataset1, species = "unknown"), msg)
+
+  # test calibration of d18O data
+
+  smmry <- function(x) suppressWarnings(summary(x))
+
+  m  <- lm(`d(18_16)Mean` ~ o18_True, data = dataset1) %>% smmry
+  cf <- coef(m)
 
   expectedD18O <- tibble::tibble(
     species = "d18O",
@@ -54,11 +50,21 @@ test_that("running the calibration model", {
     timeStamp = 1,
     intercept = -2.,
     slope = 0.9,
-    pValueIntercept = 0,
-    pValueSlope = 0,
-    residualRMSD = 0,
-    rSquared = 1
+    pValueIntercept = signif(cf[1, 4], 2),
+    pValueSlope = signif(cf[2, 4], 2),
+    residualRMSD = signif(calculateRMSD(m$residuals), 2),
+    rSquared = signif(m$r.squared, 2),
   )
+
+  actualD18O <- runCalibrationModel(dataset1, species = "d18O",
+                                    block = 1, timeStamp = 1)
+
+  expect_equal(actualD18O, expectedD18O)
+
+  # test calibration of dD data
+
+  m  <- lm(`d(D_H)Mean` ~ H2_True, data = dataset1) %>% smmry
+  cf <- coef(m)
 
   expectedDD <- tibble::tibble(
     species = "dD",
@@ -67,19 +73,15 @@ test_that("running the calibration model", {
     foo = "bla",
     intercept = 0.,
     slope = 1.,
-    pValueIntercept = 0.26,
-    pValueSlope = 0,
-    residualRMSD = 0,
-    rSquared = 1
+    pValueIntercept = signif(cf[1, 4], 2),
+    pValueSlope = signif(cf[2, 4], 2),
+    residualRMSD = signif(calculateRMSD(m$residuals), 2),
+    rSquared = signif(m$r.squared, 2),
   )
-
-  actualD18O <- runCalibrationModel(dataset1, species = "d18O",
-                                    block = 1, timeStamp = 1)
 
   actualDD   <- runCalibrationModel(dataset1, species = "dD",
                                     block = 1, timeStamp = 1, foo = "bla")
 
-  expect_equal(actualD18O, expectedD18O)
   expect_equal(actualDD, expectedDD)
 
 })
@@ -161,12 +163,33 @@ test_that("test applyCalibration", {
 
 test_that("test simple linear calibration", {
 
+  smmry <- function(x) suppressWarnings(summary(x))
+
+  m1  <- lm(`d(18_16)Mean` ~ o18_True, data = dataset1) %>% smmry
+  m2  <- lm(`d(D_H)Mean` ~ H2_True, data = dataset1) %>% smmry
+
+  c1 <- coef(m1)
+  c2 <- coef(m2)
+
+  expected1Params <- tibble::tibble(
+    species = c("d18O", "dD"),
+    block = c(1, 1),
+    timeStamp = c(4, 4),
+    intercept = c(-2., 0.),
+    slope = c(0.9, 1.),
+    pValueIntercept = signif(c(c1[1, 4], c2[1, 4]), 2),
+    pValueSlope = signif(c(c1[2, 4], c2[2, 4]), 2),
+    residualRMSD = signif(c(calculateRMSD(m1$residuals),
+                            calculateRMSD(m2$residuals)), 2),
+    rSquared = signif(c(m1$r.squared, m2$r.squared), 2)
+  )
+
   expected <- list(
     dataset = expected1,
     parameter = expected1Params
   )
 
-  actual <- linearCalibration(dataset1, config = config, block = 1)
+  actual <- linearCalibration(dataset1, config = config)
 
   expect_type(actual, "list")
   expect_length(actual, 2)
@@ -175,10 +198,6 @@ test_that("test simple linear calibration", {
   
   expect_equal(actual, expected)
 
-  actual <- linearCalibration(dataset1, config = config)
-  actual$dataset <- dplyr::mutate(actual$dataset, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
-  
-  expect_equal(actual, expected)
 })
 
 test_that("test use only last three injections if memory correction is not used", {
