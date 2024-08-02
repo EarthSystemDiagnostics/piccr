@@ -1,5 +1,3 @@
-context("test calibrateUsingSimpleDriftCorrection")
-
 # this dataset does not have drift. -> drift slope: 0
 dataset1 <- tibble::tribble(
   ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~useForDriftCorr,
@@ -112,14 +110,14 @@ dataset4 <- tibble::tribble(
 
 config <- list(use_memory_correction = TRUE)
 
-test_that("running the calibration model", {
+test_that("running the calibration model works", {
 
   # should throw an error
   msg <- "Unknown isotope species requested for calibration."
   expect_error(runDriftModel(dataset1, species = "unknown"), msg)
 })
 
-test_that("test linearDriftCorrection", {
+test_that("applying linear drift correction works", {
   
   actual1 <- linearDriftCorrection(dataset1, config)$dataset
   actual2 <- linearDriftCorrection(dataset2, config)$dataset
@@ -130,7 +128,7 @@ test_that("test linearDriftCorrection", {
   expect_equal(dplyr::mutate_if(actual3, is.numeric, round), expected3)
 })
 
-test_that("test calculate drift slope alpha (dataset1)", {
+test_that("calculation of drift slope alpha is correct (dataset1)", {
 
   dataset1 <- addColumnSecondsSinceStart(dataset1)
 
@@ -170,7 +168,7 @@ test_that("test calculate drift slope alpha (dataset1)", {
   expect_equal(actual, expectedParams)
 })
 
-test_that("test calculate drift slope alpha (dataset2)", {
+test_that("calculation of drift slope alpha is correct (dataset2)", {
   
   dataset2 <- addColumnSecondsSinceStart(dataset2)
   actual <- calculateDriftSlope(dataset2, config)
@@ -178,7 +176,7 @@ test_that("test calculate drift slope alpha (dataset2)", {
   expect_equal(actual$slope, c(rep(1, 3), rep(-0.5, 3)))
 })
 
-test_that("test calculate drift slope alpha (dataset3)", {
+test_that("calculation of drift slope alpha is correct (dataset3)", {
   
   dataset3 <- addColumnSecondsSinceStart(dataset3)
   actual <- calculateDriftSlope(dataset3, config)
@@ -186,7 +184,7 @@ test_that("test calculate drift slope alpha (dataset3)", {
   expect_equal(actual$slope, c(1, 2, 1.5, -0.5, 0.5, 0))
 })
 
-test_that("test use only standards specified in config", {
+test_that("using only standards specified in config works", {
   
   # this dataset has a different constant drift for both standards.
   # d18O: Std_A 1/sec; Std_B 2/sec
@@ -211,7 +209,7 @@ test_that("test use only standards specified in config", {
   expect_equal(actual$slope, c(1, 1, -0.5, -0.5))
 })
 
-test_that("test correct drift slopes when memory correction is off", {
+test_that("correct drift slopes are obtained when memory correction is off", {
 
   config <- list(use_memory_correction = FALSE)
 

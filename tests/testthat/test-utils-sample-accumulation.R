@@ -1,5 +1,3 @@
-context("test accumulateMeasurementsForEachSample")
-
 test_that("mean values are correct", {
 
   dataset1 <- tibble::tribble(
@@ -29,9 +27,10 @@ test_that("mean values are correct", {
   
   expect_true(is.data.frame(actual))
   expect_equal(actualRounded, expected1)
+
 })
 
-test_that("use only last 2 injections to calculate average", {
+test_that("using only last 2 injections to calculate average works", {
   
   dataset1 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Identifier 2`, ~block, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~dExcess, ~Sample,
@@ -64,9 +63,10 @@ test_that("use only last 2 injections to calculate average", {
   expect_true(is.data.frame(actual))
   
   expect_equal(actualRounded, expected1)
+
 })
 
-test_that("use range of injections", {
+test_that("using range of injections works", {
   
   dataset1 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Identifier 2`, ~block, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~dExcess, ~Sample,
@@ -99,4 +99,5 @@ test_that("use range of injections", {
   expect_true(is.data.frame(actual))
   
   expect_equal(actualRounded, expected1)
+
 })

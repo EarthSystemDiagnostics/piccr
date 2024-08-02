@@ -1,5 +1,3 @@
-context("Test the memory correction logic")
-
 # -------------- define test data and expected output ------------
 
 # in this dataset:
@@ -150,7 +148,7 @@ dataset4 <- tibble::tribble(
 
 # -------------- tests ------------------------------
 
-test_that("test memory corrected datasets", {
+test_that("correcting datasets for memory effect works", {
 
   actual1 <- correctForMemoryEffect(dataset1)
   actual2 <- correctForMemoryEffect(dataset2)
@@ -166,7 +164,7 @@ test_that("test memory corrected datasets", {
   expect_equal(df2Rounded, expected2)
 })
 
-test_that("test memory coefficients", {
+test_that("calculated memory coefficients are correct", {
 
   memCoeffExpected1 <- tibble::tribble(
     ~`Inj Nr`, ~A_vial1_d18O, ~A_vial1_dD, ~B_vial1_d18O, ~B_vial1_dD, ~C_vial1_d18O, ~C_vial1_dD, ~memoryCoeffD18O, ~memoryCoeffDD, ~sdMemoryCoeffD18O, ~sdMemoryCoeffDD,
@@ -199,7 +197,7 @@ test_that("test memory coefficients", {
   )
 })
 
-test_that("test that NA values don't spread in applyCalibration", {
+test_that("NA values don't spread into corrected dataset", {
   
   dataset1 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~vial_group,
@@ -262,7 +260,7 @@ test_that("test that NA values don't spread in applyCalibration", {
   expect_equal(sum(is.na(select(actual2, `d(D_H)Mean`))), 12)
 })
 
-test_that("test injection range of mean memory coefficients", {
+test_that("injection range of mean memory coefficients is correct", {
 
   actual <- calculateMemoryCoefficients(dataset1)
   expect_length(actual$`Inj Nr`, 3)
@@ -273,7 +271,7 @@ test_that("test injection range of mean memory coefficients", {
 
 })
 
-test_that("different numbers of injections for the block 1 standards does not cause error", {
+test_that("different injection numbers of block 1 standards yields no error", {
   
   dataset4 <- tibble::tribble(
     ~Line, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~vial_group,
@@ -364,7 +362,7 @@ dataset6 <- tibble::tribble(
   29,    "A",             7,         -35.,             NA,   -280.001,       1
 )
 
-test_that("test that no NA mean memory coefficients are kept", {
+test_that("no NA mean memory coefficients are kept", {
 
   actual <- calculateMemoryCoefficients(dataset5)
 
@@ -373,7 +371,7 @@ test_that("test that no NA mean memory coefficients are kept", {
 
 })
 
-test_that("test that no sample data is lost in memory correction", {
+test_that("no sample data is lost in memory correction", {
 
   expect_error(actual <- correctForMemoryEffect(dataset6), NA)
 
@@ -386,7 +384,7 @@ test_that("test that no sample data is lost in memory correction", {
 
 })
 
-test_that("test that vial grouping gives correct memory coefficients output", {
+test_that("vial grouping gives correct memory coefficients output", {
 
   actual <- calculateMemoryCoefficients(dataset4)
 
@@ -401,7 +399,7 @@ test_that("test that vial grouping gives correct memory coefficients output", {
 
 })
 
-test_that("test memory correction for identical non-consecutive samples", {
+test_that("memory correction for identical non-consecutive samples works", {
 
   # in this dataset:
   # d18O: m1 = 0.5, m2 = 0.75, m3 = 0.875, m4 = 1

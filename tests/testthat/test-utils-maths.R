@@ -1,6 +1,38 @@
-context("test addColumnDExcess (d_excess = dH - 8 * d18O)")
+test_that("calculating pooled standard deviation works", {
+  
+  dataset1 <- tibble::tribble(
+    ~`Identifier 1`, ~block, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~vial_group,
+    # ------------ / ----- / -------------- / ------------ / -----------
+    "C",             1,      1,               1,             1,
+    "C",             1,      2,               3,             1,
+    "C",             1,      3,               5,             1,
+    "A",             1,      1,               2,             1,
+    "A",             1,      1,               3,             1,
+    "B",             NA,     4,               1,             1,
+    "B",             NA,     5,               3,             1,
+    "B",             NA,     7,               9,             1,
+    "C",             2,      1,               0,             2,
+    "C",             2,      2,               -1,            2,
+    "C",             2,      3,               3,             2,
+    "C",             2,      4,               -4,            2
+  )
+  
+  actual <- calculatePooledSD(dataset1)
+  
+  expect_equal(actual$d18O, 1.207615, tolerance = 1e-6)
+  expect_equal(actual$dD, 2.919047,  tolerance = 1e-6)
 
-test_that("test addColumnDExcess", {
+})
+
+test_that("calculating root mean square deviation works", {
+
+  expect_equal(calculateRMSD(1 : 5, 2 : 6), 1)
+  expect_equal(calculateRMSD(c(1, sqrt(2), 2, 3)), 2)
+  expect_error(calculateRMSD(1 : 5, 2 : 3))
+
+})
+
+test_that("calculating and adding d-excess column works", {
   
   dataset1 <- tibble::tribble(
     ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~otherCol,
@@ -44,4 +76,5 @@ test_that("test addColumnDExcess", {
   
   expect_equal(actual1, expected1)
   expect_equal(actual2, expected2)
+
 })
