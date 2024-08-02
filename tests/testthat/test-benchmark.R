@@ -1,8 +1,3 @@
-# to silence the piccr version message
-test_processData <- function(...) {
-  suppressMessages(processData(...))
-}
-
 configPath <- system.file("extdata", "config.yaml", package = "piccr")
 
 # test should be able to run from the repository root directory or from the directory

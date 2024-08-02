@@ -1,8 +1,3 @@
-# to silence the piccr version message
-test_processFiles <- function(...) {
-  suppressMessages(processFiles(...))
-}
-
 test_that("return value and outputs from processFiles are correct", {
   
   # ---------- INITIALIZE INPUTS -------------

@@ -1,8 +1,3 @@
-# to silence the piccr version message
-test_processData <- function(...) {
-  suppressMessages(processData(...))
-}
-
 test_that("processData works on example file with differently grouped vials", {
 
   # ---------- INITIALIZE INPUTS -------------
