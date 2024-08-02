@@ -1,3 +1,7 @@
+#
+# utils: HANDLING INJECTIONS/VIALS
+# ------------------------------------------------------------------------------
+
 #' Re-calculate injection numbers
 #'
 #' Re-calculate the injection numbers to account for probes being measured
@@ -16,6 +20,135 @@ normalizeInjectionNumbers <- function(dataset) {
     mutate(`Inj Nr` = row_number()) %>%
     ungroup() %>%
     arrange(Line)
+}
+
+#' Number of warm-up standard vials
+#'
+#' Get the number of vials the very first standard in the measurement sequence
+#' (the "warm-up standard") is injected from, i.e. "vial grouping" is accounted
+#' for, so if the first standard is injected from several vials in a row, the
+#' number of the last of these vials is returned.
+#'
+#' @param dataset a data frame with measurement data of a specific data set.
+#' @import dplyr
+#'
+#' @return A single integer with the number of the last vial of the very
+#' first standard in the input \code{dataset}.
+#'
+getVialCountOfFirstStd <- function(dataset) {
+
+  dataset %>%
+    filter(`Identifier 1` == `Identifier 1`[[1]], vial_group == 1) %>%
+    select(Sample) %>%
+    max()
+}
+
+#' Filter injection range
+#'
+#' Filter out a specified injection range from a measurement data frame.
+#'
+#' Filtering is done according to the configuration parameter
+#' \code{average_over_inj} (e.g. see the \code{config.yaml} file). If the
+#' parameter is set to \code{all} or -1, all injections are kept, if it is set
+#' to a single integer `n`, the last `n` injections are kept, else if it is set
+#' to a range `n1:n2`, injections `n1:n2` are kept.
+#'
+#' @param dataset a data frame with measurement data of a specific data set.
+#' @param config A named list of configuration parameters (e.g. as read from the
+#' \code{config.yaml} file) containing at least the component
+#' \code{average_over_inj}.
+#' @import dplyr
+#'
+#' @return The input data frame \code{dataset} with only the specified
+#' injections remaining.
+#'
+filterInjections <- function(dataset, config){
+
+  n <- config$average_over_inj
+
+  # exit early if all injections should be kept
+  if (n %in% c(-1, "all")) return(dataset)
+
+  # Convert n to number or vector of numbers
+  n <- eval(parse(text = n))
+
+  if (length(n) == 1)
+    # use last n injections
+    dataset %>%
+      group_by(Sample) %>%
+      slice((n() - n + 1):n()) %>%
+      ungroup()
+  else
+    # n gives range of injections to use
+    dataset %>%
+      group_by(Sample) %>%
+      slice(n) %>%
+      ungroup()
+}
+
+#' Assign vial groups
+#'
+#' This function adds the additional column \code{vial_group} to the input
+#' data frame counting the occurrence of groups of consecutive vials of the
+#' same standard or sample across the measurement.
+#'
+#' @param dataset a data frame with measurement data of a specific data set;
+#'   needs to contain at least the columns \code{Line} and \code{Identifier 1}.
+#' @import dplyr
+#'
+#' @return The input \code{dataset} appended by the column \code{vial_group}.
+#'
+assignVialsToGroups <- function(dataset) {
+
+  groupVials <- function(sampleData) {
+
+    counter_vial_group <- 1
+    differenceInLineNumbers <- c(1, diff(sampleData$`Line`))
+
+    for (row in 1 : nrow(sampleData)) {
+
+      if (differenceInLineNumbers[row] > 1) {
+        counter_vial_group <- counter_vial_group + 1
+      }
+
+      sampleData[row, "vial_group"] <- counter_vial_group
+
+    }
+
+    return(sampleData)
+  }
+
+  dataset <- dataset %>%
+    tibble::add_column(vial_group = 1) %>%
+    group_split(`Identifier 1`) %>%
+    purrr::map(groupVials) %>%
+    bind_rows() %>%
+    arrange(Line)
+
+  return(dataset)
+
+}
+
+# ------------------------------------------------------------------------------
+#
+# utils: WORKING WITH STANDARDS
+# ------------------------------------------------------------------------------
+
+#' Determine if a given probe is a standard.
+#'
+#' Determine if a given probe is a standard based on its ID value.
+#'
+#' @param id1 character vector; the ID to test for.
+#' @param config A named list which needs to contain at least the component
+#'   \code{standards} which is expected to be a list containing at least the
+#'   component \code{name} giving the name for each used standard as specified
+#'   by the \code{Identifier 1} column of the data set.
+#'
+#' @return logical; \code{TRUE} if the requested ID is found in the
+#'   \code{config} data base of standards, else \code{FALSE}.
+#'
+isStandard <- function(id1, config){
+  id1 %in% purrr::map(config$standards, ~ .$name)
 }
 
 #' Associate standards with configuration information
@@ -108,88 +241,55 @@ groupStandardsInBlocks <- function(dataset, config){
   return(dataset)
 }
 
-#' Calculate seconds since start
+#' Select lowest and highest standard
 #'
-#' Calculate the seconds elapsed since the start of the measurement.
+#' From a data set of standards, select the two standards that exhibit the
+#' lowest and highest isotope values.
 #'
-#' The input data frame is expected to contain the column
-#' \code{Time Code} with values as character vectors of the format
-#' 'yyyy/mm/ddhh:mm:ss' (e.g. '2019/11/2510:00:00').
+#' @param dataset a data frame with the isotopic data for a set of standards
+#'   from a specific block.
+#' @import dplyr
 #' 
+#' @return A data frame with all injections from the two selected standards.
+#' 
+selectStandardsForTwoPointCalib <- function(dataset){
+
+  groups <- dataset %>%
+    split(.$`Identifier 1`)
+
+  orderedByIsotopeVal <- order(
+    purrr::map_dbl(groups, ~ mean(.$`d(18_16)Mean`, na.rm = TRUE)))
+
+  highestAndLowestStandard <- bind_rows(
+    groups[c(orderedByIsotopeVal[1], utils::tail(orderedByIsotopeVal, 1))])
+
+  return(highestAndLowestStandard)
+}
+
+#' Remove standards from data frame
+#'
+#' Remove those rows from a given data set which contain the data of the
+#' measured standards.
+#'
 #' @param dataset a data frame with measurement data of a specific data set.
-#' @import dplyr
+#' @param config a named list containing the component
+#'   \code{include_standards_in_output} to signal whether the standard data
+#'   shall be removed from \code{dataset}.
 #'
-#' @return The input \code{dataset} supplemented by the column
-#' \code{SecondsSinceStart} which gives the seconds elapsed since the start of
-#' the measurement.
-#' 
-addColumnSecondsSinceStart <- function(dataset){
-  
-  dataset %>%
-    mutate(SecondsSinceStart = lubridate::ymd_hms(.$`Time Code`)) %>%
-    mutate(SecondsSinceStart = c(0, lubridate::int_diff(.$SecondsSinceStart))) %>%
-    mutate(SecondsSinceStart = cumsum(.$SecondsSinceStart))
-}
-
-#' Determine if a given probe is a standard.
+#' @return The input \code{dataset} with the standard data removed if signalled
+#'   in \code{config}.
 #'
-#' Determine if a given probe is a standard based on its ID value.
-#'
-#' @param id1 character vector; the ID to test for.
-#' @param config A named list which needs to contain at least the component
-#'   \code{standards} which is expected to be a list containing at least the
-#'   component \code{name} giving the name for each used standard as specified
-#'   by the \code{Identifier 1} column of the data set.
-#'
-#' @return logical; \code{TRUE} if the requested ID is found in the
-#'   \code{config} data base of standards, else \code{FALSE}.
-#' 
-isStandard <- function(id1, config){
-  id1 %in% purrr::map(config$standards, ~ .$name)
-}
-
-#' Assign vial groups
-#'
-#' This function adds the additional column \code{vial_group} to the input
-#' data frame counting the occurrence of groups of consecutive vials of the
-#' same standard or sample across the measurement.
-#' 
-#' @param dataset a data frame with measurement data of a specific data set;
-#'   needs to contain at least the columns \code{Line} and \code{Identifier 1}.
-#' @import dplyr
-#' 
-#' @return The input \code{dataset} appended by the column \code{vial_group}.
-#' 
-assignVialsToGroups <- function(dataset) {
-
-  groupVials <- function(sampleData) {
-
-    counter_vial_group <- 1
-    differenceInLineNumbers <- c(1, diff(sampleData$`Line`))
-
-    for (row in 1 : nrow(sampleData)) {
-
-      if (differenceInLineNumbers[row] > 1) {
-        counter_vial_group <- counter_vial_group + 1
-      }
-
-      sampleData[row, "vial_group"] <- counter_vial_group
-
-    }
-
-    return(sampleData)
+removeStandardsFromDataIfRequested <- function(dataset, config){
+  if(!config$include_standards_in_output){
+    return(dplyr::filter(dataset, !isStandard(`Identifier 1`, config)))
   }
-
-  dataset <- dataset %>%
-    tibble::add_column(vial_group = 1) %>%
-    group_split(`Identifier 1`) %>%
-    purrr::map(groupVials) %>%
-    bind_rows() %>%
-    arrange(Line)
-
   return(dataset)
-
 }
+
+# ------------------------------------------------------------------------------
+#
+# utils: GENERAL MATHS
+# ------------------------------------------------------------------------------
 
 #' Calculate pooled standard deviation
 #'
@@ -241,20 +341,6 @@ calculatePooledSD <- function(dataset){
        dD = pooledStdDev$pooledStdDev.dD)
 }
 
-#' Calculate d-excess
-#'
-#' Calculate the second-order parameter d-excess from the d18O and dD values of
-#' a given data set according to \code{d-excess = dD - 8 * d18O}.
-#'
-#' @param dataset a data frame with measurement data of a specific data set.
-#'
-#' @return The input \code{dataset} supplemented by the column \code{dExcess}.
-#'
-addColumnDExcess <- function(dataset){
-
-  dplyr::mutate(dataset, dExcess = `d(D_H)Mean` - `d(18_16)Mean` * 8)
-}
-
 #' Calculate root-mean-square deviation
 #'
 #' Calculate the root-mean-square deviation (rmsd) of two numeric vectors.
@@ -287,6 +373,105 @@ calculateRMSD <- function(v1, v2 = NULL, na.rm = FALSE) {
 
 }
 
+#' Calculate seconds since start
+#'
+#' Calculate the seconds elapsed since the start of the measurement.
+#'
+#' The input data frame is expected to contain the column
+#' \code{Time Code} with values as character vectors of the format
+#' 'yyyy/mm/ddhh:mm:ss' (e.g. '2019/11/2510:00:00').
+#'
+#' @param dataset a data frame with measurement data of a specific data set.
+#' @import dplyr
+#'
+#' @return The input \code{dataset} supplemented by the column
+#' \code{SecondsSinceStart} which gives the seconds elapsed since the start of
+#' the measurement.
+#' 
+addColumnSecondsSinceStart <- function(dataset){
+
+  dataset %>%
+    mutate(SecondsSinceStart = lubridate::ymd_hms(.$`Time Code`)) %>%
+    mutate(SecondsSinceStart = c(0, lubridate::int_diff(.$SecondsSinceStart))) %>%
+    mutate(SecondsSinceStart = cumsum(.$SecondsSinceStart))
+}
+
+#' Calculate d-excess
+#'
+#' Calculate the second-order parameter d-excess from the d18O and dD values of
+#' a given data set according to \code{d-excess = dD - 8 * d18O}.
+#'
+#' @param dataset a data frame with measurement data of a specific data set.
+#'
+#' @return The input \code{dataset} supplemented by the column \code{dExcess}.
+#'
+addColumnDExcess <- function(dataset){
+
+  dplyr::mutate(dataset, dExcess = `d(D_H)Mean` - `d(18_16)Mean` * 8)
+}
+
+#' Average measurement time of blocks
+#'
+#' This function calculates the average measurement time that has elapsed for
+#' the specified standard blocks since the start of the measurement sequence.
+#'
+#' @param dataset a data frame with measurement data of a specific data set. It
+#'   needs to contain the additional column \code{block} which is not included
+#'   in the raw Picarro output.
+#' @param useBlocks an integer vector specifying the numbers of the standard
+#'   blocks for which the average time shall be calculated.
+#' @import dplyr
+#'
+#' @return A numeric vector of the same length as \code{useBlocks} with the
+#'   average measurement time elapsed since start of the measurement for the
+#'   respective blocks.
+#' @seealso \code{\link{groupStandardsInBlocks}}
+#' 
+getCalibTimes <- function(dataset, useBlocks){
+  
+  addColumnSecondsSinceStart(dataset) %>%
+    filter(block %in% useBlocks) %>%
+    group_by(block) %>%
+    summarise(time = mean(SecondsSinceStart)) %>%
+    arrange(block) %>%
+    .$time
+}
+
+# ------------------------------------------------------------------------------
+#
+# utils: SAMPLE AVERAGING
+# ------------------------------------------------------------------------------
+
+#' Average over injections
+#'
+#' This function takes an input data frame and returns the average across all
+#' included injections for each sample and the respective standard deviations.
+#'
+#' @param dataset a data frame with measurement data of a specific data set.
+#' @import dplyr
+#'
+#' @return A data frame with nine columns with the injection-averaged values of
+#'   d18O, dH and d-excess together with their standard deviations as well as
+#'   the respective \code{Identifier 1}, \code{Identifier 2} and \code{block}
+#'   specifiers.
+#' 
+doAccumulate <- function(dataset){
+  
+  dataset %>%
+    group_by(Sample) %>%
+    summarise(`Identifier 1` = `Identifier 1`[[1]],
+              `Identifier 2` = `Identifier 2`[[1]],
+              block = block[[1]],
+              delta.O18 = mean(`d(18_16)Mean`, na.rm = TRUE),
+              delta.H2 = mean(`d(D_H)Mean`, na.rm = TRUE),
+              sd.O18 = stats::sd(`d(18_16)Mean`, na.rm = TRUE),
+              sd.H2 = stats::sd(`d(D_H)Mean`, na.rm = TRUE),
+              d.Excess = mean(dExcess, na.rm = TRUE),
+              sd.d.Excess =
+                sqrt((stats::sd(`d(D_H)Mean`, na.rm = TRUE))^2 +
+                     64 * (stats::sd(`d(18_16)Mean`, na.rm = TRUE)^2)))
+}
+
 #' Accumulate measurements
 #'
 #' Calculate the average across a specified number of injections of the d18O,
@@ -317,169 +502,4 @@ accumulateMeasurements <- function(dataset, config){
     doAccumulate()
 
   return(accumulatedData)
-}
-
-#' Filter injection range
-#'
-#' Filter out a specified injection range from a measurement data frame.
-#'
-#' Filtering is done according to the configuration parameter
-#' \code{average_over_inj} (e.g. see the \code{config.yaml} file). If the
-#' parameter is set to \code{all} or -1, all injections are kept, if it is set
-#' to a single integer `n`, the last `n` injections are kept, else if it is set
-#' to a range `n1:n2`, injections `n1:n2` are kept.
-#'
-#' @param dataset a data frame with measurement data of a specific data set.
-#' @param config A named list of configuration parameters (e.g. as read from the
-#' \code{config.yaml} file) containing at least the component
-#' \code{average_over_inj}.
-#' @import dplyr
-#'
-#' @return The input data frame \code{dataset} with only the specified
-#' injections remaining.
-#' 
-filterInjections <- function(dataset, config){
-  
-  n <- config$average_over_inj
-  
-  # exit early if all injections should be kept
-  if (n %in% c(-1, "all")) return(dataset)
-  
-  # Convert n to number or vector of numbers
-  n <- eval(parse(text = n))
-  
-  if (length(n) == 1)
-    # use last n injections
-    dataset %>%
-      group_by(Sample) %>%
-      slice((n() - n + 1):n()) %>%
-      ungroup()
-  else
-    # n gives range of injections to use
-    dataset %>%
-      group_by(Sample) %>%
-      slice(n) %>%
-      ungroup()
-}
-
-#' Average over injections
-#'
-#' This function takes an input data frame and returns the average across all
-#' included injections for each sample and the respective standard deviations.
-#'
-#' @param dataset a data frame with measurement data of a specific data set.
-#' @import dplyr
-#'
-#' @return A data frame with nine columns with the injection-averaged values of
-#'   d18O, dH and d-excess together with their standard deviations as well as
-#'   the respective \code{Identifier 1}, \code{Identifier 2} and \code{block}
-#'   specifiers.
-#' 
-doAccumulate <- function(dataset){
-  
-  dataset %>%
-    group_by(Sample) %>%
-    summarise(`Identifier 1` = `Identifier 1`[[1]],
-              `Identifier 2` = `Identifier 2`[[1]],
-              block = block[[1]],
-              delta.O18 = mean(`d(18_16)Mean`, na.rm = TRUE),
-              delta.H2 = mean(`d(D_H)Mean`, na.rm = TRUE),
-              sd.O18 = stats::sd(`d(18_16)Mean`, na.rm = TRUE),
-              sd.H2 = stats::sd(`d(D_H)Mean`, na.rm = TRUE),
-              d.Excess = mean(dExcess, na.rm = TRUE),
-              sd.d.Excess =
-                sqrt((stats::sd(`d(D_H)Mean`, na.rm = TRUE))^2 + 64 * (stats::sd(`d(18_16)Mean`, na.rm = TRUE)^2)))
-}
-
-#' Number of warm-up standard vials
-#'
-#' Get the number of vials the very first standard in the measurement sequence
-#' (the "warm-up standard") is injected from, i.e. "vial grouping" is accounted
-#' for, so if the first standard is injected from several vials in a row, the
-#' number of the last of these vials is returned.
-#'
-#' @param dataset a data frame with measurement data of a specific data set.
-#' @import dplyr
-#'
-#' @return A single integer with the number of the last vial of the very
-#' first standard in the input \code{dataset}.
-#' 
-getVialCountOfFirstStd <- function(dataset) {
-
-  dataset %>%
-    filter(`Identifier 1` == `Identifier 1`[[1]], vial_group == 1) %>%
-    select(Sample) %>%
-    max()
-}
-
-#' Remove standards from data frame
-#'
-#' Remove those rows from a given data set which contain the data of the
-#' measured standards.
-#' 
-#' @param dataset a data frame with measurement data of a specific data set.
-#' @param config a named list containing the component
-#'   \code{include_standards_in_output} to signal whether the standard data
-#'   shall be removed from \code{dataset}.
-#'
-#' @return The input \code{dataset} with the standard data removed if signalled
-#'   in \code{config}.
-#' 
-removeStandardsFromDataIfRequested <- function(dataset, config){
-  if(!config$include_standards_in_output){
-    return(dplyr::filter(dataset, !isStandard(`Identifier 1`, config)))
-  }
-  return(dataset)
-}
-
-#' Select lowest and highest standard
-#'
-#' From a data set of standards, select the two standards that exhibit the
-#' lowest and highest isotope values.
-#'
-#' @param dataset a data frame with the isotopic data for a set of standards
-#'   from a specific block.
-#' @import dplyr
-#' 
-#' @return A data frame with all injections from the two selected standards.
-#' 
-selectStandardsForTwoPointCalib <- function(dataset){
-
-  groups <- dataset %>%
-    split(.$`Identifier 1`)
-
-  orderedByIsotopeVal <- order(
-    purrr::map_dbl(groups, ~ mean(.$`d(18_16)Mean`, na.rm = TRUE)))
-
-  highestAndLowestStandard <- bind_rows(
-    groups[c(orderedByIsotopeVal[1], utils::tail(orderedByIsotopeVal, 1))])
-
-  return(highestAndLowestStandard)
-}
-
-#' Average measurement time of blocks
-#'
-#' This function calculates the average measurement time that has elapsed for
-#' the specified standard blocks since the start of the measurement sequence.
-#' 
-#' @param dataset a data frame with measurement data of a specific data set. It
-#'   needs to contain the additional column \code{block} which is not included
-#'   in the raw Picarro output.
-#' @param useBlocks an integer vector specifying the numbers of the standard
-#'   blocks for which the average time shall be calculated.
-#' @import dplyr
-#'
-#' @return A numeric vector of the same length as \code{useBlocks} with the
-#'   average measurement time elapsed since start of the measurement for the
-#'   respective blocks.
-#' @seealso \code{\link{groupStandardsInBlocks}}
-#' 
-getCalibTimes <- function(dataset, useBlocks){
-  
-  addColumnSecondsSinceStart(dataset) %>%
-    filter(block %in% useBlocks) %>%
-    group_by(block) %>%
-    summarise(time = mean(SecondsSinceStart)) %>%
-    arrange(block) %>%
-    .$time
 }
