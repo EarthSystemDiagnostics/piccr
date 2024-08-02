@@ -513,7 +513,7 @@ test_that("quality control output structure is correct", {
   actual1 <- accumulateMeasurements(dataset1, list(average_over_inj = "all"))
   actual2 <- getQualityControlInfo(dataset1, actual1)
   
-  expect_is(actual1, "data.frame")
+  expect_true(is.data.frame(actual1))
   expect_length(actual2, 4)
 
   expect_equal(

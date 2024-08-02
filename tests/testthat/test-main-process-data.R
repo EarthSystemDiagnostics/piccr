@@ -148,7 +148,7 @@ test_that("general output structure is correct", {
   expect_true(is.data.frame(actual[[1]]$calibrated))
   expect_true(is.data.frame(actual[[1]]$calibratedAndDriftCorrected))
 
-  expect_is(actual[[1]]$processed, "data.frame")
+  expect_true(is.data.frame(actual[[1]]$processed))
 
   expect_true(is.list(actual[[1]]$pooledSD))
   expect_length(actual[[1]]$pooledSD, 2)
@@ -195,7 +195,8 @@ actualMemoryCalib2 <- processData(datasets, config)
 
 test_that("calibration method 2 runs", {
 
-  expect_is(actualMemoryCalib2[[1]]$calibratedAndDriftCorrected, "data.frame")
+  expect_true(
+    is.data.frame(actualMemoryCalib2[[1]]$calibratedAndDriftCorrected))
   expect_equal(dim(actualMemoryCalib2[[1]]$memoryCorrected),
                dim(actualMemoryCalib2[[1]]$calibratedAndDriftCorrected))
 

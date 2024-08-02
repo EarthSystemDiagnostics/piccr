@@ -290,7 +290,8 @@ test_that("different injection numbers of block 1 standards yields no error", {
   
   actual <- correctForMemoryEffect(dataset4)
   
-  expect_is(actual, "list")
+  expect_type(actual, "list")
+
 })
 
 # in these datasets:
