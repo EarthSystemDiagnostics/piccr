@@ -1,3 +1,8 @@
+# to silence the piccr version message
+test_processData <- function(...) {
+  suppressMessages(processData(...))
+}
+
 test_that("processData works on example file with differently grouped vials", {
 
   # ---------- INITIALIZE INPUTS -------------
@@ -59,7 +64,7 @@ test_that("processData works on example file with differently grouped vials", {
 
   # check if piccr runs without error
   expect_error(processedData <- readFiles(config) %>%
-                 processData(config), NA)
+                 test_processData(config), NA)
 
   skip_if_not(exists("processedData"), "previous test")
 
@@ -74,7 +79,7 @@ test_that("processData works on example file with differently grouped vials", {
 
   # check if piccr runs without error
   expect_error(processedData <- readFiles(config) %>%
-                 processData(config), NA)
+                 test_processData(config), NA)
 
   skip_if_not(exists("processedData"), "previous test")
 
@@ -92,7 +97,7 @@ test_that("processData works on example file with differently grouped vials", {
 
   # check if piccr runs without error
   expect_error(processedData <- readFiles(config) %>%
-                 processData(config), NA)
+                 test_processData(config), NA)
 
 })
 
@@ -125,8 +130,8 @@ datasets <- list(
 # ------------------------------------------------------------------------------
 # memory correction and calibration method 1
 
-actual <- processData(datasets[1], config)
-actualMemoryCalib1 <- processData(datasets, config)
+actual <- test_processData(datasets[1], config)
+actualMemoryCalib1 <- test_processData(datasets, config)
 
 test_that("general output structure is correct", {
 
@@ -191,7 +196,7 @@ test_that("data set names are preserved", {
 # memory correction and calibration method 2
 
 config$calibration_method <- 2
-actualMemoryCalib2 <- processData(datasets, config)
+actualMemoryCalib2 <- test_processData(datasets, config)
 
 test_that("calibration method 2 runs", {
 
@@ -217,7 +222,7 @@ test_that("calibration method 0 runs w/o memory correction", {
   config$calibration_method <- 0
   config$use_memory_correction <- FALSE
 
-  actual <- processData(datasets[1], config)
+  actual <- test_processData(datasets[1], config)
 
   expect_length(actual[[1]]$memoryCorrected, 0)
   expect_length(actual[[1]]$memoryCoefficients, 0)

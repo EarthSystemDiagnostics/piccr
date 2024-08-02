@@ -1,3 +1,8 @@
+# to silence the piccr version message
+test_processData <- function(...) {
+  suppressMessages(processData(...))
+}
+
 configPath <- system.file("extdata", "config.yaml", package = "piccr")
 
 # test should be able to run from the repository root directory or from the directory
@@ -19,21 +24,21 @@ datasets <- list(
 test_that("general acceptance is fulfilled", {
 
   # memory correction and calibration method 1
-  actualMemoryCalib1 <- processData(datasets, config)
+  actualMemoryCalib1 <- test_processData(datasets, config)
 
   # memory correction and calibration method 2
   config$calibration_method <- 2
-  actualMemoryCalib2 <- processData(datasets, config)
+  actualMemoryCalib2 <- test_processData(datasets, config)
 
   # memory correction and calibration method 0
   config$calibration_method <- 0
-  actualMemoryCalib0 <- processData(datasets, config)
+  actualMemoryCalib0 <- test_processData(datasets, config)
 
   # NO memory correction and calibration method 2; average first three injections
   config$calibration_method <- 2
   config$use_memory_correction <- FALSE
   config$average_over_inj <- "1:3"
-  actualNoMemoryCalib2 <- processData(datasets, config)
+  actualNoMemoryCalib2 <- test_processData(datasets, config)
 
   # --------------------------------------------------------------------------
   # ACCEPTANCE TEST 1:

@@ -1,3 +1,8 @@
+# to silence the piccr version message
+test_processFiles <- function(...) {
+  suppressMessages(processFiles(...))
+}
+
 test_that("return value and outputs from processFiles are correct", {
   
   # ---------- INITIALIZE INPUTS -------------
@@ -16,7 +21,7 @@ test_that("return value and outputs from processFiles are correct", {
   
   # --------- CALL FUNCTION UNDER TEST ------------
   
-  processedData <- processFiles(config = newConfigPath)
+  processedData <- test_processFiles(config = newConfigPath)
   
   # --------- MAKE EXPECTATIONS --------------------
   
@@ -52,16 +57,16 @@ test_that("return value and outputs from processFiles are correct", {
   configContents$use_memory_correction <- FALSE
   rlist::list.save(configContents, newConfigPath)
 
-  expect_error(processFiles(config = newConfigPath), NA)
+  expect_error(test_processFiles(config = newConfigPath), NA)
 
   configContents$calibration_method <- 0
   rlist::list.save(configContents, newConfigPath)
 
-  expect_error(processFiles(config = newConfigPath), NA)
+  expect_error(test_processFiles(config = newConfigPath), NA)
 
   configContents$use_memory_correction <- TRUE
   configContents$calibration_method <- 2
   rlist::list.save(configContents, newConfigPath)
 
-  expect_error(processFiles(config = newConfigPath), NA)
+  expect_error(test_processFiles(config = newConfigPath), NA)
 })
