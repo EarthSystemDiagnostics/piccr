@@ -1,4 +1,105 @@
-context("Test creating quality control information and writing them to file")
+# ------------------------------------------------------------------------------
+# ----- testing writing data to file -------------------------------------------
+# ------------------------------------------------------------------------------
+
+d1Content <- "Identifier 1,a,b\na,1.2,3.1\n"
+d2Content <- "Identifier 1,c,d\na,3.1,\nb,9,-2\n"
+
+config <- list(output_directory = tempdir(), include_standards_in_output = TRUE)
+datasets <- list(
+  list(name = "d1.csv", processed = readr::read_csv(d1Content)), 
+  list(name = "d2.csv", processed = readr::read_csv(d2Content))
+)
+
+test_that("correct files are created when output dir exists", {
+
+  writeDataToFile(datasets, config)
+  
+  expect_true(file.exists(file.path(tempdir(), "d1.csv")))
+  expect_true(file.exists(file.path(tempdir(), "d2.csv")))
+
+})
+
+test_that("correct files are created when output dir does not exist", {
+  
+  # make sure that the directory does not exist
+  unlink("some_dir_that_does_not_exist", recursive = TRUE)
+  stopifnot(!dir.exists("some_dir_that_does_not_exist"))
+  
+  config <- list(output_directory = "some_dir_that_does_not_exist",
+                 include_standards_in_output = TRUE)
+  
+  writeDataToFile(datasets, config)
+  
+  expect_true(file.exists(file.path("some_dir_that_does_not_exist", "d1.csv")))
+  expect_true(file.exists(file.path("some_dir_that_does_not_exist", "d2.csv")))
+  
+  unlink("some_dir_that_does_not_exist", recursive = TRUE)
+
+})
+
+test_that("file contents are correct", {
+
+  writeDataToFile(datasets, config)
+  
+  expect_identical(readr::read_file(file.path(tempdir(), "d1.csv")),
+                   d1Content)
+  expect_identical(readr::read_file(file.path(tempdir(), "d2.csv")),
+                   d2Content)
+
+})
+
+test_that("omitting standards from output works when standard is in file", {
+
+  config <- list(output_directory = tempdir(), 
+                 include_standards_in_output = FALSE,
+                 standards = list(list(name = "a"), list(name = "c")))
+  
+  writeDataToFile(datasets, config)
+  
+  expect_identical(readr::read_file(file.path(tempdir(), "d1.csv")),
+                   "Identifier 1,a,b\n")
+  
+  expect_identical(readr::read_file(file.path(tempdir(), "d2.csv")),
+                   "Identifier 1,c,d\nb,9,-2\n")
+
+})
+
+test_that("omitting standards from output works when only probes are in file", {
+
+  config <- list(output_directory = tempdir(), 
+                 include_standards_in_output = FALSE,
+                 standards = list(list(name = "c")))
+  
+  writeDataToFile(datasets, config)
+  
+  expect_identical(readr::read_file(file.path(tempdir(), "d1.csv")),
+                   d1Content)
+  
+  expect_identical(readr::read_file(file.path(tempdir(), "d2.csv")),
+                   d2Content)
+
+})
+
+test_that("omitting standards from output works when standard list is empty)", {
+
+  config <- list(output_directory = tempdir(), 
+                 include_standards_in_output = FALSE,
+                 standards = list())
+  
+  writeDataToFile(datasets, config)
+  
+  expect_identical(readr::read_file(file.path(tempdir(), "d1.csv")),
+                   d1Content)
+  
+  expect_identical(readr::read_file(file.path(tempdir(), "d2.csv")),
+                   d2Content)
+
+})
+
+# ------------------------------------------------------------------------------
+# ----- testing output of summary file -----------------------------------------
+# ------------------------------------------------------------------------------
 
 # ------------ INITIALIZE INPUTS -------------
 
@@ -186,6 +287,7 @@ test_that("gathering of quality control data works", {
   actual <- gatherQualityControlInfo(processedDataNoMemory)
 
   expect_equal(actual, expectedNoMemory)
+
 })
 
 test_that("writing of quality control data works", {
@@ -366,5 +468,60 @@ test_that("writing of quality control data works", {
                      substr(actual, ncut + ntime, nchar(actual)))
 
   expect_equal(actual, expected)
+
+})
+
+# ------------------------------------------------------------------------------
+# ----- processing data for output ---------------------------------------------
+# ------------------------------------------------------------------------------
+
+test_that("quality control output structure is correct", {
+
+  dataset1 <- tibble::tribble(
+    ~Line, ~`Identifier 1`, ~`Identifier 2`, ~block, ~`Inj Nr`, ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~dExcess, ~o18_True, ~H2_True, ~useAsControlStandard, ~Sample, ~vial_group,
+    # -- / -------------- / -------------- / ----- / -------- / -------------- / ------------ / --------/ ---------/ --------/ ---------------------/ -------/ -----------
+    1,     "WU",            "w",             1,      1,         0.9,             8.5,           15,       1,         10,       FALSE,                 1,       1,
+    2,     "WU",            "w",             1,      2,         1,               9,             20,       1,         10,       FALSE,                 1,       1,
+    3,     "WU",            "w",             1,      3,         1.1,             10.7,          25,       1,         10,       FALSE,                 1,       1,
+    4,     "C",             "x",             1,      1,         1.9,             19,            15,       2,         20,       FALSE,                 2,       1,
+    5,     "C",             "x",             1,      2,         2.1,             20.7,          20,       2,         20,       FALSE,                 2,       1,
+    6,     "C",             "x",             1,      3,         2,               22.1,          25,       2,         20,       FALSE,                 2,       1,
+    7,     "probe1",        "p",             NA,     1,         4,               49,            4,        NA,        NA,       FALSE,                 3,       1,
+    8,     "probe1",        "p",             NA,     2,         5,               49,            5,        NA,        NA,       FALSE,                 3,       1,
+    9,     "QC",            "qq",            2,      1,         10.4,            95,            11,       10,        100,      TRUE,                  4,       1,
+    10,    "QC",            "qq",            2,      2,         9.8,             102.5,         9,        10,        100,      TRUE,                  4,       1,
+    11,    "probe2",        "pp",            NA,     1,         6,               60,            4,        NA,        NA,       FALSE,                 5,       1,
+    12,    "probe2",        "pp",            NA,     2,         7,               71,            5,        NA,        NA,       FALSE,                 5,       1,
+    13,    "B",             "z",             3,      1,         2.8,             28.5,          11,       3,         30,       FALSE,                 6,       1,
+    14,    "B",             "z",             3,      2,         3.2,             31,            9,        3,         30,       FALSE,                 6,       1,
+    15,    "C",             "x",             3,      1,         2.3,             19.1,           -2,       2,         20,      FALSE,                 7,       2,
+    16,    "C",             "x",             3,      2,         2.45,            22.7,           2,        2,         20,      FALSE,                 7,       2
+  )
+  expected1 <- tibble::tribble(
+    ~Sample, ~`Identifier 1`, ~block, ~d18OMeasured, ~d18OTrue, ~d18ODeviation, ~dDMeasured, ~dDTrue, ~dDDeviation,
+    # -----/ ---------------/ ------/ -------------/ ---------/ --------------/ -----------/ -------/ ------------
+    1,       "WU",            1,      1,             1,         0,              9.4,         10,      0.6,
+    2,       "C",             1,      2,             2,         0,              20.6,        20,      -0.6,
+    4,       "QC",            2,      10.1,          10,        -0.1,           98.75,       100,     1.25,
+    6,       "B",             3,      3,             3,         0,              29.75,       30,      0.25,
+    7,       "C",             3,      2.375,         2,         -0.375,         20.9,        20,      -0.9
+    )
+  expected2 <- list(name = "QC", d18O = -0.1, dD = 1.25)
+  expected3 <- list(d18O = 0.194, dD = 0.836)
+  expected4 <- list(d18O = 0.382, dD = 3.427)
+  
+  actual1 <- accumulateMeasurements(dataset1, list(average_over_inj = "all"))
+  actual2 <- getQualityControlInfo(dataset1, actual1)
+  
+  expect_true(is.data.frame(actual1))
+  expect_length(actual2, 4)
+
+  expect_equal(
+    dplyr::mutate_if(actual2$deviationsFromTrue, is.numeric, round, digits = 5),
+    expected1)
+
+  expect_equal(actual2$deviationOfControlStandard, expected2)
+  expect_equal(lapply(actual2$rmsdDeviationsFromTrue, round, 3), expected3)
+  expect_equal(lapply(actual2$pooledSD, round, 3), expected4)
 
 })

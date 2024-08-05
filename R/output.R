@@ -1,3 +1,71 @@
+#' Build output list
+#' 
+#' This function performs the final processing step for a specific dataset after
+#' all corrections are done by collecting the relevant data and information and
+#' returning them in a single output structure.
+#' 
+#' @note
+#' If you change the output of this function, remember to update
+#' the roxygen docstring (section return value) in `piccr_output.R`.
+#'
+#' @param name the file name of the data set.
+#' @param config a named list containing the logical component
+#'   \code{use_memory_correction}, which specifies if memory correction was used
+#'   in the processing, and the component \code{calibration_method}, which
+#'   signals the type of the calibration method that was used.
+#' @param dataset a data frame with the raw measurement data.
+#' @param memoryCorrected a data frame with the memory-corrected measurement
+#'   data.
+#' @param memoryCoefficients a data frame of estimated memory coefficients.
+#' @param calibrated a data frame with the (memory-corrected and) calibrated
+#'   measurement data.
+#' @param calibratedAndDriftCorrected a data frame with the (memory-corrected),
+#'   calibrated and drift-corrected measurement data.
+#' @param accumulated a data frame with the corrected and calibrated data
+#'   averaged over a specified number of injections.
+#' @param calibrationParams a tibble with the estimated calibration
+#'   parameters, together with quality control assessment, which were applied
+#'   for calibrating the measurement data.
+#' @param driftParams a tibble with the estimated drift parameters, together
+#'   with quality control assessment, which were applied for drift-correcting
+#'   the measurement data.
+#' @param qualityControlInfo the output of \code{\link{getQualityControlInfo}}.
+#' @inherit piccr_output return
+#' @seealso \code{\link{processData}},
+#'   \code{\link{calculateMemoryCoefficients}},
+#'   \code{\link{correctForMemoryEffect}},
+#'   \code{\link{linearCalibration}},
+#'   \code{\link{calibrateUsingSimpleDriftCorrection}},
+#'   \code{\link{calibrateUsingDoubleCalibration}},
+#'   \code{\link{accumulateMeasurements}},
+#'   \code{\link{getQualityControlInfo}}.
+#' 
+buildOutputList <- function(name, config, dataset,
+                            memoryCorrected, memoryCoefficients,
+                            calibrated, calibratedAndDriftCorrected,
+                            accumulated, calibrationParams, driftParams,
+                            qualityControlInfo){
+  
+  list(
+    name = name,
+    
+    raw = dataset,
+    memoryCorrected = if (config$use_memory_correction) memoryCorrected,
+    calibrated = calibrated,
+    calibratedAndDriftCorrected = if (config$calibration_method != 0) calibratedAndDriftCorrected,
+    processed = accumulated,
+    
+    memoryCoefficients = if (config$use_memory_correction) memoryCoefficients,
+    deviationsFromTrue = qualityControlInfo$deviationsFromTrue,
+    rmsdDeviationsFromTrue = qualityControlInfo$rmsdDeviationsFromTrue,
+    deviationOfControlStandard = qualityControlInfo$deviationOfControlStandard,
+    pooledSD = qualityControlInfo$pooledSD,
+    
+    calibrationParams = calibrationParams,
+    driftParams = if (config$calibration_method == 1) driftParams
+  )
+}
+
 #' Output quality control summary file
 #' 
 #' Write an output file to disc summarising the quality control information from
@@ -178,6 +246,75 @@ gatherQualityControlInfo <- function(datasets) {
       driftParameter = driftParameter
     )
   )
+}
+
+#' Obtain quality control information
+#'
+#' Obtain the quality control information for a processed data set based on the
+#' deviations of the measured standards from their expected values.
+#' 
+#' @param dataset a data frame with corrected and calibrated measurement data of
+#'   a specific data set.
+#' @param accumulatedDataset a data frame with the accumulated
+#'   (i.e. injection-averaged) measurement data for this data set.
+#' @import dplyr
+#' 
+#' @return A list with three elements:
+#'   \describe{
+#'   \item{\code{deviationsFromTrue}:}{data frame with the measured (and
+#'     processsed) value (d18O and dH), the expected value, and the deviation of
+#'     the measured from the expected value for each analysed standard.}
+#'   \item{\code{rmsdDeviationsFromTrue}:}{a list with the two elements
+#'     \code{d18O} and \code{dD} with the respective root mean square deviation
+#'     across all deviations in \code{deviationsFromTrue} (with the very first
+#'     standard of the measurement sequence excluded).}
+#'   \item{\code{deviationOfControlStandard}:}{a list with the two elements
+#'     \code{d18O} and \code{dD} of the deviations from the expected value for
+#'     the quality control standard(s) specified in the config file.}
+#'   \item{\code{pooledSD}:}{a list with the two elements \code{d18O}
+#'     and \code{dD} of the pooled standard deviations across all measured
+#'     vials.}
+#' }
+#' @seealso \code{\link{calculatePooledSD}}
+#' 
+getQualityControlInfo <- function(dataset, accumulatedDataset) {
+
+  infoDataOnStd <- dataset %>%
+    group_by(Sample) %>%
+    summarise(d18OTrue = `o18_True`[[1]],
+              dDTrue = `H2_True`[[1]],
+              useAsControlStandard = useAsControlStandard[[1]])
+
+  deviationDataOfStandards <- accumulatedDataset %>%
+    inner_join(infoDataOnStd, by = "Sample") %>%
+    mutate(d18ODeviation = d18OTrue - delta.O18,
+           dDDeviation = dDTrue - delta.H2) %>%
+    select(Sample, `Identifier 1`, block,
+           d18OMeasured = delta.O18, d18OTrue, d18ODeviation,
+           dDMeasured = delta.H2, dDTrue, dDDeviation,
+           useAsControlStandard) %>%
+    tidyr::drop_na()
+
+  deviationOfControlStandard <- deviationDataOfStandards %>%
+    filter(useAsControlStandard == TRUE) %>%
+    select(name = `Identifier 1`, d18O = d18ODeviation, dD = dDDeviation) %>%
+    as.list()
+
+  vialCountOfFirstStd <- getVialCountOfFirstStd(dataset)
+
+  rmsdDeviationDataOfStandards <- deviationDataOfStandards %>%
+    filter(Sample > vialCountOfFirstStd) %>% # discard very first standard here
+    summarise(d18O = calculateRMSD(d18OMeasured, d18OTrue),
+              dD = calculateRMSD(dDMeasured, dDTrue)) %>%
+    as.list()
+
+  return(list(
+    deviationsFromTrue = select(deviationDataOfStandards, -useAsControlStandard),
+    pooledSD = calculatePooledSD(dataset),
+    rmsdDeviationsFromTrue = rmsdDeviationDataOfStandards,
+    deviationOfControlStandard = deviationOfControlStandard
+  ))
+
 }
 
 #' Print quality control information
@@ -371,4 +508,72 @@ printRunInfo <- function(configFile) {
   cat(sprintf("* config file: %s\n", configFile))
   cat(sprintf("* processing date: %s\n\n", format(Sys.time())))
 
+}
+
+#' Save processed data
+#'
+#' Save a given number of processed datasets on disc as csv files in a specified
+#' directory.
+#'   
+#' @param datasets a list of processed measurement data as output by
+#'   \code{\link{processData}} or minimum a list of lists with each sublist
+#'   containing a processed data set in the component \code{processed}.
+#' @param config a named list which needs to contain the following components:
+#'   \describe{
+#'   \item{\code{output_directory}:}{character string with the directory path
+#'     where the data shall be saved.}
+#'   \item{\code{include_standards_in_output}:}{logical; if \code{TRUE} the
+#'   processed data of measured standards is included in the output.}
+#' }
+#' @import dplyr
+#' 
+writeDataToFile <- function(datasets, config){
+  config$output_directory %>%
+    createOutputDirectory() %>%
+    writeDatasets(datasets, config)
+}
+
+#' Create output directory
+#'
+#' Create the directory in which the programme output data is saved.
+#'
+#' @param folder character string with the path to the folder which is
+#'   to be created. The folder may already exist in which case nothing happens.
+#' @return the input \code{folder}.
+#' 
+createOutputDirectory <- function(folder){
+  dir.create(folder, showWarnings = FALSE)
+  return(folder) # make function usable in a pipe
+}
+
+#' Write data sets to disc
+#'
+#' Write the given processed data sets to disc as csv files. This is a wrapper
+#' for \code{\link{writeSingleDataset}} which performs the actual saving for a
+#' single data set.
+#'
+#' @param folder character string with the directory path in which to save the
+#'   data.
+#' @param config a named list containing the component
+#'   \code{include_standards_in_output}: a logical to signal whether to save
+#'   the processed data including the measured standards or not.
+#' @inheritParams writeDataToFile
+#' @seealso \code{\link{writeSingleDataset}}
+#' 
+writeDatasets <- function(folder, datasets, config){
+  purrr::walk(datasets, writeSingleDataset, folder = folder, config = config)
+}
+
+#' Write a data set to disc
+#'
+#' Write the given processed data set to disc as a csv file in the specified
+#' directory.
+#' @param dataset a data frame of processed measurement data.
+#' @inheritParams writeDatasets
+#' @import dplyr
+#' 
+writeSingleDataset <- function(dataset, folder, config){
+  dataset$processed %>%
+    removeStandardsFromDataIfRequested(config) %>%
+    readr::write_csv(file = file.path(folder, dataset$name), na = "")
 }

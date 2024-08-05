@@ -20,7 +20,7 @@ Suggests:
     knitr,
     rlist,
     rmarkdown,
-    testthat
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Imports:
     dplyr,
@@ -33,3 +33,4 @@ Imports:
     yaml
 URL: https://github.com/EarthSystemDiagnostics/piccr
 BugReports: https://github.com/EarthSystemDiagnostics/piccr/issues
+Config/testthat/edition: 3

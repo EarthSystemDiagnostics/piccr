@@ -1,5 +1,3 @@
-context("Test simple calibration without drift correction")
-
 # In this data set, o18_True is calculated from d(18_16)Mean applying
 # a slope = 0.9 and an intercept = -2.
 dataset1 <- tibble::tribble(
@@ -31,7 +29,7 @@ expected1 <- tibble::tribble(
 
 config <- list(use_memory_correction = TRUE, use_three_point_calibration = TRUE)
 
-test_that("running the calibration model", {
+test_that("running the calibration model works", {
 
   # should throw an error
   msg <- "Unknown isotope species requested for calibration."
@@ -86,7 +84,7 @@ test_that("running the calibration model", {
 
 })
 
-test_that("test getCalibration", {
+test_that("getting calibration parameter works", {
   
   o18InterceptExpected <- -2.
   o18SlopeExpected <- 0.9
@@ -103,9 +101,10 @@ test_that("test getCalibration", {
   
   expect_equal(actual2$intercept, H2InterceptExpected)
   expect_equal(actual2$slope, H2SlopeExpected)
+
 })
 
-test_that("test getCalibration for dataset with rows that should be excluded", {
+test_that("getting calib params works for dataset with rows to be excluded", {
   
   # In this dataset only the first two rows should be used to determine calibration intercept and slope.
   dataset2 <- tibble::tribble(
@@ -129,9 +128,10 @@ test_that("test getCalibration for dataset with rows that should be excluded", {
   
   expect_equal(actual2$intercept, 0)
   expect_equal(actual2$slope, 1)
+
 })
 
-test_that("test applyCalibration", {
+test_that("applying calibration works", {
   
   calibrationParams <- tibble::tibble(
     species = c("d18O", "dD"),
@@ -159,9 +159,10 @@ test_that("test applyCalibration", {
   actual <- dplyr::mutate(actual, `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
   
   expect_equal(actual, expected)
+
 })
 
-test_that("test simple linear calibration", {
+test_that("running simple linear calibration works", {
 
   smmry <- function(x) suppressWarnings(summary(x))
 
@@ -194,13 +195,16 @@ test_that("test simple linear calibration", {
   expect_type(actual, "list")
   expect_length(actual, 2)
 
-  actual$dataset <- dplyr::mutate(actual$dataset, `d(18_16)Mean` = round(`d(18_16)Mean`, 2), `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
+  actual$dataset <- dplyr::mutate(actual$dataset,
+                                  `d(18_16)Mean` = round(`d(18_16)Mean`, 2),
+                                  `d(D_H)Mean` = round(`d(D_H)Mean`, 1))
   
   expect_equal(actual, expected)
 
+
 })
 
-test_that("test use only last three injections if memory correction is not used", {
+test_that("using only last three injections without memory correction works", {
   
   dataset3 <- tibble::tribble(
     ~Line, ~`Time Code`, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration, ~vial_group,
@@ -228,9 +232,10 @@ test_that("test use only last three injections if memory correction is not used"
   
   expect_equal(actual$intercept[2], 0)
   expect_equal(actual$slope[2], 1)
+
 })
 
-test_that("test two point calibration", {
+test_that("getting calibration parameter for two calibration standars works", {
   
   dataset4 <- tibble::tribble(
     ~Line, ~`Time Code`, ~`Identifier 1`, ~`Inj Nr`, ~`d(18_16)Mean`, ~block, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration, ~vial_group,
@@ -258,9 +263,10 @@ test_that("test two point calibration", {
   
   expect_equal(actual$intercept[2], 0)
   expect_equal(actual$slope[2], 1)
+
 })
 
-test_that("test training data for grouped vials", {
+test_that("getting training data for grouped vials works", {
 
   config <- list(use_memory_correction = FALSE,
                  use_three_point_calibration = TRUE)

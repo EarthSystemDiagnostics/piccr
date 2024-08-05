@@ -1,7 +1,4 @@
-context("test calibrateUsingDoubleCalibration")
-
-
-test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and intercept 0)", {
+test_that("running double calibration works (no drift, slope, intercept = 0)", {
   
   dataset <- tibble::tribble(
     ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`, ~o18_True, ~H2_True, ~useForCalibration,
@@ -71,7 +68,8 @@ test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and
   expect_type(actual, "list")
   expect_length(actual, 2)
 
-  actual$dataset <- dplyr::mutate(actual$dataset, `d(18_16)Mean` = round(`d(18_16)Mean`, 10),
+  actual$dataset <- dplyr::mutate(actual$dataset,
+                                  `d(18_16)Mean` = round(`d(18_16)Mean`, 10),
                                   `d(D_H)Mean` = round(`d(D_H)Mean`, 10))
   actual$parameter$timeStamp <- round(actual$parameter$timeStamp, 1)
   
@@ -79,7 +77,7 @@ test_that("test calibrateUsingDoubleCalibration (no drift, calibration slope and
 
 })
 
-test_that("test getCalibrationSlopes (case slopes are zero)", {
+test_that("obtained calibration slopes are correct (case slopes are zero)", {
   
   params <- tibble::tibble(
     species = c("d18O", "dD", "d18O", "dD"),
@@ -96,9 +94,10 @@ test_that("test getCalibrationSlopes (case slopes are zero)", {
   expect_equal(actual$d18O$beta, 0)
   expect_equal(actual$dD$alpha, 0)
   expect_equal(actual$dD$beta, 0)
+
 })
 
-test_that("test getCalibrationSlopes (case slopes are not zero)", {
+test_that("obtained calibration slopes are correct (case slopes aren't zero)", {
 
   params <- tibble::tibble(
     species = c("d18O", "dD", "d18O", "dD"),
@@ -115,9 +114,10 @@ test_that("test getCalibrationSlopes (case slopes are not zero)", {
   expect_equal(actual$d18O$alpha, -0.1)
   expect_equal(actual$dD$beta, -1)
   expect_equal(actual$dD$alpha, 3)
+
 })
 
-test_that("test applyDoubleCalibration", {
+test_that("running double calibration works (with slope and intercept drift)", {
   
   dataset <- tibble::tribble(
     ~`Identifier 1`, ~block, ~`Time Code`,               ~`d(18_16)Mean`, ~`d(D_H)Mean`,
@@ -163,7 +163,10 @@ test_that("test applyDoubleCalibration", {
   )
   
   actual <- applyDoubleCalibration(dataset, params)
-  actual <- dplyr::mutate(actual, `d(18_16)Mean` = round(actual$`d(18_16)Mean`), `d(D_H)Mean` = round(actual$`d(D_H)Mean`))
+  actual <- dplyr::mutate(actual,
+                          `d(18_16)Mean` = round(actual$`d(18_16)Mean`),
+                          `d(D_H)Mean` = round(actual$`d(D_H)Mean`))
   
   expect_equal(actual, expected)
+
 })

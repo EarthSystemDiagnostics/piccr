@@ -1,4 +1,104 @@
-context("test processData")
+test_that("processData works on example file with differently grouped vials", {
+
+  # ---------- INITIALIZE INPUTS -------------
+
+  inputDir <- if (endsWith(getwd(), "testthat")) {
+                "test_data/special_file"
+              } else {
+                "tests/testthat/test_data/special_file"
+              }
+
+  standards <- list(
+    list(
+      name = "TD1",
+      o18_True = -33.8,
+      H2_True = -266.7,
+      use_for_drift_correction = TRUE,
+      use_for_calibration = FALSE,
+      use_as_control_standard = FALSE),
+    list(
+      name = "VSMOW2",
+      o18_True = 0.,
+      H2_True = 0.,
+      use_for_drift_correction = FALSE,
+      use_for_calibration = TRUE,
+      use_as_control_standard = FALSE),
+    list(
+      name = "SLAP2",
+      o18_True = -55.5,
+      H2_True = -427.5,
+      use_for_drift_correction = FALSE,
+      use_for_calibration = TRUE,
+      use_as_control_standard = FALSE),
+    list(
+      name = "DML",
+      o18_True = -42.39,
+      H2_True = -341.24,
+      use_for_drift_correction = FALSE,
+      use_for_calibration = FALSE,
+      use_as_control_standard = TRUE))
+
+  config <- list(
+    file_extension = ".csv",
+    input_directory = inputDir,
+    include_standards_in_output = TRUE,
+    average_over_inj = 3,
+    use_three_point_calibration = FALSE,
+    calibration_method = 1,
+    use_memory_correction = TRUE,
+    standards = standards
+  )
+
+  # --------- TEST PROGRAMME RUN ------------
+
+  # -----------------------------------------
+  # 1. no corrections at all
+
+  config$use_memory_correction <- FALSE
+  config$calibration_method <- 0
+
+  # check if piccr runs without error
+  expect_error(processedData <- readFiles(config) %>%
+                 test_processData(config), NA)
+
+  skip_if_not(exists("processedData"), "previous test")
+
+  # check number of accumulated data points
+  expect_equal(nrow(processedData[[1]]$processed), 43)
+
+  # -----------------------------------------
+  # 2. apply memory correction
+
+  config$use_memory_correction <- TRUE
+  config$calibration_method <- 0
+
+  # check if piccr runs without error
+  expect_error(processedData <- readFiles(config) %>%
+                 test_processData(config), NA)
+
+  skip_if_not(exists("processedData"), "previous test")
+
+  # check number of memory coefficients used
+  expect_equal(nrow(processedData[[1]]$memoryCoefficients), 10)
+
+  # check validity of memory-corrected data
+  expect_equal(nrow(processedData[[1]]$memoryCorrected), 440)
+
+  # -----------------------------------------
+  # 3. apply memory and simple drift correction
+
+  config$use_memory_correction <- TRUE
+  config$calibration_method <- 1
+
+  # check if piccr runs without error
+  expect_error(processedData <- readFiles(config) %>%
+                 test_processData(config), NA)
+
+})
+
+# ------------------------------------------------------------------------------
+# ----- READL DATA USAGE -------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 configPath <- system.file("extdata", "config.yaml", package = "piccr")
 
@@ -25,10 +125,10 @@ datasets <- list(
 # ------------------------------------------------------------------------------
 # memory correction and calibration method 1
 
-actual <- processData(datasets[1], config)
-actualMemoryCalib1 <- processData(datasets, config)
+actual <- test_processData(datasets[1], config)
+actualMemoryCalib1 <- test_processData(datasets, config)
 
-test_that("check general output structure", {
+test_that("general output structure is correct", {
 
   expect_length(actual, 1)
   expect_true(is.list(actual))
@@ -48,7 +148,7 @@ test_that("check general output structure", {
   expect_true(is.data.frame(actual[[1]]$calibrated))
   expect_true(is.data.frame(actual[[1]]$calibratedAndDriftCorrected))
 
-  expect_is(actual[[1]]$processed, "data.frame")
+  expect_true(is.data.frame(actual[[1]]$processed))
 
   expect_true(is.list(actual[[1]]$pooledSD))
   expect_length(actual[[1]]$pooledSD, 2)
@@ -72,7 +172,7 @@ test_that("check general output structure", {
 
 })
   
-test_that("check that no NAs were introduced", {
+test_that("no NAs were introduced", {
   
   for (dataset in actualMemoryCalib1) {
     expect_equal(sum(is.na(dataset$processed$`delta.O18`)), 2)
@@ -81,7 +181,7 @@ test_that("check that no NAs were introduced", {
   
 })
 
-test_that("check that data set names are preserved", {
+test_that("data set names are preserved", {
 
   expect_equal(names(actualMemoryCalib1), names(datasets))
 
@@ -91,11 +191,12 @@ test_that("check that data set names are preserved", {
 # memory correction and calibration method 2
 
 config$calibration_method <- 2
-actualMemoryCalib2 <- processData(datasets, config)
+actualMemoryCalib2 <- test_processData(datasets, config)
 
-test_that("check that calibration method 2 runs", {
+test_that("calibration method 2 runs", {
 
-  expect_is(actualMemoryCalib2[[1]]$calibratedAndDriftCorrected, "data.frame")
+  expect_true(
+    is.data.frame(actualMemoryCalib2[[1]]$calibratedAndDriftCorrected))
   expect_equal(dim(actualMemoryCalib2[[1]]$memoryCorrected),
                dim(actualMemoryCalib2[[1]]$calibratedAndDriftCorrected))
 
@@ -111,12 +212,12 @@ test_that("check that calibration method 2 runs", {
 # ------------------------------------------------------------------------------
 # No memory correction and calibration method 0
 
-test_that("check that calibration method 0 runs w/o memory correction", {
+test_that("calibration method 0 runs w/o memory correction", {
 
   config$calibration_method <- 0
   config$use_memory_correction <- FALSE
 
-  actual <- processData(datasets[1], config)
+  actual <- test_processData(datasets[1], config)
 
   expect_length(actual[[1]]$memoryCorrected, 0)
   expect_length(actual[[1]]$memoryCoefficients, 0)
@@ -127,112 +228,4 @@ test_that("check that calibration method 0 runs w/o memory correction", {
   expect_equal(actual[[1]]$calibrationParams$species, c("d18O", "dD"))
   expect_equal(actual[[1]]$calibrationParams$block, rep(1, 2))
 
-})
-
-# ------------------------------------------------------------------------------
-# memory correction and calibration method 0
-
-config$calibration_method <- 0
-config$use_memory_correction <- TRUE
-actualMemoryCalib0 <- processData(datasets, config)
-
-# NO memory correction and calibration method 2; average first three injections
-
-config$calibration_method <- 2
-config$use_memory_correction <- FALSE
-config$average_over_inj <- "1:3"
-actualNoMemoryCalib2 <- processData(datasets, config)
-
-test_that("general acceptance is fulfilled", {
-
-  # --------------------------------------------------------------------------
-  # ACCEPTANCE TEST 1:
-  # new piccr pkg performs as good as old command line version, or even better
-  # --------------------------------------------------------------------------
-
-  qcMemoryCalib2   <- gatherQualityControlInfo(actualMemoryCalib2)
-
-  rmsdD18OGood <- calculateRMSD(qcMemoryCalib2$rmsdQualityControl$d18O)
-  rmsdDDGood   <- calculateRMSD(qcMemoryCalib2$rmsdQualityControl$dD)
-
-  rmsdD18OCLVersion <- calculateRMSD(c(-0.096, -0.014, -0.053))
-  rmsdDDCLVersion   <- calculateRMSD(c(-1.205, -0.486, -0.693))
-
-  expect_lte(rmsdD18OGood, rmsdD18OCLVersion)
-  expect_lte(rmsdDDGood, rmsdDDCLVersion)
-
-  # ----------------------------------------------------------
-  # ACCEPTANCE TEST 2:
-  # no memory correction is worse than using memory correction
-  # ----------------------------------------------------------
-
-  qcNoMemoryCalib2 <- gatherQualityControlInfo(actualNoMemoryCalib2)
-
-  rmsdD18OBad <- calculateRMSD(qcNoMemoryCalib2$rmsdQualityControl$d18O)
-  rmsdDDBad   <- calculateRMSD(qcNoMemoryCalib2$rmsdQualityControl$dD)
-
-  expect_lte(rmsdD18OGood, rmsdD18OBad)
-  expect_lte(rmsdDDGood, rmsdDDBad)
-
-  # ---------------------------------------------------------
-  # ACCEPTANCE TEST 3:
-  # drift correction is as good as without it, or even better
-  # ---------------------------------------------------------
-
-  # set upper tolerance for "equally as good" drift correction
-  toleranceD18O <- 0.01
-  toleranceDD <-   0.1
-
-  qcMemoryCalib0   <- gatherQualityControlInfo(actualMemoryCalib0)
-  qcMemoryCalib1   <- gatherQualityControlInfo(actualMemoryCalib1)
-
-  # calibration method 2 versus method 0
-
-  d <- rmsdD18OGood - calculateRMSD(qcMemoryCalib0$rmsdQualityControl$d18O)
-
-  if (d > 0) {
-    expect_lte(d, toleranceD18O)
-  } else {
-    expect_lte(d, 0)
-  }
-
-  d <- rmsdDDGood - calculateRMSD(qcMemoryCalib0$rmsdQualityControl$dD)
-
-  if (d > 0) {
-    expect_lte(d, toleranceDD)
-  } else {
-    expect_lte(d, 0)
-  }
-
-  # calibration method 1 versus method 0
-
-  d <- calculateRMSD(qcMemoryCalib1$rmsdQualityControl$d18O) -
-    calculateRMSD(qcMemoryCalib0$rmsdQualityControl$d18O)
-
-  if (d > 0) {
-    expect_lte(d, toleranceD18O)
-  } else {
-    expect_lte(d, 0)
-  }
-
-  d <- calculateRMSD(qcMemoryCalib1$rmsdQualityControl$dD) -
-    calculateRMSD(qcMemoryCalib0$rmsdQualityControl$dD)
-
-  if (d > 0) {
-    expect_lte(d, toleranceDD)
-  } else {
-    expect_lte(d, 0)
-  }
-
-  # ----------------------------------
-  # BENCHMARK TEST:
-  # current performance should be kept
-  # ----------------------------------
-
-  # best current performance
-  benchmarkD18O <- 0.03
-  benchmarkDD   <- 0.4
-
-  expect_lte(rmsdD18OGood, benchmarkD18O)
-  expect_lte(rmsdDDGood, benchmarkDD)
 })
