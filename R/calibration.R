@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# I. simple linear calibration
+# I. simple linear calibration using only a single standard block
 # ------------------------------------------------------------------------------
 
 #' Get calibration training data
