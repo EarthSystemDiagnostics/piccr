@@ -471,6 +471,82 @@ test_that("writing of quality control data works", {
 
 })
 
+test_that("quality control data gathering works for several QC standards", {
+
+  # the same QC-std injected several times in the measurement
+  deviationsFromTrue1 <- tibble::tribble(
+    ~Sample, ~`Identifier 1`, ~block, ~d18ODeviation, ~dDDeviation,
+    # ---- / -------------- / ----- / ------------- / ------------
+    1,     "C",               1L,      0.01,          0.1,
+    2,     "QC1",             1L,      0.01,          0.1,
+    3,     "QC1",             1L,      0.02,          0.2,
+    4,     "A",               1L,      0.07,          0.7,
+    5,     "QC1",             2L,      -0.01,         -0.1,
+    6,     "C",               3L,      -0.03,         -0.3,
+    7,     "QC1",             3L,      0.01,          0.1,
+  )
+  # different QC-std.s injected in the measurement
+  deviationsFromTrue2 <- tibble::tribble(
+    ~Sample, ~`Identifier 1`, ~block, ~d18ODeviation, ~dDDeviation,
+    # ---- / -------------- / ----- / ------------- / ------------
+    1,     "C",               1L,      -0.1,          1,
+    2,     "A",               1L,      -0.7,          -7,
+    3,     "QC1",             2L,      -0.1,          -1,
+    4,     "QC2",             2L,      -0.4,          -4,
+    5,     "C",               3L,      0.7,           -7
+  )
+
+  datasets <- list(
+    good = list(
+      name = "good",
+      deviationOfControlStandard = list(
+        name = rep("QC1", 4), d18O = c(0.01, 0.02, -0.01, 0.01),
+                 dD = c(0.1, 0.2, -0.1, 0.1)),
+      rmsdDeviationsFromTrue = list(d18O = 0.03, dD = 0.3),
+      pooledSD = list(d18O = 0.03, dD = 0.3),
+      deviationsFromTrue = deviationsFromTrue1,
+      memoryCoefficients = memoryCoefficients1,
+      calibrationParams = calibrationParameter1,
+      driftParams = driftParameter1
+    ),
+    bad = list(
+      name = "bad",
+      deviationOfControlStandard = list(
+        name = c("QC1", "QC2"), d18O = c(-0.1, -0.4), dD = c(-1, -4)),
+      rmsdDeviationsFromTrue = list(d18O = 0.48, dD = 4.8),
+      pooledSD = list(d18O = 0.3, dD = 3),
+      deviationsFromTrue = deviationsFromTrue2,
+      memoryCoefficients = memoryCoefficients2,
+      calibrationParams = calibrationParameter2,
+      driftParams = driftParameter2
+    )
+  )
+
+  rmsdQC <- tibble::tibble(
+    dataset = c("good", "bad"), name = c("QC1", "QC1, QC2"),
+    d18O = c(0.01, 0.29), dD = c(0.1, 2.9))
+  rmsdAll <- tibble::tibble(
+    dataset = c("good", "bad"), d18O = c(0.03, 0.48), dD = c(0.3, 4.8))
+
+  expected <- list(
+    rmsdQualityControl = rmsdQC,
+    rmsdAllStandards = rmsdAll,
+    pooledSD = pooledSD,
+    deviationsFromTrue = list(
+      good = deviationsFromTrue1, bad = deviationsFromTrue2),
+    memoryCoefficients = memCoeff,
+    calibrationParameter = calibrationParameter,
+    driftParameter = driftParameter
+  )
+
+  actual <- gatherQualityControlInfo(datasets)
+  actual$rmsdQualityControl$d18O <- round(actual$rmsdQualityControl$d18O, 2)
+  actual$rmsdQualityControl$dD <- round(actual$rmsdQualityControl$dD, 1)
+
+  expect_equal(actual, expected)
+
+})
+
 # ------------------------------------------------------------------------------
 # ----- processing data for output ---------------------------------------------
 # ------------------------------------------------------------------------------

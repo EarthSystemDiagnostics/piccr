@@ -1,3 +1,8 @@
+# piccr 1.3.4.9000
+
+* bug fix in `gatherQualityControlInfo()` when a quality control standard is
+  injected several times per measurement file (#55).
+
 # piccr 1.3.3.9000
 
 * fix in internal function `printRunInfo()` when time stamp includes fractional

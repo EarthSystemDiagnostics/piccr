@@ -142,9 +142,10 @@ outputSummaryFile <- function(processedData, config, outputFile = NULL) {
 #' @return A named list with seven elements:
 #' \describe{
 #'   \item{\code{rmsdQualityControl}:}{a tibble for the root-mean-square
-#'   deviation (rmsd) of the quality control standard for each measurement file,
-#'   listing the file name, the name(s) of the quality control standard, and the
-#'   rmsd values for the oxygen and hydrogen isotope values.}
+#'   deviation (rmsd) of the quality control standard(s) for each measurement
+#'   file, listing the file name, the name(s) of the quality control
+#'   standard(s), and the rmsd values for the oxygen and hydrogen isotope
+#'   values.}
 #'   \item{\code{rmsdAllStandards}:}{a tibble for the root-mean-square
 #'   deviation (rmsd) of all measured standards for each measurement file,
 #'   listing the file name and the rmsd values for the oxygen and hydrogen
@@ -180,7 +181,8 @@ gatherQualityControlInfo <- function(datasets) {
 
   rmsdQualityControl <- purrr::map_dfr(datasets, function(x) {
     tibble::tibble(dataset = x$name,
-                   name = paste(x$deviationOfControlStandard$name, sep = ", "),
+                   name = paste(unique(x$deviationOfControlStandard$name),
+                                collapse = ", "),
                    d18O = calculateRMSD(x$deviationOfControlStandard$d18O),
                    dD = calculateRMSD(x$deviationOfControlStandard$dD))})
 
