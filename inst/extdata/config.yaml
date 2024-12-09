@@ -1,0 +1,57 @@
+# This is a config file for the piccr package
+# Use only spaces no tabs for white space!
+
+# -------- input and output options --------
+file_extension: ".csv"                            # File extension used for the raw Picarro measurement files.
+input_directory:  tests/testthat/test_data        # Directory containing the raw measurement files.
+output_directory: tests/testthat/test_data/output # Output directory to contain the calibrated data.
+include_standards_in_output: yes                  # Format of desired csv-file output:
+                                                  # flag = no  -> only output sample data;
+                                                  # flag = yes -> output standard and sample data in original order.
+
+# -------- data processing options --------
+average_over_inj: 3               # Specify number of injections to average for each sample to obtain final d18O, d2H etc. values:
+                                  # Pass single number to use the last n injections;
+                                  # Pass x:y to use injections x to y. E.g. 2:4 to use injections 2, 3, and 4;
+                                  # Pass "all" or -1 to use all injections.
+use_three_point_calibration: yes  # Type of calibration:
+                                  # flag = yes -> use all standards set as calibration standards for calibration regression ("three-point calibration");
+                                  # flag = no  -> use only two standards ("two-point calibration").
+calibration_method: 1             # Set type of desired calibration and drift processing:
+                                  # flag = 0 -> only apply calibration without any drift correction;
+                                  # flag = 1 -> apply simple drift correction and subsequent calibration;
+                                  # flag = 2 -> use interpolated calibration between beginning and end of measurement to account for drift.
+use_memory_correction: yes        # Signal memory correction: Pass yes or no.
+
+# -------- set standards --------
+standards:
+  - name: HGL-0
+    o18_True: 0.
+    H2_True: 0.
+    use_for_drift_correction: no
+    use_for_calibration: no
+    use_as_control_standard: no
+  - name: DML
+    o18_True: -42.50
+    H2_True: -341.0
+    use_for_drift_correction: yes
+    use_for_calibration: yes
+    use_as_control_standard: no
+  - name: TD1
+    o18_True: -33.90
+    H2_True: -266.2
+    use_for_drift_correction: yes
+    use_for_calibration: yes
+    use_as_control_standard: no
+  - name: JASE
+    o18_True: -50.22
+    H2_True: -392.5
+    use_for_drift_correction: yes
+    use_for_calibration: yes
+    use_as_control_standard: no
+  - name: NGT
+    o18_True: -33.89
+    H2_True: -261.0
+    use_for_drift_correction: no
+    use_for_calibration: no
+    use_as_control_standard: yes

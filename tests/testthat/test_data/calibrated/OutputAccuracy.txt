@@ -1,0 +1,18 @@
+### FILE MEANS: ###
+
+"mean.rmsd_delta.O18","mean.rmsd_delta.H2","mean.pooledSD3Inj_delta.O18","mean.pooledSD3Inj_delta.H2"
+0.06,0.859,0.022,0.104
+
+### VALUES FOR EACH FILE: ###
+
+"FileNo","rmsd_delta.O18","rmsd_delta.H2","pooledSD3Inj_delta.O18","pooledSD3Inj_delta.H2","sd.residuals_delta.O18","sd.residuals_delta.H2"
+1,0.124,1.347,0.024,0.124,0.157,1.253
+2,0.027,0.486,0.021,0.096,0.004,0.408
+3,0.031,0.743,0.023,0.091,0.052,0.646
+
+### INTER STANDARD BIAS TO LITERATURE VALUES FOR EACH FILE: ###
+
+"FileNo","block","DML_delta.O18","JASE_delta.O18","NGT_delta.O18","DML_delta.H2","JASE_delta.H2","NGT_delta.H2"
+1,"block2",-0.131,-0.139,-0.096,-1.494,-1.327,-1.205
+2,"block2",0.023,-0.037,-0.014,-0.559,-0.399,-0.486
+3,"block2",-0.004,-0.005,-0.053,-0.867,-0.653,-0.693

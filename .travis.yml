@@ -1,0 +1,14 @@
+language: r
+
+cache: packages
+
+r_packages:
+  - covr
+
+script:
+  - apt-key adv --recv-key --keyserver keyserver.ubuntu.com C9A7585B49D51698710F3A115E25F516B04C661B
+  - R CMD build .
+  - R CMD check *tar.gz
+
+after_success:
+  - Rscript -e 'covr::codecov()'
